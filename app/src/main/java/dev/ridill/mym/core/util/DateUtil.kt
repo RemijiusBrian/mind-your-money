@@ -1,37 +1,28 @@
 package dev.ridill.mym.core.util
 
-import java.time.Instant
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatterBuilder
-import java.time.temporal.ChronoField
-import java.util.*
 
 object DateUtil {
-
-    fun currentEpochMillis(): Long = Instant.now().toEpochMilli()
-
-    fun currentDate(): LocalDate = LocalDate.now()
-
     fun currentDateTime(): LocalDateTime = LocalDateTime.now()
 
-    fun parse(dateString: String, pattern: String): LocalDateTime? = tryOrNull {
+    /*fun parse(dateString: String, pattern: String): LocalDateTime? = tryOrNull {
         val formatter = valueFormatter(pattern)
         LocalDateTime.parse(dateString, formatter)
-    }
+    }*/
 
-    private fun valueFormatter(pattern: String): DateTimeFormatter = DateTimeFormatterBuilder()
+    /*private fun valueFormatter(pattern: String): DateTimeFormatter = DateTimeFormatterBuilder()
         .append(DateTimeFormatter.ofPattern(pattern))
         .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
         .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
         .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
         .parseDefaulting(ChronoField.DAY_OF_MONTH, 1)
         .parseDefaulting(ChronoField.MONTH_OF_YEAR, 1)
-        .toFormatter(Locale.getDefault())
+        .toFormatter(Locale.getDefault())*/
 
     object Formatters {
         val mmHyphenYyyy: DateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy")
+        val dayShortNameAndDayNumber: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, dd")
     }
 }
 

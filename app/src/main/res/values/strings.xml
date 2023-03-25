@@ -22,6 +22,8 @@
 
     <!-- Content Description -->
     <string name="content_error">Error</string>
+    <string name="content_scroll_up">Scroll Up</string>
+    <string name="content_add_new_expense">Add New Expense</string>
 
     <!-- Notifications -->
     <string name="notification_channel_group_payment_plans">Payment Plans</string>
@@ -83,4 +85,6 @@
     <string name="your_limit">Your Limit</string>
     <string name="youve_spent">You\'ve Spent</string>
     <string name="balance">Balance</string>
+    <string name="expenses">Expenses</string>
+    <string name="expense_list_empty">You don\'t have any expenses yet.</string>
 </resources>

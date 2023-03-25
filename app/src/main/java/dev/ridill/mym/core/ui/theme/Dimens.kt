@@ -14,6 +14,13 @@ val SpacingXSmall = 4.dp
 val SpacingSmall = 8.dp
 val SpacingMedium = 12.dp
 
+val ElevationLevel0 = 0.0.dp
+val ElevationLevel1 = 1.0.dp
+val ElevationLevel2 = 3.0.dp
+val ElevationLevel3 = 6.0.dp
+val ElevationLevel4 = 8.0.dp
+val ElevationLevel5 = 12.0.dp
+
 fun mymContentPadding(
     start: Dp = SpacingSmall,
     top: Dp = SpacingMedium,

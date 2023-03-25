@@ -19,7 +19,9 @@ object DashboardScreenSpec : ScreenSpec {
         val viewModel: DashboardViewModel = hiltViewModel(navBackStackEntry)
 
         DashboardScreen(
-            viewModel = viewModel
+            viewModel = viewModel,
+            navigateToExpenseDetails = {},
+            navigateToBottomBarSpec = {}
         )
     }
 }

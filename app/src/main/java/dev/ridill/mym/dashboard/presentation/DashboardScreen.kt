@@ -1,19 +1,28 @@
 package dev.ridill.mym.dashboard.presentation
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.VectorConverter
 import androidx.compose.animation.core.TargetBasedAnimation
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -22,45 +31,90 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ridill.mym.R
+import dev.ridill.mym.core.navigation.screenSpecs.BottomBarSpec
 import dev.ridill.mym.core.navigation.screenSpecs.DashboardScreenSpec
-import dev.ridill.mym.core.ui.components.HorizontalSpacer
-import dev.ridill.mym.core.ui.components.MYMScaffold
-import dev.ridill.mym.core.ui.components.VerticalSpacer
-import dev.ridill.mym.core.ui.components.VerticalSpinner
+import dev.ridill.mym.core.ui.components.*
 import dev.ridill.mym.core.ui.theme.*
 import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.One
+import dev.ridill.mym.core.util.Zero
+import kotlinx.coroutines.launch
 import kotlin.math.roundToLong
 
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel
+    viewModel: DashboardViewModel,
+    navigateToExpenseDetails: (Long?) -> Unit,
+    navigateToBottomBarSpec: (BottomBarSpec) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    val snackbarController = rememberSnackbarController()
+    val context = LocalContext.current
+
+    LaunchedEffect(snackbarController, context, viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is DashboardViewModel.DashboardEvents.ShowUiMessage -> {
+                    snackbarController.showSnackbar(event.uiText.toString())
+                }
+            }
+        }
+    }
+
     ScreenContent(
-        isLimitSet = state.isMonthlyLimitSet,
-        monthlyLimit = state.monthlyLimit,
-        amountSpent = state.expenditure,
-        balance = state.balanceFromLimit,
-        balancePercentOfLimit = state.balancePercent
+        snackbarController = snackbarController,
+        state = state,
+        onAddFabClick = { navigateToExpenseDetails(null) },
+        onExpenseClick = navigateToExpenseDetails,
+        onBottomBarActionClick = navigateToBottomBarSpec
     )
 }
 
 @Composable
 private fun ScreenContent(
-    isLimitSet: Boolean,
-    monthlyLimit: Long,
-    amountSpent: Double,
-    balance: Double,
-    balancePercentOfLimit: Float
+    snackbarController: SnackbarController,
+    state: DashboardState,
+    onAddFabClick: () -> Unit,
+    onExpenseClick: (Long) -> Unit,
+    onBottomBarActionClick: (BottomBarSpec) -> Unit
 ) {
+    val lazyListState = rememberLazyListState()
+    val showScrollUpButton by remember {
+        derivedStateOf { lazyListState.firstVisibleItemIndex > 3 }
+    }
+    val coroutineScope = rememberCoroutineScope()
+
     MYMScaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text(stringResource(DashboardScreenSpec.label)) }
             )
-        }
+        },
+        bottomBar = {
+            BottomAppBar(
+                actions = {
+                    BottomBarSpec.bottomBarDestinations.forEach { spec ->
+                        IconButton(onClick = { onBottomBarActionClick(spec) }) {
+                            Icon(
+                                imageVector = spec.icon,
+                                contentDescription = stringResource(spec.label)
+                            )
+                        }
+                    }
+                },
+                floatingActionButton = {
+                    FloatingActionButton(onClick = onAddFabClick) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.content_add_new_expense)
+                        )
+                    }
+                },
+                tonalElevation = ElevationLevel1
+            )
+        },
+        snackbarController = snackbarController
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -69,12 +123,64 @@ private fun ScreenContent(
                 .padding(mymContentPadding())
         ) {
             ExpenditureOverview(
-                isLimitSet = isLimitSet,
-                monthlyLimit = monthlyLimit,
-                amountSpent = amountSpent,
-                balance = balance,
-                balancePercentOfLimit = balancePercentOfLimit
+                isLimitSet = state.isMonthlyLimitSet,
+                monthlyLimit = state.monthlyLimit,
+                amountSpent = state.expenditure,
+                balance = state.balanceFromLimit,
+                balancePercentOfLimit = state.balancePercent
             )
+            VerticalSpacer(spacing = SpacingMedium)
+            ListLabel(labelRes = R.string.expenses)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(Float.One),
+                contentAlignment = Alignment.Center
+            ) {
+                if (state.expenses.isEmpty()) {
+                    ListEmptyIndicator(R.string.expense_list_empty)
+                }
+                LazyColumn(
+                    state = lazyListState,
+                    verticalArrangement = Arrangement.spacedBy(SpacingSmall),
+                    modifier = Modifier
+                        .matchParentSize()
+                ) {
+                    items(items = state.expenses, key = { it.id }) { expense ->
+                        ExpenseCard(
+                            note = expense.note,
+                            date = expense.dateFormatted,
+                            amount = expense.amountFormatted,
+                            modifier = Modifier
+                                .animateItemPlacement(),
+                            onClick = { onExpenseClick(expense.id) }
+                        )
+                    }
+                }
+
+                this@Column.AnimatedVisibility(
+                    visible = showScrollUpButton,
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                ) {
+                    SmallFloatingActionButton(onClick = {
+                        coroutineScope.launch {
+                            if (lazyListState.isScrollInProgress) {
+                                lazyListState.scrollToItem(Int.Zero)
+                            } else {
+                                lazyListState.animateScrollToItem(Int.Zero)
+                            }
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowUpward,
+                            contentDescription = stringResource(R.string.content_scroll_up)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -241,11 +347,11 @@ private fun BalanceCard(
 private fun PreviewScreenContent() {
     ExpenseTrackerTheme {
         ScreenContent(
-            isLimitSet = true,
-            monthlyLimit = 5_000L,
-            amountSpent = 100.0,
-            balance = 1_000.0,
-            balancePercentOfLimit = 0.5f
+            state = DashboardState(),
+            onAddFabClick = {},
+            onExpenseClick = {},
+            onBottomBarActionClick = {},
+            snackbarController = rememberSnackbarController()
         )
     }
 }
