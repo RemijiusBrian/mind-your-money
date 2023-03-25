@@ -1,1 +1,1 @@
-# mind-your-money
+# MYM (Mind Your Money)
