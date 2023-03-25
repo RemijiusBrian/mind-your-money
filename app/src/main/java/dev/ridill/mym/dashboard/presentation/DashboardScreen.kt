@@ -120,7 +120,7 @@ private fun ScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(mymContentPadding())
+                .padding(defaultScreenPadding())
         ) {
             ExpenditureOverview(
                 isLimitSet = state.isMonthlyLimitSet,

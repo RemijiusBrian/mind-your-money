@@ -21,14 +21,14 @@ val ElevationLevel3 = 6.0.dp
 val ElevationLevel4 = 8.0.dp
 val ElevationLevel5 = 12.0.dp
 
-fun mymContentPadding(
-    start: Dp = SpacingSmall,
-    top: Dp = SpacingMedium,
+fun defaultScreenPadding(
+    top: Dp = SpacingSmall,
+    start: Dp = SpacingMedium,
     end: Dp = SpacingMedium,
     bottom: Dp = SpacingSmall
 ): PaddingValues = PaddingValues(
-    start = start,
     top = top,
+    start = start,
     end = end,
     bottom = bottom
 )
