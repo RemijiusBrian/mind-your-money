@@ -1,0 +1,86 @@
+<resources>
+    <string name="app_name">MYM</string>
+
+    <!-- Destination Labels -->
+    <string name="destination_dashboard">Dashboard</string>
+
+    <string name="destination_add_edit_expense">Add/Edit Expense</string>
+    <string name="destination_detailed_view">Detailed</string>
+    <string name="destination_payment_plans">Payment Plans</string>
+    <string name="destination_add_edit_payment_plan">Add/Edit Payment Plan</string>
+    <string name="destination_settings">Settings</string>
+
+    <!-- Permission Rationals -->
+    <string name="permission_receive_sms_rationale">needs permission to view your SMS messages so that it can try to add expenses automatically.</string>
+    <string name="permission_post_notifications_rationale">needs permission to post notifications to remind you of your payments.</string>
+
+    <!-- Error -->
+    <string name="error_invalid_amount">Please enter a valid amount</string>
+    <string name="error_invalid_note">Please enter a valid note</string>
+    <string name="error_invalid_description">Please enter a valid description</string>
+    <string name="error_invalid_tag_name">Please enter a valid tag name</string>
+
+    <!-- Content Description -->
+    <string name="content_error">Error</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_group_payment_plans">Payment Plans</string>
+    <string name="notification_channel_group_bills_desc">All \'Payment Plans\' notifications</string>
+    <string name="notification_channel_payment_plan_reminder">Payment Reminders</string>
+    <string name="upcoming_payment_reminder_notification_text">Coming up on %s</string>
+    <string name="upcoming_payments">Upcoming Payments</string>
+
+    <string name="notification_channel_group_expenses">Expenses</string>
+    <string name="notification_channel_group_expenses_desc">All \'Expense\' notifications</string>
+    <string name="notification_channel_expenses_added">Auto Add Expenses</string>
+    <string name="expense_notification_title">Expense Added</string>
+    <string name="expense_notification_text">Expense added for %s</string>
+    <string name="expenses_added_notification_summary">%d New Expenses</string>
+
+    <!-- Preferences -->
+    <string name="general">General</string>
+    <string name="theme">Theme</string>
+    <string name="links">Links</string>
+    <string name="contact_support">Contact Support</string>
+    <string name="bug_report_feature_request">Report a bug or request a feature</string>
+    <string name="info">Info</string>
+    <string name="app_version">App Version</string>
+    <string name="expense">Expense</string>
+    <string name="expenditure_limit">Expenditure Limit</string>
+
+    <!-- Dialog Messages -->
+    <string name="dialog_delete_expense_title">Delete Expense?</string>
+    <string name="dialog_delete_expense_message">Are you sure you want to delete this expense? This action cannot be undone.</string>
+    <string name="dialog_delete_selected_expense_title">Delete Selected Expenses?</string>
+    <string name="dialog_delete_selected_expense_message">Are you sure you want to delete the selected expenses? This action cannot be undone.</string>
+    <string name="dialog_delete_payment_plan_title">Delete Payment Plan?</string>
+    <string name="dialog_delete_payment_plan_message">Are you sure you want to delete this payment plan? This action cannot be undone.</string>
+    <string name="dialog_delete_tag_title">Delete Tag?</string>
+    <string name="dialog_delete_tag_message">Are you sure you want to delete this tag? This action cannot be undone.</string>
+    <string name="dialog_discard_changes_title">Discard Changes?</string>
+    <string name="dialog_discard_changes_message">You appear to have some unsaved changes. Do you want to discard the changes made?</string>
+
+    <!-- Additional -->
+    <plurals name="repeat_period">
+        <item quantity="zero">One time payment</item>
+        <item quantity="one">Repeats every month</item>
+        <item quantity="other">Repeats every %d months</item>
+    </plurals>
+
+    <!-- Texts -->
+    <string name="action_confirm">Confirm</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="action_discard">Discard</string>
+    <string name="action_undo">Undo</string>
+    <string name="action_agree">Agree</string>
+
+    <string name="theme_dynamic">Dynamic</string>
+    <string name="theme_system_default">System Default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+
+    <string name="your_limit">Your Limit</string>
+    <string name="youve_spent">You\'ve Spent</string>
+    <string name="balance">Balance</string>
+</resources>
