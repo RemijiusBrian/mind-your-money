@@ -56,7 +56,7 @@ fun DashboardScreen(
         viewModel.events.collect { event ->
             when (event) {
                 is DashboardViewModel.DashboardEvents.ShowUiMessage -> {
-                    snackbarController.showSnackbar(event.uiText.toString())
+                    snackbarController.showSnackbar(event.uiText.asString(context))
                 }
             }
         }
@@ -130,7 +130,8 @@ private fun ScreenContent(
                 balancePercentOfLimit = state.balancePercent
             )
             VerticalSpacer(spacing = SpacingMedium)
-            ListLabel(labelRes = R.string.expenses)
+            LabelText(labelRes = R.string.expenses)
+            VerticalSpacer(spacing = SpacingMedium)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -345,7 +346,7 @@ private fun BalanceCard(
 @Preview(showBackground = true)
 @Composable
 private fun PreviewScreenContent() {
-    ExpenseTrackerTheme {
+    MYMTheme {
         ScreenContent(
             state = DashboardState(),
             onAddFabClick = {},

@@ -2,8 +2,8 @@ package dev.ridill.mym.core.data.preferences
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
-import dev.ridill.mym.core.model.AppTheme
-import dev.ridill.mym.core.model.MYMPreferences
+import dev.ridill.mym.core.domain.model.AppTheme
+import dev.ridill.mym.core.domain.model.MYMPreferences
 import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.core.util.orZero
 import kotlinx.coroutines.flow.Flow

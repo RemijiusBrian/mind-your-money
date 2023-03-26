@@ -86,7 +86,7 @@ fun ETSnackbar(
     }
 }
 
-class SnackbarController(
+data class SnackbarController(
     val snackbarHostState: SnackbarHostState,
     private val coroutineScope: CoroutineScope
 ) {

@@ -1,4 +1,4 @@
-package dev.ridill.mym.core.model
+package dev.ridill.mym.core.domain.model
 
 import android.content.Context
 import androidx.annotation.StringRes
@@ -23,3 +23,5 @@ sealed class UiText {
         is StringResource -> stringResource(resId, *args)
     }
 }
+
+fun @receiver:StringRes Int.toUiText(): UiText = UiText.StringResource(this)

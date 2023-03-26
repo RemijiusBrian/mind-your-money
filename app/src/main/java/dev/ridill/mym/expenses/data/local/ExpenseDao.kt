@@ -30,4 +30,7 @@ interface ExpenseDao : BaseDao<ExpenseEntity> {
         """
     )
     fun getExpenditureForDate(date: String): Flow<Double>
+
+    @Query("SELECT * FROM ExpenseEntity WHERE id = :id")
+    suspend fun getExpenseById(id: Long): ExpenseEntity?
 }

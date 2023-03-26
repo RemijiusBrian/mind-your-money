@@ -3,8 +3,7 @@
 
     <!-- Destination Labels -->
     <string name="destination_dashboard">Dashboard</string>
-
-    <string name="destination_add_edit_expense">Add/Edit Expense</string>
+    <string name="destination_expense_details">Expense Details</string>
     <string name="destination_detailed_view">Detailed</string>
     <string name="destination_payment_plans">Payment Plans</string>
     <string name="destination_add_edit_payment_plan">Add/Edit Payment Plan</string>
@@ -24,6 +23,11 @@
     <string name="content_error">Error</string>
     <string name="content_scroll_up">Scroll Up</string>
     <string name="content_add_new_expense">Add New Expense</string>
+    <string name="content_navigate_up">Navigate Back</string>
+    <string name="content_delete">Delete</string>
+    <string name="content_dismiss">Dismiss</string>
+    <string name="content_save">Save</string>
+    <string name="content_new_tag">New Tag</string>
 
     <!-- Notifications -->
     <string name="notification_channel_group_payment_plans">Payment Plans</string>
@@ -87,4 +91,16 @@
     <string name="balance">Balance</string>
     <string name="expenses">Expenses</string>
     <string name="expense_list_empty">You don\'t have any expenses yet.</string>
+    <string name="add_expense">Add Expense</string>
+    <string name="edit_expense">Edit Expense</string>
+    <string name="amount">Amount</string>
+    <string name="add_note">Add a note</string>
+    <string name="tags">Tags</string>
+    <string name="new_tag_chip_label">New</string>
+    <string name="new_tag">New Tag</string>
+    <string name="name">Name</string>
+    <string name="tag_created">New Tag Created</string>
+    <string name="expense_added">Expense Added</string>
+    <string name="expense_updated">Expense Updated</string>
+    <string name="expense_deleted">Expense Deleted</string>
 </resources>

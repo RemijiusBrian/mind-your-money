@@ -16,6 +16,7 @@ import dagger.hilt.components.SingletonComponent
 import dev.ridill.mym.core.data.db.MYMDatabase
 import dev.ridill.mym.core.data.preferences.PreferencesManager
 import dev.ridill.mym.core.data.preferences.PreferencesManagerImpl
+import dev.ridill.mym.core.domain.util.Validator
 import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.core.util.DispatcherProviderImpl
 import javax.inject.Singleton
@@ -56,4 +57,7 @@ object AppModule {
 
     @Provides
     fun provideDispatcherProvider(): DispatcherProvider = DispatcherProviderImpl()
+
+    @Provides
+    fun provideValidator(): Validator = Validator()
 }

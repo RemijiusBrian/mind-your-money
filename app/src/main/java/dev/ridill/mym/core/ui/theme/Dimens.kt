@@ -13,6 +13,9 @@ val CornerRadiusExtraLarge = 24.dp
 val SpacingXSmall = 4.dp
 val SpacingSmall = 8.dp
 val SpacingMedium = 12.dp
+val SpacingLarge = 16.dp
+val SpacingLargeTop = 32.dp
+val SpacingListEnd = 80.dp
 
 val ElevationLevel0 = 0.0.dp
 val ElevationLevel1 = 1.0.dp
@@ -22,10 +25,10 @@ val ElevationLevel4 = 8.0.dp
 val ElevationLevel5 = 12.0.dp
 
 fun defaultScreenPadding(
-    top: Dp = SpacingSmall,
-    start: Dp = SpacingMedium,
-    end: Dp = SpacingMedium,
-    bottom: Dp = SpacingSmall
+    top: Dp = SpacingMedium,
+    start: Dp = SpacingLarge,
+    end: Dp = SpacingLarge,
+    bottom: Dp = SpacingMedium
 ): PaddingValues = PaddingValues(
     top = top,
     start = start,

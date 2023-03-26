@@ -1,19 +1,27 @@
 package dev.ridill.mym.expenses.domain.model
 
+import android.os.Parcelable
 import dev.ridill.mym.core.util.DateUtil
-import dev.ridill.mym.core.util.Formatter
+import dev.ridill.mym.core.util.Empty
+import dev.ridill.mym.core.util.Zero
+import kotlinx.parcelize.Parcelize
 import java.time.LocalDateTime
 
+@Parcelize
 data class Expense(
-    val id: Long = 0L,
+    val id: Long,
     val note: String,
-    val amount: Double,
-    val date: LocalDateTime,
-    val tag: Tag? = null
-) {
-    val dateFormatted: String
-        get() = date.format(DateUtil.Formatters.dayShortNameAndDayNumber)
-
-    val amountFormatted: String
-        get() = Formatter.currency(amount)
+    val amount: String,
+    val dateTime: LocalDateTime,
+    val tagName: String?
+) : Parcelable {
+    companion object {
+        val DEFAULT = Expense(
+            id = Long.Zero,
+            note = String.Empty,
+            amount = String.Empty,
+            dateTime = DateUtil.currentDateTime(),
+            tagName = null
+        )
+    }
 }

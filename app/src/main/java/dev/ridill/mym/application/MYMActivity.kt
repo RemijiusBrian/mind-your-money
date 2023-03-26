@@ -11,7 +11,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.mym.core.navigation.MYMNavHost
-import dev.ridill.mym.core.ui.theme.ExpenseTrackerTheme
+import dev.ridill.mym.core.ui.theme.MYMTheme
 
 @AndroidEntryPoint
 class MYMActivity : ComponentActivity() {
@@ -19,7 +19,7 @@ class MYMActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         installSplashScreen()
         setContent {
-            ExpenseTrackerTheme {
+            MYMTheme {
                 val navController = rememberNavController()
                 Surface(
                     color = MaterialTheme.colorScheme.background

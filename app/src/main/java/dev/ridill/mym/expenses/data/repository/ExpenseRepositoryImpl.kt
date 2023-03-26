@@ -4,6 +4,7 @@ import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.expenses.data.local.ExpenseDao
 import dev.ridill.mym.expenses.data.local.entity.ExpenseAndTagRelation
 import dev.ridill.mym.expenses.domain.model.Expense
+import dev.ridill.mym.expenses.domain.model.ExpenseListItem
 import dev.ridill.mym.expenses.domain.repository.ExpenseRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -14,9 +15,9 @@ class ExpenseRepositoryImpl(
     private val dispatcher: DispatcherProvider
 ) : ExpenseRepository {
 
-    override fun getExpenseForDate(monthHyphenYearString: String): Flow<List<Expense>> =
+    override fun getExpenseForDate(monthHyphenYearString: String): Flow<List<ExpenseListItem>> =
         dao.getExpensesForDate(monthHyphenYearString).map { entities ->
-            entities.map(ExpenseAndTagRelation::toExpense)
+            entities.map(ExpenseAndTagRelation::toExpenseListItem)
         }
 
     override fun getExpenditureForDate(monthHyphenYearString: String): Flow<Double> =
@@ -24,5 +25,13 @@ class ExpenseRepositoryImpl(
 
     override suspend fun insert(expense: Expense) = withContext(dispatcher.io) {
         dao.insert(expense.toEntity())
+    }
+
+    override suspend fun getExpenseById(id: Long): Expense? = withContext(dispatcher.io) {
+        dao.getExpenseById(id)?.toExpense()
+    }
+
+    override suspend fun delete(expense: Expense) = withContext(dispatcher.io) {
+        dao.delete(expense.toEntity())
     }
 }

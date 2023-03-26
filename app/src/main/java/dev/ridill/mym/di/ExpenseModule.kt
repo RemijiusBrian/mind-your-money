@@ -9,7 +9,9 @@ import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.expenses.data.local.ExpenseDao
 import dev.ridill.mym.expenses.data.local.TagsDao
 import dev.ridill.mym.expenses.data.repository.ExpenseRepositoryImpl
+import dev.ridill.mym.expenses.data.repository.TagsRepositoryImpl
 import dev.ridill.mym.expenses.domain.repository.ExpenseRepository
+import dev.ridill.mym.expenses.domain.repository.TagsRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -26,4 +28,10 @@ object ExpenseModule {
         dao: ExpenseDao,
         dispatcherProvider: DispatcherProvider
     ): ExpenseRepository = ExpenseRepositoryImpl(dao, dispatcherProvider)
+
+    @Provides
+    fun provideTagsRepository(
+        dao: TagsDao,
+        dispatcherProvider: DispatcherProvider
+    ): TagsRepository = TagsRepositoryImpl(dao, dispatcherProvider)
 }

@@ -1,8 +1,12 @@
 package dev.ridill.mym.core.util
 
 import java.text.NumberFormat
+import java.util.*
 
 object Formatter {
+
+    fun defaultCurrencySymbol(): String = Currency.getInstance(Locale.getDefault()).symbol
+
     fun currency(
         value: Double,
         maxFractionDigits: Int = DEFAULT_FRACTION_DIGITS,

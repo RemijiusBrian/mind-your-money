@@ -1,4 +1,4 @@
-package dev.ridill.mym.core.model
+package dev.ridill.mym.core.domain.model
 
 import androidx.annotation.StringRes
 import dev.ridill.mym.R

@@ -4,16 +4,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dev.ridill.mym.R
 import dev.ridill.mym.core.data.preferences.PreferencesManager
-import dev.ridill.mym.core.model.UiText
+import dev.ridill.mym.core.domain.model.UiText
+import dev.ridill.mym.core.domain.model.toUiText
 import dev.ridill.mym.core.util.One
 import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.core.util.asStateFlow
 import dev.ridill.mym.core.util.ifNaN
 import dev.ridill.mym.dashboard.model.repository.DashboardRepository
+import dev.ridill.mym.expenses.presentation.EXPENSE_ADDED
+import dev.ridill.mym.expenses.presentation.EXPENSE_DELETED
+import dev.ridill.mym.expenses.presentation.EXPENSE_UPDATED
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -54,6 +60,17 @@ class DashboardViewModel @Inject constructor(
 
     private val eventsChannel = Channel<DashboardEvents>()
     val events get() = eventsChannel.receiveAsFlow()
+
+    fun onExpenseDetailsActionResult(result: String) = viewModelScope.launch {
+        when (result) {
+            EXPENSE_ADDED -> R.string.expense_added
+            EXPENSE_UPDATED -> R.string.expense_updated
+            EXPENSE_DELETED -> R.string.expense_deleted
+            else -> null
+        }?.let { res ->
+            eventsChannel.send(DashboardEvents.ShowUiMessage(res.toUiText()))
+        }
+    }
 
     sealed class DashboardEvents {
         data class ShowUiMessage(val uiText: UiText) : DashboardEvents()

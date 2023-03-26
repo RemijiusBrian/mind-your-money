@@ -11,12 +11,29 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 
 @Composable
-fun ListLabel(
+fun LabelText(
     @StringRes labelRes: Int,
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.labelLarge,
     fontWeight: FontWeight = FontWeight.Medium,
     color: Color = MaterialTheme.colorScheme.tertiary
+) {
+    Text(
+        text = stringResource(labelRes),
+        style = textStyle,
+        fontWeight = fontWeight,
+        color = color,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun TitleText(
+    @StringRes labelRes: Int,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = MaterialTheme.typography.titleLarge,
+    fontWeight: FontWeight = FontWeight.SemiBold,
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
     Text(
         text = stringResource(labelRes),
