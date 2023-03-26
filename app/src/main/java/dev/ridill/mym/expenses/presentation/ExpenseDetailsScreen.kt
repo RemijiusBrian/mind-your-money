@@ -192,26 +192,22 @@ private fun ScreenContent(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(SpacingSmall)
             ) {
-                TextField(
+                MinWidthTextField(
                     value = amount,
                     onValueChange = onAmountChange,
+                    textStyle = MaterialTheme.typography.displayMedium,
+                    leadingIcon = {
+                        Text(
+                            text = Formatter.defaultCurrencySymbol(),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    placeholder = Int.Zero.toString(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number,
                         imeAction = ImeAction.Next
-                    ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    leadingIcon = { Text(Formatter.defaultCurrencySymbol()) },
-                    placeholder = { Text(stringResource(R.string.amount)) },
-                    modifier = Modifier
-                        .defaultMinSize(minWidth = InputFieldMinWidth)
-                        .widthIn(min = InputFieldMinWidth, max = InputFieldMaxWidth),
-                    textStyle = MaterialTheme.typography.headlineMedium
-                        .copy(textAlign = TextAlign.Center),
-                    singleLine = true
+                    )
                 )
 
                 TextField(
@@ -239,8 +235,7 @@ private fun ScreenContent(
                     keyboardActions = KeyboardActions(
                         onDone = { onSave() }
                     ),
-                    placeholder = { Text(stringResource(R.string.add_note)) },
-                    maxLines = 2
+                    placeholder = { Text(stringResource(R.string.add_note)) }
                 )
 
                 Tags(
@@ -277,7 +272,6 @@ private fun ScreenContent(
 private val InputFieldMinWidth = 80.dp
 private val InputFieldMaxWidth = 240.dp
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Tags(
     tagsList: List<Tag>,
