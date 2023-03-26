@@ -12,7 +12,7 @@ data class ExpenseListItem(
     val tag: Tag? = null
 ) {
     val dateFormatted: String
-        get() = date.format(DateUtil.Formatters.dayShortNameAndDayNumber)
+        get() = date.format(DateUtil.Formatters.dayDetails)
 
     val amountFormatted: String
         get() = Formatter.currency(amount)

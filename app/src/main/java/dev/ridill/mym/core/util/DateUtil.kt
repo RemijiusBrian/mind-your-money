@@ -22,7 +22,7 @@ object DateUtil {
 
     object Formatters {
         val mmHyphenYyyy: DateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy")
-        val dayShortNameAndDayNumber: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, dd")
+        val dayDetails: DateTimeFormatter = DateTimeFormatter.ofPattern("dd, EEE")
     }
 }
 

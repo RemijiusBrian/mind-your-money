@@ -152,6 +152,7 @@ private fun ScreenContent(
                             note = expense.note,
                             date = expense.dateFormatted,
                             amount = expense.amountFormatted,
+                            tag = expense.tag,
                             modifier = Modifier
                                 .animateItemPlacement(),
                             onClick = { onExpenseClick(expense.id) }

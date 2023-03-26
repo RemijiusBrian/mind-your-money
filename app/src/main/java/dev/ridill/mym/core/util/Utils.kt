@@ -14,7 +14,7 @@ inline fun <T> tryOrNull(block: () -> T): T? = try {
 fun Color.onColor(
     onBrightColor: Color = Color.Black,
     onDarkColor: Color = Color.White
-): Color = if (luminance() > 0.5f) onBrightColor else onDarkColor
+): Color = if (luminance() > 0.25f) onBrightColor else onDarkColor
 
 inline fun logD(vararg args: Any = emptyArray(), statement: () -> Any) =
     Timber.d("AppDebug: ${statement()}", *args)

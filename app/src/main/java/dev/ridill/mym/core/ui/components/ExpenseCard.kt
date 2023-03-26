@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import dev.ridill.mym.core.ui.theme.SpacingMedium
 import dev.ridill.mym.core.ui.theme.SpacingSmall
+import dev.ridill.mym.core.ui.theme.SpacingXSmall
 import dev.ridill.mym.core.util.One
 import dev.ridill.mym.core.util.onColor
 import dev.ridill.mym.expenses.domain.model.Tag
@@ -106,12 +107,16 @@ private fun TagIndicator(
     Surface(
         color = color,
         shape = FilterChipDefaults.shape,
-        modifier = modifier
-            .height(FilterChipDefaults.Height),
+        modifier = modifier,
         contentColor = color.onColor()
     ) {
         Box(
-            contentAlignment = Alignment.Center
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .padding(
+                    horizontal = SpacingSmall,
+                    vertical = SpacingXSmall
+                )
         ) {
             Text(
                 text = name,
