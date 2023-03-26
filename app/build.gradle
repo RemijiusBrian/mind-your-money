@@ -101,7 +101,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // Room Persistence
-    def room_version = "2.5.0"
+    def room_version = "2.5.1"
     implementation("androidx.room:room-runtime:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
     // Kotlin Extensions and Coroutines support for Room
@@ -117,7 +117,7 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
     // Work Manager
-    implementation("androidx.work:work-runtime-ktx:2.8.0")
+    implementation("androidx.work:work-runtime-ktx:2.8.1")
 
     // Kotlin Coroutines
     def coroutines_version = '1.6.4'
@@ -126,7 +126,7 @@ dependencies {
     implementation("com.github.Zhuinden:flow-combinetuple-kt:1.1.1")
 
     // Lifecycle Components
-    def lifecycle_version = '2.6.0'
+    def lifecycle_version = '2.6.1'
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version")

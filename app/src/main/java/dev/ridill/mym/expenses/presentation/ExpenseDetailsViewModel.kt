@@ -95,12 +95,16 @@ class ExpenseDetailsViewModel @Inject constructor(
         savedStateHandle[SHOW_DELETE_CONFIRMATION] = true
     }
 
-    fun onShowDeleteWarningDismiss() {
+    fun onDeleteDismiss() {
         savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
     }
 
-    fun onShowDeleteWarningConfirm() {
-        savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
+    fun onDeleteConfirm() {
+        viewModelScope.launch {
+            expenseRepo.delete(expense.value)
+            savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
+            eventsChannel.send(ExpenseDetailsEvent.NavigateBackWithResult(EXPENSE_DELETED))
+        }
     }
 
     fun onNewTagClick() {

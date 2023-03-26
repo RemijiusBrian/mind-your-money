@@ -104,7 +104,9 @@ fun ExpenseDetailsScreen(
         onNewTagDismiss = viewModel::onNewTagDismiss,
         onNewTagConfirm = viewModel::onNewTagConfirm,
         onSave = viewModel::onSaveClick,
-        navigateUp = navigateUp
+        navigateUp = navigateUp,
+        onDeleteDismiss = viewModel::onDeleteDismiss,
+        onDeleteConfirm = viewModel::onDeleteConfirm
     )
 }
 
@@ -119,6 +121,8 @@ private fun ScreenContent(
     onNoteChange: (String) -> Unit,
     state: ExpenseDetailsState,
     onDeleteClick: () -> Unit,
+    onDeleteDismiss: () -> Unit,
+    onDeleteConfirm: () -> Unit,
     onTagSelect: (Tag) -> Unit,
     onNewTagClick: () -> Unit,
     newTag: () -> TagInput,
@@ -257,6 +261,15 @@ private fun ScreenContent(
                     contentDescription = stringResource(R.string.content_save)
                 )
             }
+        }
+
+        if (state.showDeleteConfirmation) {
+            ConfirmationDialog(
+                titleRes = R.string.dialog_delete_expense_title,
+                messageRes = R.string.dialog_delete_expense_message,
+                onDismiss = onDeleteDismiss,
+                onConfirm = onDeleteConfirm
+            )
         }
     }
 }
@@ -409,7 +422,9 @@ private fun PreviewScreenContent() {
             scaffoldState = rememberBottomSheetScaffoldState(),
             newTag = { TagInput.INITIAL },
             onTagNameChange = {},
-            onTagColorSelect = {}
+            onTagColorSelect = {},
+            onDeleteDismiss = {},
+            onDeleteConfirm = {}
         )
     }
 }
