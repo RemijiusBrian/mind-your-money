@@ -182,6 +182,7 @@ private fun ScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .imePadding()
                 .padding(defaultScreenPadding(top = SpacingLargeTop))
         ) {
             Column(
