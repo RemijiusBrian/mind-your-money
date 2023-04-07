@@ -13,6 +13,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +28,7 @@ import dev.ridill.mym.core.ui.theme.SpacingSmall
 
 @Composable
 fun MinWidthTextField(
-    value: String,
+    valueProvider: () -> String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String? = null,
@@ -45,8 +47,11 @@ fun MinWidthTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     contentColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
+    val showPlaceholder by remember {
+        derivedStateOf { valueProvider().isEmpty() }
+    }
     BasicTextField(
-        value = value,
+        value = valueProvider(),
         onValueChange = onValueChange,
         modifier = modifier,
         keyboardOptions = keyboardOptions,
@@ -77,7 +82,7 @@ fun MinWidthTextField(
                         contentAlignment = Alignment.CenterStart
                     ) {
                         placeholder?.let {
-                            this@Row.AnimatedVisibility(visible = value.isEmpty()) {
+                            this@Row.AnimatedVisibility(showPlaceholder) {
                                 Text(
                                     text = it,
                                     color = contentColor.copy(alpha = ContentAlpha.PERCENT_32)

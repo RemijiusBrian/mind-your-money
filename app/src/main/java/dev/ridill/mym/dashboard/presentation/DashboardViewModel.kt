@@ -13,9 +13,9 @@ import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.core.util.asStateFlow
 import dev.ridill.mym.core.util.ifNaN
 import dev.ridill.mym.dashboard.model.repository.DashboardRepository
-import dev.ridill.mym.expenses.presentation.EXPENSE_ADDED
-import dev.ridill.mym.expenses.presentation.EXPENSE_DELETED
-import dev.ridill.mym.expenses.presentation.EXPENSE_UPDATED
+import dev.ridill.mym.expenses.presentation.expenseDetails.EXPENSE_ADDED
+import dev.ridill.mym.expenses.presentation.expenseDetails.EXPENSE_DELETED
+import dev.ridill.mym.expenses.presentation.expenseDetails.EXPENSE_UPDATED
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -24,8 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val repo: DashboardRepository,
-    private val preferencesManager: PreferencesManager
+    repo: DashboardRepository,
+    preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     private val expenditure = repo.getExpenditureForCurrentMonth()

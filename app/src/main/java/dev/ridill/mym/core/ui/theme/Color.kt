@@ -67,6 +67,7 @@ val DarkOutlineVariant = Color(0xFF414942)
 val DarkScrim = Color(0xFF000000)
 
 object ContentAlpha {
+    const val PERCENT_100 = 1f
     const val PERCENT_60 = 0.60f
     const val PERCENT_32 = 0.32f
     const val PERCENT_16 = 0.16f

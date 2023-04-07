@@ -29,6 +29,22 @@
     <string name="content_save">Save</string>
     <string name="content_new_tag">New Tag</string>
 
+    <string name="content_create_new_tag">Create New Tag</string>
+    <string name="content_delete_expense">Delete Expense</string>
+    <string name="content_edit_limit">Edit Limit</string>
+    <string name="content_delete_tag">Delete Tag</string>
+    <string name="content_balance_low_warning">Balance Low</string>
+    <string name="content_cancel_multi_selection_mode">Cancel Multi Selection Mode</string>
+    <string name="content_toggle_menu">Toggle Menu</string>
+    <string name="content_payment_plan_category">Payment Plan Category</string>
+    <string name="content_expand">Expand</string>
+    <string name="content_clear">Clear</string>
+    <string name="content_toggle_dropdown">Toggle dropdown</string>
+    <string name="content_scroll_to_top">Scroll to top</string>
+    <string name="content_untag_expenses">Untag expenses</string>
+    <string name="content_date_picker">Date Picker</string>
+    <string name="content_notification_status">Notification Status</string>
+
     <!-- Notifications -->
     <string name="notification_channel_group_payment_plans">Payment Plans</string>
     <string name="notification_channel_group_bills_desc">All \'Payment Plans\' notifications</string>
@@ -103,4 +119,5 @@
     <string name="expense_added">Expense Added</string>
     <string name="expense_updated">Expense Updated</string>
     <string name="expense_deleted">Expense Deleted</string>
+    <string name="select_tag_to_assign_to_expenses">Select tag to assign to expenses</string>
 </resources>

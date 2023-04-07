@@ -1,4 +1,4 @@
-package dev.ridill.mym.expenses.presentation
+package dev.ridill.mym.expenses.presentation.expenseDetails
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -31,7 +31,7 @@ class ExpenseDetailsViewModel @Inject constructor(
     private val expenseRepo: ExpenseRepository,
     private val tagsRepo: TagsRepository,
     private val validator: Validator
-) : ViewModel() {
+) : ViewModel(), ExpenseDetailsActions {
 
     private val expenseId = ExpenseDetailsScreenSpec
         .getExpenseIdFromSavedStateHandle(savedStateHandle)
@@ -43,10 +43,10 @@ class ExpenseDetailsViewModel @Inject constructor(
 
     private val tagsList = tagsRepo.getAllTags()
     private val selectedTagName = expense.map { it.tagName }.distinctUntilChanged()
-    private val showDeleteConfirmation =
-        savedStateHandle.getStateFlow(SHOW_DELETE_CONFIRMATION, false)
+    private val showDeleteConfirmation = savedStateHandle
+        .getStateFlow(SHOW_DELETE_CONFIRMATION, false)
 
-    val newTag = savedStateHandle.getStateFlow(NEW_TAG, TagInput.INITIAL)
+    val newTag = savedStateHandle.getStateFlow<TagInput?>(NEW_TAG, null)
 
     val state = combineTuple(
         tagsList,
@@ -76,30 +76,30 @@ class ExpenseDetailsViewModel @Inject constructor(
             ?: Expense.DEFAULT
     }
 
-    fun onNoteChange(value: String) {
+    override fun onNoteChange(value: String) {
         savedStateHandle[KEY_EXPENSE] = expense.value
             .copy(note = value)
     }
 
-    fun onAmountChange(value: String) {
+    override fun onAmountChange(value: String) {
         savedStateHandle[KEY_EXPENSE] = expense.value
             .copy(amount = value)
     }
 
-    fun onTagSelect(tag: Tag) {
+    override fun onTagSelect(tag: Tag) {
         savedStateHandle[KEY_EXPENSE] = expense.value
             .copy(tagName = tag.name.takeIf { it != expense.value.tagName })
     }
 
-    fun onDeleteClick() {
+    override fun onDeleteClick() {
         savedStateHandle[SHOW_DELETE_CONFIRMATION] = true
     }
 
-    fun onDeleteDismiss() {
+    override fun onDeleteDismiss() {
         savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
     }
 
-    fun onDeleteConfirm() {
+    override fun onDeleteConfirm() {
         viewModelScope.launch {
             expenseRepo.delete(expense.value)
             savedStateHandle[SHOW_DELETE_CONFIRMATION] = false
@@ -107,42 +107,46 @@ class ExpenseDetailsViewModel @Inject constructor(
         }
     }
 
-    fun onNewTagClick() {
+    override fun onNewTagClick() {
         viewModelScope.launch {
+            savedStateHandle[NEW_TAG] = TagInput.INITIAL
             eventsChannel.send(ExpenseDetailsEvent.ToggleTagInput(true))
         }
     }
 
-    fun onNewTagNameChange(value: String) {
+    override fun onNewTagNameChange(value: String) {
         savedStateHandle[NEW_TAG] = newTag.value
-            .copy(name = value)
+            ?.copy(name = value)
     }
 
-    fun onNewTagColorSelect(value: Color) {
+    override fun onNewTagColorSelect(value: Color) {
         savedStateHandle[NEW_TAG] = newTag.value
-            .copy(colorCode = value.toArgb())
+            ?.copy(colorCode = value.toArgb())
     }
 
-    fun onNewTagDismiss() {
+    override fun onNewTagDismiss() {
         viewModelScope.launch {
             eventsChannel.send(ExpenseDetailsEvent.ToggleTagInput(false))
+            savedStateHandle[NEW_TAG] = null
         }
     }
 
-    fun onNewTagConfirm() {
-        viewModelScope.launch {
-            val input = newTag.value
-            if (input.name.isEmpty()) return@launch
+    override fun onNewTagConfirm() {
+        newTag.value?.let { input ->
+            viewModelScope.launch {
+                if (input.name.isEmpty()) return@launch
 
-            tagsRepo.insert(input)
-            savedStateHandle[KEY_EXPENSE] = expense.value
-                .copy(tagName = input.name)
-            eventsChannel.send(ExpenseDetailsEvent.ToggleTagInput(false))
-            eventsChannel.send(ExpenseDetailsEvent.ShowUiMessage(UiText.StringResource(R.string.tag_created)))
+                tagsRepo.insert(input)
+                savedStateHandle[KEY_EXPENSE] = expense.value
+                    .copy(tagName = input.name)
+                eventsChannel.send(ExpenseDetailsEvent.ToggleTagInput(false))
+                savedStateHandle[NEW_TAG] = null
+                eventsChannel.send(ExpenseDetailsEvent.ShowUiMessage(UiText.StringResource(R.string.tag_created)))
+            }
         }
     }
 
-    fun onSaveClick() {
+    override fun onSave() {
         viewModelScope.launch {
             val expense = expense.value
             val error = validator.validateExpense(expense)
