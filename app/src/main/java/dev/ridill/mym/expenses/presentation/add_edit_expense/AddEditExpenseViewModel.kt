@@ -1,4 +1,4 @@
-package dev.ridill.mym.expenses.presentation.expense_details
+package dev.ridill.mym.expenses.presentation.add_edit_expense
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -11,7 +11,7 @@ import dev.ridill.mym.R
 import dev.ridill.mym.core.domain.model.UiText
 import dev.ridill.mym.core.domain.util.Validator
 import dev.ridill.mym.core.navigation.screenSpecs.ARG_INVALID_ID_LONG
-import dev.ridill.mym.core.navigation.screenSpecs.ExpenseDetailsScreenSpec
+import dev.ridill.mym.core.navigation.screenSpecs.AddEditExpenseScreenSpec
 import dev.ridill.mym.core.util.asStateFlow
 import dev.ridill.mym.expenses.domain.model.Expense
 import dev.ridill.mym.expenses.domain.model.Tag
@@ -26,14 +26,14 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ExpenseDetailsViewModel @Inject constructor(
+class AddEditExpenseViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val expenseRepo: ExpenseRepository,
     private val tagsRepo: TagsRepository,
     private val validator: Validator
-) : ViewModel(), ExpenseDetailsActions {
+) : ViewModel(), AddEditExpenseActions {
 
-    private val expenseId = ExpenseDetailsScreenSpec
+    private val expenseId = AddEditExpenseScreenSpec
         .getExpenseIdFromSavedStateHandle(savedStateHandle)
     private val isEditMode = expenseId != ARG_INVALID_ID_LONG
 

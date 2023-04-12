@@ -1,9 +1,9 @@
-package dev.ridill.mym.expenses.presentation.expense_details
+package dev.ridill.mym.expenses.presentation.add_edit_expense
 
 import androidx.compose.ui.graphics.Color
 import dev.ridill.mym.expenses.domain.model.Tag
 
-interface ExpenseDetailsActions {
+interface AddEditExpenseActions {
     fun onNoteChange(value: String)
     fun onAmountChange(value: String)
     fun onTagSelect(tag: Tag)

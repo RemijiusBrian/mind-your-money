@@ -1,4 +1,4 @@
-package dev.ridill.mym.expenses.presentation.expense_details
+package dev.ridill.mym.expenses.presentation.add_edit_expense
 
 import dev.ridill.mym.expenses.domain.model.Tag
 

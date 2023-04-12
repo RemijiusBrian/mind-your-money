@@ -1,5 +1,6 @@
 package dev.ridill.mym.core.navigation.screenSpecs
 
+import androidx.annotation.StringRes
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
@@ -13,15 +14,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.*
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
-import dev.ridill.mym.expenses.presentation.expense_details.EXPENSE_DETAILS_ACTION
-import dev.ridill.mym.expenses.presentation.expense_details.ExpenseDetailsScreenContent
-import dev.ridill.mym.expenses.presentation.expense_details.ExpenseDetailsViewModel
+import dev.ridill.mym.expenses.presentation.add_edit_expense.AddEditExpenseScreenContent
+import dev.ridill.mym.expenses.presentation.add_edit_expense.AddEditExpenseViewModel
+import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_DETAILS_ACTION
 
-object ExpenseDetailsScreenSpec : ScreenSpec {
+object AddEditExpenseScreenSpec : ScreenSpec {
 
     override val route: String = "expense_details/{$ARG_EXPENSE_ID}"
 
     override val label: Int = R.string.destination_expense_details
+
+    @StringRes
+    fun getTitle(isEditMode: Boolean): Int =
+        if (isEditMode) R.string.edit_expense else R.string.add_expense
 
     override val arguments: List<NamedNavArgument> = listOf(
         navArgument(ARG_EXPENSE_ID) {
@@ -42,7 +47,7 @@ object ExpenseDetailsScreenSpec : ScreenSpec {
 
     @Composable
     override fun Content(navController: NavHostController, navBackStackEntry: NavBackStackEntry) {
-        val viewModel: ExpenseDetailsViewModel = hiltViewModel(navBackStackEntry)
+        val viewModel: AddEditExpenseViewModel = hiltViewModel(navBackStackEntry)
         val isEditMode = getExpenseIdFromArgs(navBackStackEntry) > ARG_INVALID_ID_LONG
 
         val amount = viewModel.amount.collectAsStateWithLifecycle("")
@@ -62,16 +67,16 @@ object ExpenseDetailsScreenSpec : ScreenSpec {
         LaunchedEffect(snackbarController, context, viewModel) {
             viewModel.events.collect { event ->
                 when (event) {
-                    is ExpenseDetailsViewModel.ExpenseDetailsEvent.NavigateBackWithResult -> {
+                    is AddEditExpenseViewModel.ExpenseDetailsEvent.NavigateBackWithResult -> {
                         navController.previousBackStackEntry
                             ?.savedStateHandle
                             ?.set(EXPENSE_DETAILS_ACTION, event.result)
                         navController.navigateUp()
                     }
-                    is ExpenseDetailsViewModel.ExpenseDetailsEvent.ShowUiMessage -> {
+                    is AddEditExpenseViewModel.ExpenseDetailsEvent.ShowUiMessage -> {
                         snackbarController.showSnackbar(event.uiText.asString(context), event.error)
                     }
-                    is ExpenseDetailsViewModel.ExpenseDetailsEvent.ToggleTagInput -> {
+                    is AddEditExpenseViewModel.ExpenseDetailsEvent.ToggleTagInput -> {
                         if (event.show) {
                             bottomSheetScaffoldState.bottomSheetState.expand()
                         } else {
@@ -82,7 +87,7 @@ object ExpenseDetailsScreenSpec : ScreenSpec {
             }
         }
 
-        ExpenseDetailsScreenContent(
+        AddEditExpenseScreenContent(
             isEditMode = isEditMode,
             actions = viewModel,
             navigateUp = navController::navigateUp,
