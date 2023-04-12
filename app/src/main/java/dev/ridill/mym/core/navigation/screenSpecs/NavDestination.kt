@@ -5,7 +5,8 @@ sealed interface NavDestination {
     companion object {
         val allDestinations = listOf<NavDestination>(
             DashboardScreenSpec,
-            ExpenseDetailsScreenSpec
+            ExpenseDetailsScreenSpec,
+            SettingsScreenSpec
         ).associateBy(NavDestination::route)
     }
 

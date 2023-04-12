@@ -13,9 +13,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.*
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
-import dev.ridill.mym.expenses.presentation.expenseDetails.EXPENSE_DETAILS_ACTION
-import dev.ridill.mym.expenses.presentation.expenseDetails.ExpenseDetailsScreenContent
-import dev.ridill.mym.expenses.presentation.expenseDetails.ExpenseDetailsViewModel
+import dev.ridill.mym.expenses.presentation.expense_details.EXPENSE_DETAILS_ACTION
+import dev.ridill.mym.expenses.presentation.expense_details.ExpenseDetailsScreenContent
+import dev.ridill.mym.expenses.presentation.expense_details.ExpenseDetailsViewModel
 
 object ExpenseDetailsScreenSpec : ScreenSpec {
 

@@ -1,4 +1,4 @@
-package dev.ridill.mym.expenses.presentation.expenseDetails
+package dev.ridill.mym.expenses.presentation.expense_details
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*

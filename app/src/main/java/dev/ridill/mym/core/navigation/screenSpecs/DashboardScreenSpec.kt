@@ -9,7 +9,7 @@ import androidx.navigation.NavHostController
 import dev.ridill.mym.R
 import dev.ridill.mym.dashboard.presentation.DashboardScreen
 import dev.ridill.mym.dashboard.presentation.DashboardViewModel
-import dev.ridill.mym.expenses.presentation.expenseDetails.EXPENSE_DETAILS_ACTION
+import dev.ridill.mym.expenses.presentation.expense_details.EXPENSE_DETAILS_ACTION
 
 object DashboardScreenSpec : ScreenSpec {
 
@@ -35,7 +35,9 @@ object DashboardScreenSpec : ScreenSpec {
             navigateToExpenseDetails = { expenseId ->
                 navController.navigate(ExpenseDetailsScreenSpec.routeWithArgs(expenseId))
             },
-            navigateToBottomBarSpec = {}
+            navigateToBottomBarSpec = {
+                navController.navigate(it.route)
+            }
         )
     }
 }
