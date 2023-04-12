@@ -1,14 +1,19 @@
 package dev.ridill.mym.settings.presentation.settings
 
 import android.content.Intent
-import androidx.lifecycle.*
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.mym.R
 import dev.ridill.mym.core.data.preferences.PreferencesManager
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.domain.model.UiText
+import dev.ridill.mym.core.util.Formatter
+import dev.ridill.mym.core.util.asStateFlow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -21,12 +26,13 @@ class SettingsViewModel @Inject constructor(
 ) : ViewModel(), SettingsActions {
 
     private val preferences = preferencesManager.preferences
+    private val appTheme = preferences.map { it.theme }.distinctUntilChanged()
+    private val monthlyLimit = preferences.map { it.monthlyLimit }.distinctUntilChanged()
 
-    private val showThemeSelection = savedStateHandle.getLiveData("showThemeSelection", false)
-    private val showExpenditureLimitUpdate =
-        savedStateHandle.getLiveData("showExpenditureLimitUpdate", false)
-    private val showBalanceWarningPercentPicker =
-        savedStateHandle.getLiveData("showBalanceWarningPercentPicker", false)
+    private val showThemeSelection = savedStateHandle
+        .getStateFlow(SHOW_THEME_SELECTION, false)
+    private val showMonthlyLimitInput = savedStateHandle
+        .getStateFlow(SHOW_MONTHLY_LIMIT_INPUT, false)
 
     private val showAutoAddExpenseDescription =
         savedStateHandle.getStateFlow(KEY_SHOW_AUTO_ADD_EXPENSE_DESC, false)
@@ -35,54 +41,51 @@ class SettingsViewModel @Inject constructor(
     val events get() = eventsChannel.receiveAsFlow()
 
     val state = combineTuple(
-        preferences,
-        showThemeSelection.asFlow(),
-        showExpenditureLimitUpdate.asFlow(),
-        showBalanceWarningPercentPicker.asFlow(),
+        appTheme,
+        monthlyLimit,
+        showThemeSelection,
+        showMonthlyLimitInput,
         showAutoAddExpenseDescription
     ).map { (
-                preferences,
+                appTheme,
+                monthlyLimit,
                 showThemeSelection,
-                showExpenditureUpdate,
-                showBalanceWarningPercentPicker,
+                showMonthlyLimitInput,
                 showAutoAddExpenseDescription
             ) ->
         SettingsState(
-            appTheme = preferences.theme,
-//            expenditureLimit = TextUtil.formatAmountWithCurrency(preferences.expenditureLimit),
+            appTheme = appTheme,
+            monthlyLimit = Formatter.currency(monthlyLimit),
             showThemeSelection = showThemeSelection,
-            showExpenditureUpdate = showExpenditureUpdate,
-            showBalanceWarningPercentPicker = showBalanceWarningPercentPicker,
-//            balanceWarningPercent = preferences.balanceWarningPercent,
+            showMonthlyLimitInput = showMonthlyLimitInput,
             showAutoAddExpenseDescription = showAutoAddExpenseDescription,
-//            backupAccount = preferences.backupAccount
         )
-    }.asLiveData()
+    }.asStateFlow(viewModelScope, SettingsState.INITIAL)
 
     override fun onThemePreferenceClick() {
-        showThemeSelection.value = true
+        savedStateHandle[SHOW_THEME_SELECTION] = true
     }
 
     override fun onAppThemeSelectionDismiss() {
-        showThemeSelection.value = false
+        savedStateHandle[SHOW_THEME_SELECTION] = false
     }
 
     override fun onAppThemeSelectionConfirm(theme: AppTheme) {
         viewModelScope.launch {
             preferencesManager.updateAppTheme(theme)
-            showThemeSelection.value = false
+            savedStateHandle[SHOW_THEME_SELECTION] = false
         }
     }
 
-    override fun onExpenditureLimitPreferenceClick() {
-        showExpenditureLimitUpdate.value = true
+    override fun onMonthlyLimitPreferenceClick() {
+        savedStateHandle[SHOW_MONTHLY_LIMIT_INPUT] = true
     }
 
-    override fun onExpenditureLimitUpdateDismiss() {
-        showExpenditureLimitUpdate.value = false
+    override fun onMonthlyLimitInputDismiss() {
+        savedStateHandle[SHOW_MONTHLY_LIMIT_INPUT] = false
     }
 
-    override fun onExpenditureLimitUpdateConfirm(amount: String) {
+    override fun onMonthlyLimitInputConfirm(amount: String) {
         val parsedAmount = amount.toLongOrNull() ?: return
         viewModelScope.launch {
             if (parsedAmount < 0L) {
@@ -94,25 +97,9 @@ class SettingsViewModel @Inject constructor(
                 )
                 return@launch
             }
-//            preferencesManager.updateExpenditureLimit(parsedAmount)
-//            eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.expenditure_limit_updated)))
-            showExpenditureLimitUpdate.value = false
-        }
-    }
-
-    override fun onShowLowBalanceUnderPercentPreferenceClick() {
-        showBalanceWarningPercentPicker.value = true
-    }
-
-    override fun onShowLowBalanceUnderPercentUpdateDismiss() {
-        showBalanceWarningPercentPicker.value = false
-    }
-
-    override fun onShowLowBalanceUnderPercentUpdateConfirm(value: Float) {
-        viewModelScope.launch {
-//            preferencesManager.updateBalanceWarningPercent(value)
-            showBalanceWarningPercentPicker.value = false
-//            eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.value_updated)))
+            preferencesManager.updateMonthlyLimit(parsedAmount)
+            eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.monthly_limit_updated)))
+            savedStateHandle[SHOW_MONTHLY_LIMIT_INPUT] = false
         }
     }
 
@@ -148,4 +135,6 @@ class SettingsViewModel @Inject constructor(
     }
 }
 
+private const val SHOW_THEME_SELECTION = "SHOW_THEME_SELECTION"
+private const val SHOW_MONTHLY_LIMIT_INPUT = "SHOW_MONTHLY_LIMIT_INPUT"
 private const val KEY_SHOW_AUTO_ADD_EXPENSE_DESC = "KEY_SHOW_AUTO_ADD_EXPENSE_DESC"

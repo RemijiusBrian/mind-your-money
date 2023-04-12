@@ -7,12 +7,9 @@ interface SettingsActions {
     fun onAppThemeSelectionDismiss()
     fun onAppThemeSelectionConfirm(theme: AppTheme)
 
-    fun onExpenditureLimitPreferenceClick()
-    fun onExpenditureLimitUpdateDismiss()
-    fun onExpenditureLimitUpdateConfirm(amount: String)
-    fun onShowLowBalanceUnderPercentPreferenceClick()
-    fun onShowLowBalanceUnderPercentUpdateDismiss()
-    fun onShowLowBalanceUnderPercentUpdateConfirm(value: Float)
+    fun onMonthlyLimitPreferenceClick()
+    fun onMonthlyLimitInputDismiss()
+    fun onMonthlyLimitInputConfirm(amount: String)
 
     fun onAutoAddExpenseClick()
     fun onAutoAddExpenseDismiss()

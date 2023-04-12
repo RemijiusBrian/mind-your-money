@@ -1,7 +1,6 @@
 package dev.ridill.mym.core.util
 
-import android.icu.text.CompactDecimalFormat
-import android.icu.text.NumberFormat
+import java.text.NumberFormat
 import java.util.*
 
 object Formatter {
@@ -27,7 +26,7 @@ object Formatter {
     }.format(value)
 
     private fun currencyFormat(): NumberFormat =
-        CompactDecimalFormat.getCurrencyInstance(Locale.getDefault())
+        NumberFormat.getCurrencyInstance(Locale.getDefault())
 }
 
 private const val DEFAULT_FRACTION_DIGITS = 2

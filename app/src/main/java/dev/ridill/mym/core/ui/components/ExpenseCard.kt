@@ -23,7 +23,7 @@ fun ExpenseCard(
     amount: String,
     modifier: Modifier = Modifier,
     tag: Tag? = null,
-    colors: ListItemColors = defaultExpenseCardColors(),
+    colors: ListItemColors = ListItemDefaults.colors(),
     shape: Shape = CardDefaults.shape
 ) {
     Card(
@@ -71,13 +71,6 @@ fun ExpenseCard(
         )
     }
 }
-
-@Composable
-fun defaultExpenseCardColors() = ListItemDefaults.colors(
-    containerColor = MaterialTheme.colorScheme.primaryContainer,
-    headlineColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    trailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer
-)
 
 /*@Composable
 fun ExpenseCardLayout(

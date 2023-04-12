@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import dev.ridill.mym.core.ui.theme.ContentAlpha
+import dev.ridill.mym.core.ui.theme.SpacingLarge
 import dev.ridill.mym.core.ui.theme.SpacingMedium
 
 @Composable
@@ -26,7 +27,7 @@ fun SectionTitle(
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Bold,
         modifier = modifier
-            .padding(horizontal = SpacingMedium)
+            .padding(horizontal = SpacingLarge)
             .padding(top = SpacingMedium)
     )
 }
@@ -43,7 +44,7 @@ fun BasicPreference(
         modifier = Modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(SpacingMedium)
+            .padding(SpacingLarge)
             .then(modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {

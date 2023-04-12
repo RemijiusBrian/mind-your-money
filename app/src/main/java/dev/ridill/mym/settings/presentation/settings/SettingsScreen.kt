@@ -6,28 +6,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.BrightnessMedium
+import androidx.compose.material.icons.outlined.Message
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import dev.ridill.mym.BuildConfig
 import dev.ridill.mym.R
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.navigation.screenSpecs.SettingsScreenSpec
-import dev.ridill.mym.core.ui.components.BackArrowButton
-import dev.ridill.mym.core.ui.components.MYMScaffold
-import dev.ridill.mym.core.ui.components.SnackbarController
+import dev.ridill.mym.core.ui.components.*
 import dev.ridill.mym.core.util.launchUrl
 import dev.ridill.mym.settings.presentation.components.BasicPreference
-import dev.ridill.mym.settings.presentation.components.ExpenditureLimitUpdateDialog
 import dev.ridill.mym.settings.presentation.components.SectionTitle
 
 @Composable
@@ -59,38 +60,31 @@ fun SettingsScreenContent(
                 .verticalScroll(rememberScrollState())
         ) {
             // General Section
-            SectionTitle(title = R.string.general)
+            SectionTitle(title = R.string.pref_title_general)
             BasicPreference(
-                title = R.string.theme,
+                title = R.string.pref_theme,
                 summary = stringResource(state.appTheme.label),
                 icon = Icons.Default.BrightnessMedium,
                 onClick = actions::onThemePreferenceClick
             )
-            /* BasicPreference(
-                 title = R.string.notifications,
-                 icon = ImageVector.vectorResource(R.drawable.ic_notification),
-                 onClick = navigateToNotificationSettings
-             )*/
+            BasicPreference(
+                title = R.string.pref_notifications,
+                icon = Icons.Outlined.Notifications,
+                onClick = navigateToNotificationSettings
+            )
 
             // Expense Section
-            SectionTitle(title = R.string.expense)
+            SectionTitle(title = R.string.pref_title_expense)
             BasicPreference(
-                title = R.string.expenditure_limit,
-                summary = state.expenditureLimit,
-                onClick = actions::onExpenditureLimitPreferenceClick
-            )
-            /*BasicPreference(
-                title = R.string.show_warning_when_balance_under,
-                summary = if (state.balanceWarningPercent > 0)
-                    TextUtil.formatPercent(state.balanceWarningPercent)
-                else stringResource(R.string.disabled),
-                onClick = actions::onShowLowBalanceUnderPercentPreferenceClick
+                title = R.string.pref_monthly_limit,
+                summary = state.monthlyLimit,
+                onClick = actions::onMonthlyLimitPreferenceClick
             )
             BasicPreference(
-                title = R.string.auto_add_expenses,
-                summary = stringResource(R.string.auto_add_expenses),
+                title = R.string.pref_auto_add_expense,
+                summary = stringResource(R.string.pref_summary_auto_add_expense),
                 onClick = actions::onAutoAddExpenseClick
-            )*/
+            )
 
             // Backup Section
             /*SectionTitle(title = R.string.backup)
@@ -109,8 +103,7 @@ fun SettingsScreenContent(
             // Links Section
             SectionTitle(title = R.string.links)
             BasicPreference(
-                title = R.string.source_code,
-//                summary = stringResource(R.string.bug_report_feature_request),
+                title = R.string.pref_source_code,
                 onClick = {
                     context.launchUrl(BuildConfig.REPO_URL) { uiText ->
                         uiText?.let {
@@ -122,9 +115,9 @@ fun SettingsScreenContent(
             )
 
             // Info Section
-            SectionTitle(title = R.string.info)
+            SectionTitle(title = R.string.pref_title_info)
             BasicPreference(
-                title = R.string.app_version,
+                title = R.string.pref_app_version,
                 summary = BuildConfig.VERSION_NAME,
                 icon = Icons.Default.Info
             )
@@ -138,29 +131,22 @@ fun SettingsScreenContent(
             )
         }
 
-        if (state.showExpenditureUpdate) {
-            ExpenditureLimitUpdateDialog(
-                previousLimit = state.expenditureLimit,
-                onDismiss = actions::onExpenditureLimitUpdateDismiss,
-                onConfirm = actions::onExpenditureLimitUpdateConfirm
-            )
-        }
-
-        if (state.showBalanceWarningPercentPicker) {
-            SliderDialog(
-                currentValue = state.balanceWarningPercent,
-                onDismiss = actions::onShowLowBalanceUnderPercentUpdateDismiss,
-                onConfirm = actions::onShowLowBalanceUnderPercentUpdateConfirm
+        if (state.showMonthlyLimitInput) {
+            MonthlyLimitInputDialog(
+                previousLimit = state.monthlyLimit,
+                onDismiss = actions::onMonthlyLimitInputDismiss,
+                onConfirm = actions::onMonthlyLimitInputConfirm
             )
         }
 
         if (state.showAutoAddExpenseDescription) {
-            /*PermissionRationaleDialog(
+            PermissionRationaleDialog(
                 rationalMessage = R.string.permission_receive_sms_rationale,
-                icon = ImageVector.vectorResource(R.drawable.ic_message),
+                icon = Icons.Outlined.Message,
+//                ImageVector.vectorResource(R.drawable.ic_message),
                 onDismiss = actions::onAutoAddExpenseDismiss,
                 onConfirm = actions::onAutoAddExpenseConfirm
-            )*/
+            )
         }
     }
 }
@@ -171,54 +157,43 @@ private fun ThemeSelectionDialog(
     onDismiss: () -> Unit,
     onConfirm: (AppTheme) -> Unit
 ) {
-    var selection by remember { mutableStateOf(selectedTheme) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = { onConfirm(selection) }) {
-                Text(stringResource(R.string.action_confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.action_cancel))
-            }
-        },
+        confirmButton = {},
         title = { Text(text = stringResource(R.string.select_theme)) },
         text = {
             Column {
                 AppTheme.values().forEach { theme ->
-                    /*RadioButtonWithLabel(
+                    RadioButtonWithLabel(
                         label = theme.label,
-                        selected = theme == selection,
-                        onClick = { selection = theme },
+                        selected = theme == selectedTheme,
+                        onClick = { onConfirm(theme) },
                         modifier = Modifier
                             .fillMaxWidth()
-                    )*/
+                    )
                 }
             }
         },
         icon = {
-            Icon(imageVector = Icons.Outlined.BrightnessMedium, contentDescription = null)
+            Icon(
+                imageVector = Icons.Outlined.BrightnessMedium,
+                contentDescription = null
+            )
         }
     )
 }
 
 @Composable
-private fun SliderDialog(
-    currentValue: Float,
+private fun MonthlyLimitInputDialog(
+    previousLimit: String,
     onDismiss: () -> Unit,
-    onConfirm: (Float) -> Unit,
-    modifier: Modifier = Modifier
+    onConfirm: (String) -> Unit
 ) {
-    var selection by remember { mutableStateOf(currentValue) }
+    var input by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-//            Text(stringResource(R.string.show_warning_below_percentage_selection_title))
-        },
         confirmButton = {
-            TextButton(onClick = { onConfirm(selection) }) {
+            TextButton(onClick = { onConfirm(input) }) {
                 Text(stringResource(R.string.action_confirm))
             }
         },
@@ -227,34 +202,30 @@ private fun SliderDialog(
                 Text(stringResource(R.string.action_cancel))
             }
         },
+        icon = {
+//            Icon(
+//                painter = painterResource(R.drawable.ic_piggy_bank),
+//                contentDescription = null
+//            )
+        },
+        title = {
+            Text(stringResource(R.string.enter_monthly_limit))
+        },
         text = {
             Column {
-                /*Text(
-                    text = if (selection > Float.Zero)
-                        stringResource(
-                            R.string.warning_will_show_when_balance_drops_below,
-                            (selection * 100).roundToInt()
-                        )
-                    else stringResource(R.string.disabled_low_warning_balance)
-                )*/
-                Slider(
-                    value = selection,
-                    onValueChange = { selection = it },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    steps = 100,
-                    colors = SliderDefaults.colors(
-                        activeTickColor = Color.Transparent
+//                Text(text = stringResource(R.string))
+                OutlinedTextField(
+                    value = input,
+                    onValueChange = { input = it },
+                    shape = MaterialTheme.shapes.medium,
+                    singleLine = true,
+                    placeholder = { Text(previousLimit) },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Done
                     )
                 )
             }
-        },
-        icon = {
-            /*Icon(
-                imageVector = Icons.Outlined.Warning,
-                contentDescription = stringResource(R.string.content_description_balance_low_warning)
-            )*/
-        },
-        modifier = modifier
+        }
     )
 }
