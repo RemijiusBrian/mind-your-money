@@ -27,6 +27,8 @@ import dev.ridill.mym.R
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.navigation.screenSpecs.SettingsScreenSpec
 import dev.ridill.mym.core.ui.components.*
+import dev.ridill.mym.core.ui.theme.SpacingMedium
+import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.launchUrl
 import dev.ridill.mym.settings.presentation.components.BasicPreference
 import dev.ridill.mym.settings.presentation.components.SectionTitle
@@ -77,7 +79,8 @@ fun SettingsScreenContent(
             SectionTitle(title = R.string.pref_title_expense)
             BasicPreference(
                 title = R.string.pref_monthly_limit,
-                summary = state.monthlyLimit,
+                summary = if (state.monthlyLimit <= 0) stringResource(R.string.disabled)
+                else Formatter.currency(state.monthlyLimit),
                 onClick = actions::onMonthlyLimitPreferenceClick
             )
             BasicPreference(
@@ -133,7 +136,7 @@ fun SettingsScreenContent(
 
         if (state.showMonthlyLimitInput) {
             MonthlyLimitInputDialog(
-                previousLimit = state.monthlyLimit,
+                previousLimit = Formatter.currency(state.monthlyLimit),
                 onDismiss = actions::onMonthlyLimitInputDismiss,
                 onConfirm = actions::onMonthlyLimitInputConfirm
             )
@@ -213,7 +216,8 @@ private fun MonthlyLimitInputDialog(
         },
         text = {
             Column {
-//                Text(text = stringResource(R.string))
+                Text(text = stringResource(R.string.monthly_limit_input_message))
+                VerticalSpacer(spacing = SpacingMedium)
                 OutlinedTextField(
                     value = input,
                     onValueChange = { input = it },

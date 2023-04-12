@@ -10,7 +10,6 @@ import dev.ridill.mym.R
 import dev.ridill.mym.core.data.preferences.PreferencesManager
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.domain.model.UiText
-import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.asStateFlow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -55,7 +54,7 @@ class SettingsViewModel @Inject constructor(
             ) ->
         SettingsState(
             appTheme = appTheme,
-            monthlyLimit = Formatter.currency(monthlyLimit),
+            monthlyLimit = monthlyLimit,
             showThemeSelection = showThemeSelection,
             showMonthlyLimitInput = showMonthlyLimitInput,
             showAutoAddExpenseDescription = showAutoAddExpenseDescription,

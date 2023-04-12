@@ -126,4 +126,5 @@
     <string name="disabled">Disabled</string>
     <string name="monthly_limit_updated">Monthly limit updated</string>
     <string name="enter_monthly_limit">Enter Monthly Limit</string>
+    <string name="monthly_limit_input_message">Enter the amount you would like to limit your expense to</string>
 </resources>
