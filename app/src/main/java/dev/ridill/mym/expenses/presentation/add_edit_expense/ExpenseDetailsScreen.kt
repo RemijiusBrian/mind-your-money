@@ -1,9 +1,11 @@
-package dev.ridill.mym.expenses.presentation.expense_details
+package dev.ridill.mym.expenses.presentation.add_edit_expense
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Save
@@ -22,23 +24,23 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
+import dev.ridill.mym.core.navigation.screenSpecs.AddEditExpenseScreenSpec
 import dev.ridill.mym.core.ui.components.*
 import dev.ridill.mym.core.ui.theme.*
 import dev.ridill.mym.core.util.Formatter
-import dev.ridill.mym.core.util.One
 import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.expenses.domain.model.Tag
 import dev.ridill.mym.expenses.domain.model.TagInput
 import kotlinx.coroutines.launch
 
 @Composable
-fun ExpenseDetailsScreenContent(
+fun AddEditExpenseScreenContent(
     isEditMode: Boolean,
     amountProvider: () -> String,
     noteProvider: () -> String,
     state: ExpenseDetailsState,
     newTagProvider: () -> TagInput?,
-    actions: ExpenseDetailsActions,
+    actions: AddEditExpenseActions,
     scaffoldState: BottomSheetScaffoldState,
     snackbarController: SnackbarController,
     navigateUp: () -> Unit
@@ -59,7 +61,9 @@ fun ExpenseDetailsScreenContent(
                 TopAppBar(
                     navigationIcon = { BackArrowButton(onClick = navigateUp) },
                     title = {
-                        Text(stringResource(if (isEditMode) R.string.edit_expense else R.string.add_expense))
+                        Text(
+                            stringResource(AddEditExpenseScreenSpec.getTitle(isEditMode))
+                        )
                     },
                     actions = {
                         if (isEditMode) {
@@ -88,16 +92,21 @@ fun ExpenseDetailsScreenContent(
             sheetPeekHeight = Dp.Zero,
             sheetSwipeEnabled = false
         ) { paddingValues ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
                 Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(Float.One)
-                        .padding(defaultScreenPadding(top = SpacingLargeTop)),
+                        .matchParentSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(
+                            defaultScreenPadding(
+                                top = SpacingLargeTop,
+                                bottom = SpacingListEnd
+                            )
+                        ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(SpacingSmall)
                 ) {
@@ -137,7 +146,7 @@ fun ExpenseDetailsScreenContent(
                     onClick = actions::onSave,
                     modifier = Modifier
                         .padding(FabSpacing)
-                        .align(Alignment.End)
+                        .align(Alignment.BottomEnd)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Save,

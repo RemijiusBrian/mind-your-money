@@ -1,20 +1,17 @@
 package dev.ridill.mym.core.ui.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import dev.ridill.mym.core.ui.theme.SpacingMedium
+import androidx.compose.ui.unit.dp
 import dev.ridill.mym.core.ui.theme.SpacingSmall
 import dev.ridill.mym.core.ui.theme.SpacingXSmall
-import dev.ridill.mym.core.util.One
 import dev.ridill.mym.core.util.onColor
 import dev.ridill.mym.expenses.domain.model.Tag
 
@@ -29,40 +26,50 @@ fun ExpenseCard(
     colors: ListItemColors = defaultExpenseCardColors(),
     shape: Shape = CardDefaults.shape
 ) {
-    ListItem(
-        headlineContent = { Text(text = note) },
-        supportingContent = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+    Card(
+        onClick = onClick,
+        shape = shape
+    ) {
+        ListItem(
+            headlineContent = {
                 Text(
-                    text = date,
-                    style = MaterialTheme.typography.bodySmall
+                    text = note,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
-                tag?.let {
-                    Spacer(Modifier.width(SpacingSmall))
-                    TagIndicator(
-                        name = it.name,
-                        color = it.color
+            },
+            supportingContent = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = date,
+                        style = MaterialTheme.typography.bodySmall
                     )
+                    tag?.let {
+                        Spacer(Modifier.width(SpacingSmall))
+                        TagIndicator(
+                            name = it.name,
+                            color = it.color
+                        )
+                    }
                 }
-            }
-        },
-        colors = colors,
-        trailingContent = {
-            Text(
-                text = amount,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        modifier = Modifier
-            .clip(shape)
-            .clickable { onClick() }
-            .then(modifier)
-    )
+            },
+            colors = colors,
+            trailingContent = {
+                Text(
+                    text = amount,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .widthIn(max = 120.dp)
+                )
+            },
+            modifier = modifier
+        )
+    }
 }
 
 @Composable
@@ -72,7 +79,7 @@ fun defaultExpenseCardColors() = ListItemDefaults.colors(
     trailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer
 )
 
-@Composable
+/*@Composable
 fun ExpenseCardLayout(
     note: String,
     date: String,
@@ -118,7 +125,7 @@ fun ExpenseCardLayout(
             overflow = TextOverflow.Ellipsis
         )
     }
-}
+}*/
 
 @Composable
 private fun TagIndicator(
@@ -144,7 +151,9 @@ private fun TagIndicator(
                 text = name,
                 modifier = Modifier
                     .padding(horizontal = SpacingSmall),
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

@@ -26,7 +26,6 @@ import dev.ridill.mym.core.ui.components.BackArrowButton
 import dev.ridill.mym.core.ui.components.MYMScaffold
 import dev.ridill.mym.core.ui.components.SnackbarController
 import dev.ridill.mym.core.util.launchUrl
-import dev.ridill.mym.core.util.logD
 import dev.ridill.mym.settings.presentation.components.BasicPreference
 import dev.ridill.mym.settings.presentation.components.ExpenditureLimitUpdateDialog
 import dev.ridill.mym.settings.presentation.components.SectionTitle
@@ -113,8 +112,10 @@ fun SettingsScreenContent(
                 title = R.string.source_code,
 //                summary = stringResource(R.string.bug_report_feature_request),
                 onClick = {
-                    context.launchUrl(BuildConfig.REPO_URL) {
-                        logD { it?.asString(context).orEmpty() }
+                    context.launchUrl(BuildConfig.REPO_URL) { uiText ->
+                        uiText?.let {
+                            snackbarController.showSnackbar(it.asString(context))
+                        }
                     }
                 },
                 icon = ImageVector.vectorResource(R.drawable.ic_github)
