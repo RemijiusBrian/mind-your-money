@@ -11,7 +11,7 @@ object Formatter {
         value: Double,
         maxFractionDigits: Int = DEFAULT_FRACTION_DIGITS,
         groupUsed: Boolean = true
-    ): String = NumberFormat.getCurrencyInstance().apply {
+    ): String = currencyFormat().apply {
         maximumFractionDigits = maxFractionDigits
         isGroupingUsed = groupUsed
     }.format(value)
@@ -20,10 +20,13 @@ object Formatter {
         value: Long,
         maxFractionDigits: Int = DEFAULT_FRACTION_DIGITS,
         groupUsed: Boolean = true
-    ): String = NumberFormat.getCurrencyInstance().apply {
+    ): String = currencyFormat().apply {
         maximumFractionDigits = maxFractionDigits
         isGroupingUsed = groupUsed
     }.format(value)
+
+    private fun currencyFormat(): NumberFormat =
+        NumberFormat.getCurrencyInstance(Locale.getDefault())
 }
 
 private const val DEFAULT_FRACTION_DIGITS = 2
