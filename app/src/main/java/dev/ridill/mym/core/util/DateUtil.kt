@@ -2,6 +2,8 @@ package dev.ridill.mym.core.util
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 
 object DateUtil {
     fun currentDateTime(): LocalDateTime = LocalDateTime.now()
@@ -21,8 +23,25 @@ object DateUtil {
         .toFormatter(Locale.getDefault())*/
 
     object Formatters {
+        private val ordinalMap: Map<Long, String> = buildMap {
+            put(1L, "1st");
+            put(2L, "2nd");
+            put(3L, "3rd");
+            put(21L, "21st");
+            put(22L, "22nd");
+            put(23L, "23rd");
+            put(31L, "31st");
+            repeat(31) {
+                val day = it + 1L
+                putIfAbsent(day, "${day}th")
+            }
+        }
+
         val mmHyphenYyyy: DateTimeFormatter = DateTimeFormatter.ofPattern("MM-yyyy")
-        val dayDetails: DateTimeFormatter = DateTimeFormatter.ofPattern("dd, EEE")
+        val dayDetails: DateTimeFormatter = DateTimeFormatterBuilder()
+            .appendPattern("EEE, ")
+            .appendText(ChronoField.DAY_OF_MONTH, ordinalMap)
+            .toFormatter()
     }
 }
 
