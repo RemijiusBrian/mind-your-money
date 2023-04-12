@@ -1,11 +1,9 @@
 package dev.ridill.mym.core.ui.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -20,18 +18,14 @@ fun TagChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val containerColor by animateColorAsState(
-        targetValue = if (selected) color
-        else Color.Transparent
-    )
     FilterChip(
         selected = selected,
         onClick = onClick,
         label = { Text(name) },
         modifier = modifier,
         colors = FilterChipDefaults.filterChipColors(
-            containerColor = containerColor,
-            labelColor = containerColor.onColor()
+            selectedContainerColor = color,
+            selectedLabelColor = color.onColor()
         )
     )
 }

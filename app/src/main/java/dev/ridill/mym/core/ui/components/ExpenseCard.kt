@@ -20,35 +20,57 @@ import dev.ridill.mym.expenses.domain.model.Tag
 
 @Composable
 fun ExpenseCard(
+    onClick: () -> Unit,
     note: String,
     date: String,
     amount: String,
     modifier: Modifier = Modifier,
     tag: Tag? = null,
-    onClick: (() -> Unit)? = null,
-    billExpense: Boolean = false,
-    colors: CardColors = CardDefaults.cardColors(),
+    colors: ListItemColors = defaultExpenseCardColors(),
     shape: Shape = CardDefaults.shape
 ) {
-    Card(
+    ListItem(
+        headlineContent = { Text(text = note) },
+        supportingContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = date,
+                    style = MaterialTheme.typography.bodySmall
+                )
+                tag?.let {
+                    Spacer(Modifier.width(SpacingSmall))
+                    TagIndicator(
+                        name = it.name,
+                        color = it.color
+                    )
+                }
+            }
+        },
+        colors = colors,
+        trailingContent = {
+            Text(
+                text = amount,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
         modifier = Modifier
             .clip(shape)
-            .then(
-                if (billExpense || onClick == null) Modifier
-                else Modifier.clickable { onClick() }
-            )
-            .then(modifier),
-        colors = colors,
-        shape = shape
-    ) {
-        ExpenseCardLayout(
-            note = note,
-            date = date,
-            amount = amount,
-            tag = tag
-        )
-    }
+            .clickable { onClick() }
+            .then(modifier)
+    )
 }
+
+@Composable
+fun defaultExpenseCardColors() = ListItemDefaults.colors(
+    containerColor = MaterialTheme.colorScheme.primaryContainer,
+    headlineColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    trailingIconColor = MaterialTheme.colorScheme.onPrimaryContainer
+)
 
 @Composable
 fun ExpenseCardLayout(

@@ -5,6 +5,7 @@ import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -46,7 +47,7 @@ object ExpenseDetailsScreenSpec : ScreenSpec {
 
         val amount = viewModel.amount.collectAsStateWithLifecycle("")
         val note = viewModel.note.collectAsStateWithLifecycle("")
-        val state = viewModel.state.collectAsStateWithLifecycle()
+        val state by viewModel.state.collectAsStateWithLifecycle()
         val newTag = viewModel.newTag.collectAsStateWithLifecycle()
 
         val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
@@ -87,7 +88,7 @@ object ExpenseDetailsScreenSpec : ScreenSpec {
             navigateUp = navController::navigateUp,
             amountProvider = { amount.value },
             noteProvider = { note.value },
-            state = state.value,
+            state = state,
             newTagProvider = { newTag.value },
             scaffoldState = bottomSheetScaffoldState,
             snackbarController = snackbarController

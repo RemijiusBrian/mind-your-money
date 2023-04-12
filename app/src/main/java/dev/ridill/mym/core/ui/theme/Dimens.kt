@@ -24,6 +24,8 @@ val ElevationLevel3 = 6.0.dp
 val ElevationLevel4 = 8.0.dp
 val ElevationLevel5 = 12.0.dp
 
+val FabSpacing = 16.dp
+
 fun defaultScreenPadding(
     top: Dp = SpacingMedium,
     start: Dp = SpacingLarge,

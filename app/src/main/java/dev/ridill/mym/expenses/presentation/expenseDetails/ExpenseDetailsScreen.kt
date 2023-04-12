@@ -2,13 +2,11 @@ package dev.ridill.mym.expenses.presentation.expenseDetails
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material.icons.outlined.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -25,10 +23,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.*
-import dev.ridill.mym.core.ui.theme.ContentAlpha
-import dev.ridill.mym.core.ui.theme.SpacingLargeTop
-import dev.ridill.mym.core.ui.theme.SpacingSmall
-import dev.ridill.mym.core.ui.theme.defaultScreenPadding
+import dev.ridill.mym.core.ui.theme.*
 import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.One
 import dev.ridill.mym.core.util.Zero
@@ -55,18 +50,16 @@ fun ExpenseDetailsScreenContent(
         }
     }
 
-    Box(modifier = Modifier.imePadding()) {
+    Box(
+        modifier = Modifier
+            .imePadding()
+    ) {
         MYMScaffold(
             topBar = {
                 TopAppBar(
                     navigationIcon = { BackArrowButton(onClick = navigateUp) },
                     title = {
-                        Text(
-                            stringResource(
-                                id = if (isEditMode) R.string.edit_expense
-                                else R.string.add_expense
-                            )
-                        )
+                        Text(stringResource(if (isEditMode) R.string.edit_expense else R.string.add_expense))
                     },
                     actions = {
                         if (isEditMode) {
@@ -82,16 +75,14 @@ fun ExpenseDetailsScreenContent(
             },
             scaffoldState = scaffoldState,
             sheetContent = {
-                newTagProvider()?.let { input ->
-                    NewTagSheet(
-                        onTagNameChange = actions::onNewTagNameChange,
-                        onTagColorSelect = actions::onNewTagColorSelect,
-                        onConfirm = actions::onNewTagConfirm,
-                        onDismiss = actions::onNewTagDismiss,
-                        name = { input.name },
-                        colorCode = input.colorCode
-                    )
-                }
+                NewTagSheetContent(
+                    onTagNameChange = actions::onNewTagNameChange,
+                    onTagColorSelect = actions::onNewTagColorSelect,
+                    onConfirm = actions::onNewTagConfirm,
+                    onDismiss = actions::onNewTagDismiss,
+                    name = { newTagProvider()?.name.orEmpty() },
+                    colorCode = newTagProvider()?.colorCode
+                )
             },
             snackbarController = snackbarController,
             sheetPeekHeight = Dp.Zero,
@@ -101,13 +92,12 @@ fun ExpenseDetailsScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(defaultScreenPadding(top = SpacingLargeTop))
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(Float.One)
-                        .verticalScroll(rememberScrollState()),
+                        .padding(defaultScreenPadding(top = SpacingLargeTop)),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(SpacingSmall)
                 ) {
@@ -129,38 +119,10 @@ fun ExpenseDetailsScreenContent(
                         )
                     )
 
-//                    val containerColor = MaterialTheme.colorScheme.surfaceVariant
-//                        .copy(alpha = ContentAlpha.PERCENT_32)
-                    TextField(
-                        value = noteProvider(),
-                        onValueChange = actions::onNoteChange,
-                        textStyle = TextStyle.Default.copy(
-                            textAlign = TextAlign.Center
-                        ),
-                        shape = MaterialTheme.shapes.medium,
-                        modifier = Modifier
-                            .defaultMinSize(minWidth = InputFieldMinWidth)
-                            .widthIn(max = InputFieldMaxWidth),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                                .copy(alpha = ContentAlpha.PERCENT_32),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                                .copy(alpha = ContentAlpha.PERCENT_32),
-                            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant
-                                .copy(alpha = ContentAlpha.PERCENT_32),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                        ),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            capitalization = KeyboardCapitalization.Words,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = { actions.onSave() }
-                        ),
-                        placeholder = { Text(stringResource(R.string.add_note)) }
+                    NoteEntryField(
+                        noteProvider = noteProvider,
+                        onNoteChange = actions::onNoteChange,
+                        onDone = actions::onSave
                     )
 
                     Tags(
@@ -174,10 +136,11 @@ fun ExpenseDetailsScreenContent(
                 FloatingActionButton(
                     onClick = actions::onSave,
                     modifier = Modifier
+                        .padding(FabSpacing)
                         .align(Alignment.End)
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Save,
+                        imageVector = Icons.Outlined.Save,
                         contentDescription = stringResource(R.string.content_save)
                     )
                 }
@@ -193,6 +156,44 @@ fun ExpenseDetailsScreenContent(
             }
         }
     }
+}
+
+@Composable
+private fun NoteEntryField(
+    noteProvider: () -> String,
+    onNoteChange: (String) -> Unit,
+    onDone: () -> Unit
+) {
+    val containerColor = MaterialTheme.colorScheme.surfaceVariant
+        .copy(alpha = ContentAlpha.PERCENT_32)
+    TextField(
+        value = noteProvider(),
+        onValueChange = onNoteChange,
+        textStyle = TextStyle.Default.copy(
+            textAlign = TextAlign.Center
+        ),
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .defaultMinSize(minWidth = InputFieldMinWidth)
+            .widthIn(max = InputFieldMaxWidth),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = containerColor,
+            unfocusedContainerColor = containerColor,
+            disabledContainerColor = containerColor,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            capitalization = KeyboardCapitalization.Words,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { onDone() }
+        ),
+        placeholder = { Text(stringResource(R.string.add_note)) }
+    )
 }
 
 private val InputFieldMinWidth = 80.dp

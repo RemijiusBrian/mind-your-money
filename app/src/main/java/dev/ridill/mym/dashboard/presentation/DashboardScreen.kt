@@ -149,13 +149,13 @@ private fun ScreenContent(
                 ) {
                     items(items = state.expenses, key = { it.id }) { expense ->
                         ExpenseCard(
+                            onClick = { onExpenseClick(expense.id) },
                             note = expense.note,
                             date = expense.dateFormatted,
                             amount = expense.amountFormatted,
-                            tag = expense.tag,
                             modifier = Modifier
                                 .animateItemPlacement(),
-                            onClick = { onExpenseClick(expense.id) }
+                            tag = expense.tag
                         )
                     }
                 }

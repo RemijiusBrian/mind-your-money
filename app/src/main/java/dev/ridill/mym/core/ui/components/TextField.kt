@@ -81,8 +81,8 @@ fun MinWidthTextField(
                     Box(
                         contentAlignment = Alignment.CenterStart
                     ) {
-                        placeholder?.let {
-                            this@Row.AnimatedVisibility(showPlaceholder) {
+                        this@Row.AnimatedVisibility(showPlaceholder) {
+                            placeholder?.let {
                                 Text(
                                     text = it,
                                     color = contentColor.copy(alpha = ContentAlpha.PERCENT_32)

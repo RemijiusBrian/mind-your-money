@@ -53,9 +53,7 @@ fun MYMScaffold(
     sheetSwipeEnabled: Boolean = true,
     topBar: @Composable (() -> Unit)? = null,
     snackbarController: SnackbarController = rememberSnackbarController(),
-    snackbarHost: @Composable (SnackbarHostState) -> Unit = {
-        ETSnackbarHost(snackbarController.copy(snackbarHostState = it))
-    },
+    snackbarHost: @Composable (SnackbarHostState) -> Unit = { ETSnackbarHost(snackbarController) },
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(containerColor),
     content: @Composable (PaddingValues) -> Unit

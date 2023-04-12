@@ -1,6 +1,5 @@
 package dev.ridill.mym.core.ui.components
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -10,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,30 +17,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.theme.SpacingLarge
+import dev.ridill.mym.core.ui.theme.SpacingMedium
 import dev.ridill.mym.core.ui.theme.SpacingSmall
-import dev.ridill.mym.core.util.onColor
 import dev.ridill.mym.expenses.domain.model.TagColors
 
 @Composable
-fun NewTagSheet(
+fun NewTagSheetContent(
     name: () -> String,
     onTagNameChange: (String) -> Unit,
     colorCode: Int?,
     onTagColorSelect: (Color) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    windowInsets: WindowInsets = WindowInsets.navigationBars
 ) {
     Column(
-        modifier = modifier
-            .padding(
-                vertical = SpacingSmall,
-                horizontal = SpacingLarge
-            ),
-        verticalArrangement = Arrangement.spacedBy(SpacingSmall)
+        modifier = Modifier
+            .padding(windowInsets.asPaddingValues())
+            .padding(horizontal = SpacingLarge)
+            .then(modifier),
+        verticalArrangement = Arrangement.spacedBy(SpacingMedium)
     ) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -66,7 +65,6 @@ fun NewTagSheet(
             shape = MaterialTheme.shapes.medium,
             label = { Text(stringResource(R.string.name)) }
         )
-//        Divider()
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(SpacingSmall)
         ) {
@@ -95,22 +93,31 @@ private fun ColorSelector(
     selected: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    borderColor: Color = color.onColor()
+    selectorSize: Dp = ColorSelectorSize,
+    borderWidth: Dp = ColorSelectorBorderWidth,
+    borderColor: Color = LocalContentColor.current
 ) {
-    val borderWidthFraction by animateFloatAsState(targetValue = if (selected) 0.30f else 0.10f)
     Box(
         modifier = modifier
             .clip(CircleShape)
-            .size(ColorSelectorSize)
+            .size(selectorSize)
             .clickable { onClick() }
             .drawBehind {
-                drawCircle(color)
+                val selectorBorderWidthPx = borderWidth.toPx()
                 drawCircle(
-                    color = borderColor,
-                    style = Stroke(ColorSelectorSize.toPx() * borderWidthFraction)
+                    color = color,
+                    radius = (size.minDimension / 2f) - (selectorBorderWidthPx)
                 )
+
+                if (selected) {
+                    drawCircle(
+                        color = borderColor,
+                        style = Stroke(selectorBorderWidthPx)
+                    )
+                }
             }
     )
 }
 
 private val ColorSelectorSize = 32.dp
+private val ColorSelectorBorderWidth = 4.dp
