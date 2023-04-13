@@ -1,24 +1,24 @@
-package dev.ridill.mym.expenses.presentation.expense_management
+package dev.ridill.mym.expenses.presentation.all_expenses
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.*
+import androidx.compose.animation.*
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
+import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,31 +26,33 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
-import dev.ridill.mym.core.navigation.screenSpecs.ExpenseManagementScreenSpec
+import dev.ridill.mym.core.navigation.screenSpecs.AllExpensesScreenSpec
 import dev.ridill.mym.core.ui.components.*
 import dev.ridill.mym.core.ui.theme.*
 import dev.ridill.mym.core.util.*
 import dev.ridill.mym.core.util.Formatter
-import dev.ridill.mym.expenses.domain.model.Tag
 import dev.ridill.mym.expenses.domain.model.TagOverview
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.*
 
 @Composable
-fun ExpenseManagementScreenContent(
+fun AllExpensesScreenContent(
     snackbarController: SnackbarController,
-    state: ExpenseManagementState,
-    actions: ExpenseManagementActions,
+    state: AllExpensesState,
+    actions: AllExpensesActions,
     navigateUp: () -> Unit
 ) {
     BackHandler(state.multiSelectionModeActive) {
@@ -62,11 +64,9 @@ fun ExpenseManagementScreenContent(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (state.multiSelectionModeActive) stringResource(
-                            R.string.count_selected,
-                            state.selectedExpenseIds.size
-                        )
-                        else stringResource(ExpenseManagementScreenSpec.label)
+                        text = if (state.multiSelectionModeActive)
+                            stringResource(R.string.count_selected, state.selectedExpenseIds.size)
+                        else stringResource(AllExpensesScreenSpec.label)
                     )
                 },
                 navigationIcon = {
@@ -74,8 +74,7 @@ fun ExpenseManagementScreenContent(
                         IconButton(onClick = actions::onDismissMultiSelectionMode) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = null
-//                                stringResource(R.string.content_description_cancel_multi_selection_mode)
+                                contentDescription = stringResource(R.string.content_cancel_multi_selection)
                             )
                         }
                     } else {
@@ -147,7 +146,7 @@ fun ExpenseManagementScreenContent(
                             )
                         }
                     }
-                    items(items = state.expenses, key = { it.id }) { expense ->
+                    items(items = state.expensesByTagForDate, key = { it.id }) { expense ->
                         ExpenseListItem(
                             note = expense.note,
                             date = expense.dateTime.format(DateUtil.Formatters.mmHyphenYyyy),
@@ -182,15 +181,15 @@ fun ExpenseManagementScreenContent(
             )
         }
 
-        /*if (state.showExpenseDeleteConfirmation) {
-            SimpleConfirmationDialog(
-                title = R.string.dialog_delete_selected_expense_title,
-                text = R.string.dialog_delete_selected_expense_message,
+        if (state.showExpenseDeleteConfirmation) {
+            ConfirmationDialog(
+                titleRes = R.string.dialog_delete_selected_expense_title,
+                messageRes = R.string.dialog_delete_selected_expense_message,
                 onDismiss = actions::onDeleteExpensesDismissed,
                 onConfirm = actions::onDeleteExpensesConfirmed,
                 icon = Icons.Rounded.DeleteForever
             )
-        }*/
+        }
     }
 }
 
@@ -223,7 +222,6 @@ private fun TagOverviews(
                 expanded = overview.tag == selectedTag,
                 onClick = { onTagClick(overview.tag) },
                 onDeleteClick = { onTagDelete(overview.tag) },
-                isUntagged = overview.tag == Tag.Untagged.name,
                 modifier = Modifier
                     .animateItemPlacement()
                     .fillParentMaxHeight()
@@ -250,8 +248,7 @@ private fun TagOverviews(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = null
-//                            stringResource(R.string.content_description_create_new_tag)
+                            contentDescription = stringResource(R.string.content_new_tag)
                         )
                     }
                 }
@@ -269,45 +266,22 @@ private fun TagOverviewCard(
     expanded: Boolean,
     onClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    isUntagged: Boolean,
     modifier: Modifier = Modifier,
     contentColor: Color = color.onColor()
 ) {
     val transition = updateTransition(targetState = expanded, label = "tagSelection")
-    val width by transition.animateDp(
-        transitionSpec = {
-            spring(
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                stiffness = Spring.StiffnessLow
-            )
-        },
-        label = "cardWidth",
-        targetValueByState = { if (it) TagOverviewCardBaseWidth * 2f else TagOverviewCardBaseWidth }
-    )
-    val textSize by transition.animateFloat(
-        label = "textSize",
-        targetValueByState = { if (it) TAG_TEXT_SIZE_EXPANDED else TAG_TEXT_SIZE_SMALL }
-    )
-    val cornerRadius by transition.animateDp(
-        label = "cardCorner",
-        targetValueByState = { if (it) CornerRadiusLarge else CornerRadiusMedium }
-    )
     val textPadding by transition.animateDp(
         label = "textPadding",
         targetValueByState = { if (it) SpacingMedium else SpacingSmall }
-    )
-    val progressIndicatorWidth by transition.animateDp(
-        label = "progressIndicatorWidth",
-        targetValueByState = { if (it) 24.dp else 12.dp }
     )
     val animatedPercent by animateFloatAsState(percentOfTotal)
 
     Card(
         onClick = onClick,
         modifier = Modifier
-            .width(width)
+            .width(TagOverviewCardBaseWidth * (if (expanded) 2f else 1f))
             .then(modifier),
-        shape = RoundedCornerShape(cornerRadius),
+        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = color,
             contentColor = contentColor
@@ -323,9 +297,12 @@ private fun TagOverviewCard(
             ) {
                 Text(
                     text = name,
-                    fontSize = TextUnit(textSize, TextUnitType.Sp),
+                    style = if (expanded) MaterialTheme.typography.titleLarge
+                    else MaterialTheme.typography.titleMedium,
                     modifier = Modifier
-                        .padding(top = textPadding)
+                        .padding(top = textPadding),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(SpacingSmall))
                 Text(
@@ -343,10 +320,7 @@ private fun TagOverviewCard(
                     )
                 }
             }
-            if (!isUntagged && expanded) {
-//                AnimatedVisibility(
-//                    visible = expanded
-//                ) {
+            if (expanded) {
                 IconButton(
                     onClick = onDeleteClick,
                     modifier = Modifier
@@ -354,18 +328,14 @@ private fun TagOverviewCard(
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.DoNotDisturbOn,
-                        contentDescription = null
-                        /*stringResource(
-                            R.string.content_description_delete_tag
-                        )*/,
-                        tint = contentColor.copy(alpha = ContentAlpha.PERCENT_16)
+                        contentDescription = stringResource(R.string.content_delete),
+                        tint = contentColor.copy(alpha = ContentAlpha.PERCENT_60)
                     )
                 }
-//                }
             }
             VerticalProgressIndicator(
                 progress = animatedPercent,
-                width = progressIndicatorWidth,
+                width = OverviewProgressBarBaseWidth * (if (expanded) 2f else 1f),
                 modifier = Modifier
                     .fillMaxHeight(),
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
@@ -378,8 +348,7 @@ private fun TagOverviewCard(
 
 private val TagOverviewHeight = 160.dp
 private val TagOverviewCardBaseWidth = 120.dp
-private const val TAG_TEXT_SIZE_SMALL = 16f
-private const val TAG_TEXT_SIZE_EXPANDED = 20f
+private val OverviewProgressBarBaseWidth = 12.dp
 
 @Composable
 private fun TotalExpenditure(
@@ -447,49 +416,60 @@ private fun YearSelector(
     onYearSelect: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val iconRotation by animateFloatAsState(targetValue = if (expanded) 180f else 0f)
-    Column(
+    var showList by remember { mutableStateOf(false) }
+    val iconRotation by animateFloatAsState(targetValue = if (showList) 180f else 0f)
+    Row(
         modifier = modifier
-            .animateContentSize()
+            .fillMaxWidth()
     ) {
         Row(
             modifier = Modifier
                 .padding(horizontal = SpacingMedium)
                 .clip(MaterialTheme.shapes.small)
-                .clickable { expanded = !expanded }
+                .clickable(role = Role.DropdownList) { showList = !showList }
                 .padding(SpacingSmall),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = selectedYear.orEmpty(),
-                style = MaterialTheme.typography.headlineSmall
-            )
+            Crossfade(targetState = selectedYear) { year ->
+                Text(
+                    text = year.orEmpty(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    textDecoration = TextDecoration.Underline
+                )
+            }
             Spacer(Modifier.width(SpacingXSmall))
             Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = null,
-//                stringResource(R.string.content_description_toggle_dropdown),
+                imageVector = Icons.Default.ArrowLeft,
+                contentDescription = stringResource(R.string.content_toggle_years_list),
                 modifier = Modifier
                     .graphicsLayer {
                         rotationZ = iconRotation
                     }
             )
         }
-        if (expanded) {
+        AnimatedVisibility(
+            visible = showList,
+            enter = slideInHorizontally { it / 2 } + fadeIn(),
+            exit = slideOutHorizontally { it / 2 } + fadeOut()
+        ) {
             LazyRow(
                 contentPadding = PaddingValues(
                     start = SpacingMedium,
                     end = SpacingListEnd
-                )
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
-                items(yearsList, key = { it }) { year ->
+                items(items = yearsList, key = { it }) { year ->
                     val selected = year == selectedYear
                     val alpha by animateFloatAsState(
                         targetValue = if (selected) Float.One else ContentAlpha.PERCENT_32
                     )
                     Surface(
-                        onClick = { onYearSelect(year) },
+                        onClick = {
+                            showList = false
+                            onYearSelect(year)
+                        },
                         shape = MaterialTheme.shapes.small,
                         modifier = Modifier
                             .animateItemPlacement()
@@ -584,7 +564,16 @@ private fun ExpenseListItem(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    SelectableExpenseCard(
+        onClick = { if (isClickable) onClick() },
+        onLongClick = onLongClick,
+        note = note,
+        date = date,
+        amount = amount,
+        selected = selected,
+        modifier = modifier
+    )
+    /*Card(
         modifier = modifier
             .clip(MaterialTheme.shapes.medium)
             .combinedClickable(
@@ -598,13 +587,13 @@ private fun ExpenseListItem(
             else Color.Transparent
         )
     ) {
-        /*BaseExpenseCardLayout(
+        *//*BaseExpenseCardLayout(
             note = note,
             date = date,
             amount = amount,
             tag = null
-        )*/
-    }
+        )*//*
+    }*/
 }
 
 @Composable
@@ -624,16 +613,15 @@ private fun MultiSelectionOptions(
         IconButton(onClick = onDeleteClick) {
             Icon(
                 imageVector = Icons.Default.DeleteForever,
-                contentDescription = null
-//                stringResource(R.string.content_description_delete_expense)
+                contentDescription = stringResource(R.string.content_delete)
             )
         }
-        /*IconButton(onClick = onUntagClick) {
+        IconButton(onClick = onUntagClick) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_untag),
-                contentDescription = stringResource(R.string.content_description_untag_expenses)
+                imageVector = ImageVector.vectorResource(R.drawable.ic_de_tag),
+                contentDescription = stringResource(R.string.content_de_tag)
             )
-        }*/
+        }
         TriStateCheckbox(
             state = selectionState,
             onClick = { onSelectionStateChange(selectionState) })

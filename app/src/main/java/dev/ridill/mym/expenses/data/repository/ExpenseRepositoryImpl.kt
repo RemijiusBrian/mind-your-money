@@ -2,6 +2,7 @@ package dev.ridill.mym.expenses.data.repository
 
 import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.expenses.data.local.ExpenseDao
+import dev.ridill.mym.expenses.data.local.entity.ExpenseEntity
 import dev.ridill.mym.expenses.data.local.relation.ExpenseAndTagRelation
 import dev.ridill.mym.expenses.domain.model.Expense
 import dev.ridill.mym.expenses.domain.model.ExpenseListItem
@@ -36,4 +37,23 @@ class ExpenseRepositoryImpl(
     }
 
     override fun getDistinctYearsList(): Flow<List<Int>> = dao.getDistinctYears()
+
+    override fun getExpenseByTagForDate(
+        tag: String?,
+        monthHyphenYearString: String
+    ): Flow<List<Expense>> = dao.getExpensesByTagForDate(tag, monthHyphenYearString)
+        .map { entities ->
+            entities.map(ExpenseEntity::toExpense)
+        }
+
+    override suspend fun deleteMultipleExpenses(ids: List<Long>) = withContext(dispatcher.io) {
+        dao.deleteMultipleExpenses(ids)
+    }
+
+    override suspend fun setTagToExpenses(
+        tag: String?,
+        expenseIds: List<Long>
+    ) = withContext(dispatcher.io) {
+        dao.setTagToExpenses(tag, expenseIds)
+    }
 }

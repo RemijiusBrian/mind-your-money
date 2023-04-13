@@ -8,8 +8,10 @@ import dev.ridill.mym.core.data.db.MYMDatabase
 import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.expenses.data.local.ExpenseDao
 import dev.ridill.mym.expenses.data.local.TagsDao
+import dev.ridill.mym.expenses.data.repository.AllExpensesRepositoryImpl
 import dev.ridill.mym.expenses.data.repository.ExpenseRepositoryImpl
 import dev.ridill.mym.expenses.data.repository.TagsRepositoryImpl
+import dev.ridill.mym.expenses.domain.repository.AllExpensesRepository
 import dev.ridill.mym.expenses.domain.repository.ExpenseRepository
 import dev.ridill.mym.expenses.domain.repository.TagsRepository
 
@@ -34,4 +36,10 @@ object ExpenseModule {
         dao: TagsDao,
         dispatcherProvider: DispatcherProvider
     ): TagsRepository = TagsRepositoryImpl(dao, dispatcherProvider)
+
+    @Provides
+    fun provideAllExpensesRepository(
+        expenseRepo: ExpenseRepository,
+        tagsRepo: TagsRepository
+    ): AllExpensesRepository = AllExpensesRepositoryImpl(expenseRepo, tagsRepo)
 }

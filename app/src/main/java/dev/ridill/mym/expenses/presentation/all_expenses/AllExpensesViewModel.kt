@@ -1,4 +1,4 @@
-package dev.ridill.mym.expenses.presentation.expense_management
+package dev.ridill.mym.expenses.presentation.all_expenses
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
@@ -11,8 +11,7 @@ import dev.ridill.mym.R
 import dev.ridill.mym.core.domain.model.UiText
 import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.core.util.asStateFlow
-import dev.ridill.mym.expenses.domain.model.Expense
-import dev.ridill.mym.expenses.domain.repository.ExpenseManagementRepository
+import dev.ridill.mym.expenses.domain.repository.AllExpensesRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -20,10 +19,10 @@ import java.time.Month
 import javax.inject.Inject
 
 @HiltViewModel
-class ExpenseManagementViewModel @Inject constructor(
+class AllExpensesViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repo: ExpenseManagementRepository
-) : ViewModel(), ExpenseManagementActions {
+    private val repo: AllExpensesRepository
+) : ViewModel(), AllExpensesActions {
 
     private val yearsList = repo.getYearsList()
     private val selectedYear = savedStateHandle
@@ -49,12 +48,11 @@ class ExpenseManagementViewModel @Inject constructor(
     private val showTagDeletionConfirmation = savedStateHandle
         .getStateFlow(KEY_SHOW_TAG_DELETE_CONFIRMATION, false)
 
-    private val expenses = combineTuple(
+    private val expensesByTagForDate = combineTuple(
         selectedTag,
         selectedDate
     ).flatMapLatest { (tag, date) ->
-        emptyFlow<List<Expense>>()
-//        repo.getExpenses(tag, date)
+        repo.getExpensesByTagForDate(tag, date)
     }
 
     private val multiSelectionModeActive = savedStateHandle
@@ -62,7 +60,7 @@ class ExpenseManagementViewModel @Inject constructor(
     private val selectedExpenseIds = savedStateHandle
         .getStateFlow<List<Long>>(KEY_SELECTED_EXPENSE_IDS, emptyList())
     private val expenseSelectionState = combineTuple(
-        expenses,
+        expensesByTagForDate,
         selectedExpenseIds
     ).map { (expenses, selectedIds) ->
         val expenseIds = expenses.map { it.id }
@@ -86,7 +84,12 @@ class ExpenseManagementViewModel @Inject constructor(
         selectedYear,
         selectedMonth,
         showTagInput,
-        showTagDeletionConfirmation
+        showTagDeletionConfirmation,
+        expensesByTagForDate,
+        multiSelectionModeActive,
+        selectedExpenseIds,
+        expenseSelectionState,
+        showExpenseDeletionConfirmation
     ).map { (
                 tagOverviews,
                 selectedTag,
@@ -95,9 +98,14 @@ class ExpenseManagementViewModel @Inject constructor(
                 selectedYear,
                 selectedMonth,
                 showTagInput,
-                showTagDeletionConfirmation
+                showTagDeletionConfirmation,
+                expensesByTagForDate,
+                multiSelectionModeActive,
+                selectedExpenseIds,
+                expenseSelectionState,
+                showExpenseDeletionConfirmation
             ) ->
-        ExpenseManagementState(
+        AllExpensesState(
             tagOverviews = tagOverviews,
             selectedTag = selectedTag,
             totalExpenditureForDate = totalExpenditureForDate,
@@ -105,13 +113,18 @@ class ExpenseManagementViewModel @Inject constructor(
             selectedYear = selectedYear,
             selectedMonth = selectedMonth,
             showTagInput = showTagInput,
-            showTagDeletionConfirmation = showTagDeletionConfirmation
+            showTagDeletionConfirmation = showTagDeletionConfirmation,
+            expensesByTagForDate = expensesByTagForDate,
+            multiSelectionModeActive = multiSelectionModeActive,
+            selectedExpenseIds = selectedExpenseIds,
+            expenseSelectionState = expenseSelectionState,
+            showExpenseDeleteConfirmation = showExpenseDeletionConfirmation
         )
-    }.asStateFlow(viewModelScope, ExpenseManagementState.INITIAL)
+    }.asStateFlow(viewModelScope, AllExpensesState.INITIAL)
 
     init {
-//        collectExpenseYears()
-//        collectTagOverviews()
+        collectExpenseYears()
+        collectTagOverviews()
     }
 
     private val eventsChannel = Channel<DetailedViewEvent>()
@@ -119,8 +132,8 @@ class ExpenseManagementViewModel @Inject constructor(
 
     private fun collectExpenseYears() = viewModelScope.launch {
         repo.getYearsList().collectLatest { years ->
-            savedStateHandle[KEY_SELECTED_YEAR] =
-                selectedYear.value.ifEmpty { years.firstOrNull()?.toString() }.orEmpty()
+            savedStateHandle[KEY_SELECTED_YEAR] = selectedYear.value
+                .ifEmpty { years.firstOrNull()?.toString() }.orEmpty()
         }
     }
 
@@ -138,7 +151,7 @@ class ExpenseManagementViewModel @Inject constructor(
 
     private suspend fun assignTagToExpenses(tag: String?) {
         val selectedExpenses = state.value.selectedExpenseIds
-//        repo.tagExpenses(tag, selectedExpenses)
+        repo.tagExpenses(tag, selectedExpenses)
         disableMultiSelectionMode()
     }
 
@@ -194,7 +207,7 @@ class ExpenseManagementViewModel @Inject constructor(
                 )
                 return@launch
             }
-//            repo.createTag(name, color)
+            repo.createTag(name, color)
             savedStateHandle[KEY_SHOW_TAG_INPUT] = false
             eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.tag_created)))
         }
@@ -246,14 +259,13 @@ class ExpenseManagementViewModel @Inject constructor(
                 savedStateHandle[KEY_SELECTED_EXPENSE_IDS] = emptyList<Long>()
             }
             ToggleableState.Off -> {
-                state.value?.expenses?.firstOrNull()?.id?.let {
+                state.value.expensesByTagForDate.firstOrNull()?.id?.let {
                     savedStateHandle[KEY_SELECTED_EXPENSE_IDS] = listOf(it)
                 }
             }
             ToggleableState.Indeterminate -> {
-                state.value?.expenses?.let { expenses ->
-                    savedStateHandle[KEY_SELECTED_EXPENSE_IDS] = expenses.map { it.id }
-                }
+                savedStateHandle[KEY_SELECTED_EXPENSE_IDS] = state.value.expensesByTagForDate
+                    .map { it.id }
             }
         }
     }
@@ -269,10 +281,10 @@ class ExpenseManagementViewModel @Inject constructor(
     override fun onDeleteExpensesConfirmed() {
         state.value.selectedExpenseIds.let {
             viewModelScope.launch {
-//                repo.deleteExpenses(it)
+                repo.deleteExpenses(it)
                 savedStateHandle[KEY_SHOW_EXPENSE_DELETE_CONFIRMATION] = false
                 disableMultiSelectionMode()
-//                eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.selected_expenses_deleted)))
+                eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.selected_expenses_deleted)))
             }
         }
     }
@@ -280,7 +292,7 @@ class ExpenseManagementViewModel @Inject constructor(
     override fun onUntagExpensesClick() {
         viewModelScope.launch {
             assignTagToExpenses(null)
-//            eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.expenses_untagged)))
+            eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.expenses_untagged)))
         }
     }
 

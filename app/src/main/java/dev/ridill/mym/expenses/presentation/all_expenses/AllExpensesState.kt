@@ -1,11 +1,11 @@
-package dev.ridill.mym.expenses.presentation.expense_management
+package dev.ridill.mym.expenses.presentation.all_expenses
 
 import androidx.compose.ui.state.ToggleableState
 import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.expenses.domain.model.Expense
 import dev.ridill.mym.expenses.domain.model.TagOverview
 
-data class ExpenseManagementState(
+data class AllExpensesState(
     val tagOverviews: List<TagOverview> = emptyList(),
     val selectedTag: String? = null,
     val totalExpenditureForDate: Double = Double.Zero,
@@ -13,7 +13,7 @@ data class ExpenseManagementState(
     val yearsList: List<String> = emptyList(),
     val selectedYear: String = "",
     val selectedMonth: Int = 1,
-    val expenses: List<Expense> = emptyList(),
+    val expensesByTagForDate: List<Expense> = emptyList(),
     val showTagDeletionConfirmation: Boolean = false,
     val multiSelectionModeActive: Boolean = false,
     val selectedExpenseIds: List<Long> = emptyList(),
@@ -21,6 +21,6 @@ data class ExpenseManagementState(
     val showExpenseDeleteConfirmation: Boolean = false
 ) {
     companion object {
-        val INITIAL = ExpenseManagementState()
+        val INITIAL = AllExpensesState()
     }
 }

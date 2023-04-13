@@ -3,8 +3,8 @@
 
     <!-- Destination Labels -->
     <string name="destination_dashboard">Dashboard</string>
-    <string name="destination_expense_details">Expense Details</string>
-    <string name="destination_expense_management">Extensive</string>
+    <string name="destination_add_edit_expense">Add/Edit Expense</string>
+    <string name="destination_all_expenses">All Expenses</string>
     <string name="destination_payment_plans">Payment Plans</string>
     <string name="destination_add_edit_payment_plan">Add/Edit Payment Plan</string>
     <string name="destination_settings">Settings</string>
@@ -28,8 +28,11 @@
     <string name="content_dismiss">Dismiss</string>
     <string name="content_save">Save</string>
     <string name="content_new_tag">New Tag</string>
+    <string name="content_toggle_years_list">Toggle Years List</string>
+    <string name="content_de_tag">De-Tag</string>
+    <string name="content_cancel_multi_selection">Cancel Multi Selection</string>
 
-    <string name="content_create_new_tag">Create New Tag</string>
+    <!--<string name="content_create_new_tag">Create New Tag</string>
     <string name="content_delete_expense">Delete Expense</string>
     <string name="content_edit_limit">Edit Limit</string>
     <string name="content_delete_tag">Delete Tag</string>
@@ -43,7 +46,7 @@
     <string name="content_scroll_to_top">Scroll to top</string>
     <string name="content_untag_expenses">Untag expenses</string>
     <string name="content_date_picker">Date Picker</string>
-    <string name="content_notification_status">Notification Status</string>
+    <string name="content_notification_status">Notification Status</string>-->
 
     <!-- Notifications -->
     <string name="notification_channel_group_payment_plans">Payment Plans</string>
@@ -132,4 +135,6 @@
     <string name="total_spent">Total Spent</string>
     <string name="percent_of_total">%s of total</string>
     <string name="count_selected">%s selected</string>
+    <string name="selected_expenses_deleted">Expenses Deleted</string>
+    <string name="expenses_untagged">Expenses Untagged</string>
 </resources>

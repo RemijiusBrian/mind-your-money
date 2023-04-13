@@ -1,15 +1,18 @@
 package dev.ridill.mym.core.ui.components
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.ridill.mym.core.ui.theme.ContentAlpha
 import dev.ridill.mym.core.ui.theme.SpacingSmall
 import dev.ridill.mym.core.ui.theme.SpacingXSmall
 import dev.ridill.mym.core.util.onColor
@@ -29,6 +32,73 @@ fun ExpenseCard(
     Card(
         onClick = onClick,
         shape = shape
+    ) {
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = note,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            },
+            supportingContent = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = date,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    tag?.let {
+                        Spacer(Modifier.width(SpacingSmall))
+                        TagIndicator(
+                            name = it.name,
+                            color = it.color
+                        )
+                    }
+                }
+            },
+            colors = colors,
+            trailingContent = {
+                Text(
+                    text = amount,
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .widthIn(max = 120.dp)
+                )
+            },
+            modifier = modifier
+        )
+    }
+}
+
+@Composable
+fun SelectableExpenseCard(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    note: String,
+    date: String,
+    amount: String,
+    selected: Boolean,
+    modifier: Modifier = Modifier,
+    tag: Tag? = null,
+    colors: ListItemColors = ListItemDefaults.colors(
+        containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = ContentAlpha.PERCENT_16)
+        else MaterialTheme.colorScheme.surface
+    ),
+    shape: Shape = CardDefaults.shape
+) {
+    Card(
+        shape = shape,
+        modifier = Modifier
+            .clip(shape)
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
     ) {
         ListItem(
             headlineContent = {

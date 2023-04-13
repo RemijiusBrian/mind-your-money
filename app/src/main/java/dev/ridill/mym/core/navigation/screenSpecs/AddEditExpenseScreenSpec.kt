@@ -22,7 +22,7 @@ object AddEditExpenseScreenSpec : ScreenSpec {
 
     override val route: String = "expense_details/{$ARG_EXPENSE_ID}"
 
-    override val label: Int = R.string.destination_expense_details
+    override val label: Int = R.string.destination_add_edit_expense
 
     @StringRes
     fun getTitle(isEditMode: Boolean): Int =

@@ -1,25 +1,31 @@
 package dev.ridill.mym.expenses.data.repository
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import dev.ridill.mym.core.util.DateUtil
+import dev.ridill.mym.expenses.domain.model.Expense
+import dev.ridill.mym.expenses.domain.model.TagInput
 import dev.ridill.mym.expenses.domain.model.TagOverview
-import dev.ridill.mym.expenses.domain.repository.ExpenseManagementRepository
+import dev.ridill.mym.expenses.domain.repository.AllExpensesRepository
 import dev.ridill.mym.expenses.domain.repository.ExpenseRepository
 import dev.ridill.mym.expenses.domain.repository.TagsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-class ExpenseManagementRepositoryImpl(
+class AllExpensesRepositoryImpl(
     private val expenseRepo: ExpenseRepository,
     private val tagsRepo: TagsRepository
-) : ExpenseManagementRepository {
+) : AllExpensesRepository {
 
     override fun getYearsList(): Flow<List<String>> = expenseRepo.getDistinctYearsList()
-        /*.map { years ->
-            // Pad list with future years if size smaller than 10 elements
-            years.takeIf { it.size >= 10 } ?: kotlin.run {
-                val lastYear = years.lastOrNull() ?: (DateUtil.currentDateTime().year)
-                (lastYear..(lastYear + (years.size - 10))).toList()
-            }
-        }*/.map { years ->
+        .map { years ->
+            // Pad list to show a min number of elements in years list
+            val paddingDifference = YEARS_LIST_PADDING - years.size
+            val lastItem = years.lastOrNull()?.plus(1) ?: DateUtil.currentDateTime().year
+            val paddingElements = (lastItem until (lastItem + paddingDifference.coerceAtLeast(0)))
+                .toList()
+            years + paddingElements
+        }.map { years ->
             years.map { it.toString() }
         }
 
@@ -35,20 +41,17 @@ class ExpenseManagementRepositoryImpl(
 
     override suspend fun deleteTag(tag: String) = tagsRepo.delete(tag)
 
-    /*override fun getExpenses(tag: String?, monthAndYear: String): Flow<List<Expense>> =
-        tagsRepo.getExpensesByTagForDate(tag, monthAndYear).map { entities ->
-            entities.map { it.toExpense() }
-        }
+    override fun getExpensesByTagForDate(tag: String?, monthAndYear: String): Flow<List<Expense>> =
+        expenseRepo.getExpenseByTagForDate(tag, monthAndYear)
 
     override suspend fun tagExpenses(tag: String?, expenseIds: List<Long>) =
-        tagsRepo.tagExpenses(tag, expenseIds)
-
-    override suspend fun deleteTag(tag: String) =
-        tagsRepo.delete(tag)
+        expenseRepo.setTagToExpenses(tag, expenseIds)
 
     override suspend fun createTag(tag: String, color: Color) =
         tagsRepo.insert(TagInput(tag, color.toArgb()))
 
     override suspend fun deleteExpenses(ids: List<Long>) =
-        expenseRepo.deleteMultipleExpenses(ids)*/
+        expenseRepo.deleteMultipleExpenses(ids)
 }
+
+private const val YEARS_LIST_PADDING = 10

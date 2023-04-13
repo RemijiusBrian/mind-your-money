@@ -1,10 +1,10 @@
-package dev.ridill.mym.expenses.presentation.expense_management
+package dev.ridill.mym.expenses.presentation.all_expenses
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.state.ToggleableState
 import java.time.Month
 
-interface ExpenseManagementActions {
+interface AllExpensesActions {
     fun onTagSelect(tag: String)
     fun onTagDelete(tag: String)
     fun onTagDeleteDismiss()

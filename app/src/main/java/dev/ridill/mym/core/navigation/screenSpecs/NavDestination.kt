@@ -7,7 +7,7 @@ sealed interface NavDestination {
             DashboardScreenSpec,
             AddEditExpenseScreenSpec,
             SettingsScreenSpec,
-            ExpenseManagementScreenSpec
+            AllExpensesScreenSpec
         ).associateBy(NavDestination::route)
     }
 

@@ -20,5 +20,11 @@ interface ExpenseRepository {
 
     suspend fun delete(expense: Expense)
 
+    suspend fun deleteMultipleExpenses(ids: List<Long>)
+
     fun getDistinctYearsList(): Flow<List<Int>>
+
+    fun getExpenseByTagForDate(tag: String?, monthHyphenYearString: String): Flow<List<Expense>>
+
+    suspend fun setTagToExpenses(tag: String?, expenseIds: List<Long>)
 }

@@ -1,9 +1,11 @@
 package dev.ridill.mym.expenses.domain.repository
 
+import androidx.compose.ui.graphics.Color
+import dev.ridill.mym.expenses.domain.model.Expense
 import dev.ridill.mym.expenses.domain.model.TagOverview
 import kotlinx.coroutines.flow.Flow
 
-interface ExpenseManagementRepository {
+interface AllExpensesRepository {
 
     fun getYearsList(): Flow<List<String>>
 
@@ -13,11 +15,11 @@ interface ExpenseManagementRepository {
 
     suspend fun deleteTag(tag: String)
 
-//    fun getExpenses(tag: String?, monthAndYear: String): Flow<List<Expense>>
+    fun getExpensesByTagForDate(tag: String?, monthAndYear: String): Flow<List<Expense>>
 
-//    suspend fun tagExpenses(tag: String?, expenseIds: List<Long>)
+    suspend fun tagExpenses(tag: String?, expenseIds: List<Long>)
 
-//    suspend fun createTag(tag: String, color: Color)
+    suspend fun createTag(tag: String, color: Color)
 
-//    suspend fun deleteExpenses(ids: List<Long>)
+    suspend fun deleteExpenses(ids: List<Long>)
 }
