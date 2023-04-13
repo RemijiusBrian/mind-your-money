@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import dev.ridill.mym.core.data.db.BaseDao
-import dev.ridill.mym.expenses.data.local.entity.ExpenseAndTagRelation
+import dev.ridill.mym.expenses.data.local.relation.ExpenseAndTagRelation
 import dev.ridill.mym.expenses.data.local.entity.ExpenseEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -33,4 +33,7 @@ interface ExpenseDao : BaseDao<ExpenseEntity> {
 
     @Query("SELECT * FROM ExpenseEntity WHERE id = :id")
     suspend fun getExpenseById(id: Long): ExpenseEntity?
+
+    @Query("SELECT DISTINCT(strftime('%Y', dateTime / 1000, 'unixepoch')) FROM ExpenseEntity ORDER BY dateTime DESC")
+    fun getDistinctYears(): Flow<List<Int>>
 }

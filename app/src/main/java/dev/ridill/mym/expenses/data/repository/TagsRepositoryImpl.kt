@@ -3,6 +3,7 @@ package dev.ridill.mym.expenses.data.repository
 import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.expenses.data.local.TagsDao
 import dev.ridill.mym.expenses.data.local.entity.TagEntity
+import dev.ridill.mym.expenses.data.local.relation.TagWithExpenditureRelation
 import dev.ridill.mym.expenses.domain.model.Tag
 import dev.ridill.mym.expenses.domain.model.TagInput
 import dev.ridill.mym.expenses.domain.repository.TagsRepository
@@ -22,4 +23,11 @@ class TagsRepositoryImpl(
     override suspend fun insert(tag: TagInput) = withContext(dispatcherProvider.io) {
         dao.insert(tag.toEntity())
     }
+
+    override suspend fun delete(tag: String) = withContext(dispatcherProvider.io) {
+        dao.untagAndDeleteTag(tag)
+    }
+
+    override fun getTagWithExpenditure(monthAndYear: String): Flow<List<TagWithExpenditureRelation>> =
+        dao.getTagsWithExpendituresForDate(monthAndYear)
 }

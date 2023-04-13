@@ -6,7 +6,8 @@ sealed interface NavDestination {
         val allDestinations = listOf<NavDestination>(
             DashboardScreenSpec,
             AddEditExpenseScreenSpec,
-            SettingsScreenSpec
+            SettingsScreenSpec,
+            ExpenseManagementScreenSpec
         ).associateBy(NavDestination::route)
     }
 

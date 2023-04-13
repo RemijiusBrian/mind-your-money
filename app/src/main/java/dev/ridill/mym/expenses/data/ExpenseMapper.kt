@@ -1,6 +1,6 @@
 package dev.ridill.mym.expenses.data.repository
 
-import dev.ridill.mym.expenses.data.local.entity.ExpenseAndTagRelation
+import dev.ridill.mym.expenses.data.local.relation.ExpenseAndTagRelation
 import dev.ridill.mym.expenses.data.local.entity.ExpenseEntity
 import dev.ridill.mym.expenses.domain.model.Expense
 import dev.ridill.mym.expenses.domain.model.ExpenseListItem

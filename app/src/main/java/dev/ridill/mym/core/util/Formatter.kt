@@ -27,6 +27,9 @@ object Formatter {
 
     private fun currencyFormat(): NumberFormat =
         NumberFormat.getCurrencyInstance(Locale.getDefault())
+
+    fun percentage(value: Float): String = NumberFormat.getPercentInstance(Locale.getDefault())
+        .format(value)
 }
 
 private const val DEFAULT_FRACTION_DIGITS = 2

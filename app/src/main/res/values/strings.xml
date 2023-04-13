@@ -4,7 +4,7 @@
     <!-- Destination Labels -->
     <string name="destination_dashboard">Dashboard</string>
     <string name="destination_expense_details">Expense Details</string>
-    <string name="destination_detailed_view">Detailed</string>
+    <string name="destination_expense_management">Extensive</string>
     <string name="destination_payment_plans">Payment Plans</string>
     <string name="destination_add_edit_payment_plan">Add/Edit Payment Plan</string>
     <string name="destination_settings">Settings</string>
@@ -127,4 +127,9 @@
     <string name="monthly_limit_updated">Monthly limit updated</string>
     <string name="enter_monthly_limit">Enter Monthly Limit</string>
     <string name="monthly_limit_input_message">Enter the amount you would like to limit your expense to</string>
+    <string name="expenses_tagged_as">Expenses tagged as %s</string>
+    <string name="tag_deleted">Tag Deleted</string>
+    <string name="total_spent">Total Spent</string>
+    <string name="percent_of_total">%s of total</string>
+    <string name="count_selected">%s selected</string>
 </resources>
