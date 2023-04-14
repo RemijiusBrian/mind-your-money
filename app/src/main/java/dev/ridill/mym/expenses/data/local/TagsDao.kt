@@ -17,13 +17,13 @@ interface TagsDao : BaseDao<TagEntity> {
     @Query(
         """
         SELECT tag.name as tag, tag.colorCode as colorCode,
-            (SELECT SUM(amount)
+            IFNULL((SELECT SUM(amount)
             FROM ExpenseEntity subExp
-            WHERE subExp.tag = tag.name AND strftime('%m-%Y', subExp.dateTime / 1000, 'unixepoch') = :date) as expenditure
+            WHERE subExp.tag = tag.name AND strftime('%m-%Y', subExp.dateTime / 1000, 'unixepoch') = :date), 0) as expenditure
         FROM TagEntity tag
         LEFT OUTER JOIN ExpenseEntity exp ON tag.name = exp.tag
         GROUP BY tag.name
-        ORDER BY expenditure DESC, tag.name ASC
+        ORDER BY tag.name ASC
     """
     )
     fun getTagsWithExpendituresForDate(date: String): Flow<List<TagWithExpenditureRelation>>

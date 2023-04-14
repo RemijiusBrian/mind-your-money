@@ -38,7 +38,7 @@ fun AddEditExpenseScreenContent(
     isEditMode: Boolean,
     amountProvider: () -> String,
     noteProvider: () -> String,
-    state: ExpenseDetailsState,
+    state: AddEditExpenseState,
     newTagProvider: () -> TagInput?,
     actions: AddEditExpenseActions,
     scaffoldState: BottomSheetScaffoldState,

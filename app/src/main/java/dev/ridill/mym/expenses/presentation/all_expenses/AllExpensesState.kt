@@ -9,7 +9,6 @@ data class AllExpensesState(
     val tagOverviews: List<TagOverview> = emptyList(),
     val selectedTag: String? = null,
     val totalExpenditureForDate: Double = Double.Zero,
-    val showTagInput: Boolean = false,
     val yearsList: List<String> = emptyList(),
     val selectedYear: String = "",
     val selectedMonth: Int = 1,

@@ -210,7 +210,7 @@ private fun ExpenditureOverview(
                 valueStyle = MaterialTheme.typography.headlineMedium
                     .copy(fontWeight = FontWeight.SemiBold)
             ) {
-                VerticalSpinner(targetState = monthlyLimit) {
+                VerticalNumberSpinner(targetState = monthlyLimit) {
                     Text(Formatter.currency(it))
                 }
             }
@@ -229,7 +229,7 @@ private fun ExpenditureOverview(
                 valueStyle = if (!isLimitSet) MaterialTheme.typography.headlineMedium
                 else MaterialTheme.typography.titleLarge
             ) {
-                VerticalSpinner(targetState = amountSpent) {
+                VerticalNumberSpinner(targetState = amountSpent) {
                     Text(Formatter.currency(it))
                 }
             }
@@ -338,7 +338,7 @@ private fun BalanceCard(
             )
         }
     ) {
-        VerticalSpinner(targetState = balanceAmount) {
+        VerticalNumberSpinner(targetState = balanceAmount) {
             Text(Formatter.currency(it))
         }
     }

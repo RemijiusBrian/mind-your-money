@@ -1,7 +1,5 @@
 package dev.ridill.mym.expenses.data.repository
 
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.expenses.domain.model.Expense
 import dev.ridill.mym.expenses.domain.model.TagInput
@@ -47,8 +45,8 @@ class AllExpensesRepositoryImpl(
     override suspend fun tagExpenses(tag: String?, expenseIds: List<Long>) =
         expenseRepo.setTagToExpenses(tag, expenseIds)
 
-    override suspend fun createTag(tag: String, color: Color) =
-        tagsRepo.insert(TagInput(tag, color.toArgb()))
+    override suspend fun createTag(input: TagInput) =
+        tagsRepo.insert(input)
 
     override suspend fun deleteExpenses(ids: List<Long>) =
         expenseRepo.deleteMultipleExpenses(ids)

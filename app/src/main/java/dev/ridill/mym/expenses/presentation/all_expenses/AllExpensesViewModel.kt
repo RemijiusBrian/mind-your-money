@@ -1,6 +1,7 @@
 package dev.ridill.mym.expenses.presentation.all_expenses
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -11,9 +12,14 @@ import dev.ridill.mym.R
 import dev.ridill.mym.core.domain.model.UiText
 import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.core.util.asStateFlow
+import dev.ridill.mym.expenses.domain.model.TagInput
 import dev.ridill.mym.expenses.domain.repository.AllExpensesRepository
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.time.Month
 import javax.inject.Inject
@@ -29,7 +35,10 @@ class AllExpensesViewModel @Inject constructor(
         .getStateFlow(KEY_SELECTED_YEAR, DateUtil.currentDateTime().year.toString())
     private val selectedMonth = savedStateHandle
         .getStateFlow(KEY_SELECTED_MONTH, DateUtil.currentDateTime().monthValue)
-    private val selectedDate = selectedYear.zip(selectedMonth) { year, month ->
+    private val selectedDate = combineTuple(
+        selectedYear,
+        selectedMonth
+    ).map { (year, month) ->
         val paddedMonth = month.toString().padStart(2, '0')
         "$paddedMonth-$year"
     }.distinctUntilChanged()
@@ -71,10 +80,10 @@ class AllExpensesViewModel @Inject constructor(
         }
     }
 
-    private val showTagInput = savedStateHandle.getStateFlow(KEY_SHOW_TAG_INPUT, false)
-
     private val showExpenseDeletionConfirmation =
         savedStateHandle.getStateFlow(KEY_SHOW_EXPENSE_DELETE_CONFIRMATION, false)
+
+    val tagInput = savedStateHandle.getStateFlow<TagInput?>(KEY_TAG_INPUT, null)
 
     val state = combineTuple(
         tagOverviews,
@@ -83,7 +92,6 @@ class AllExpensesViewModel @Inject constructor(
         yearsList,
         selectedYear,
         selectedMonth,
-        showTagInput,
         showTagDeletionConfirmation,
         expensesByTagForDate,
         multiSelectionModeActive,
@@ -97,7 +105,6 @@ class AllExpensesViewModel @Inject constructor(
                 yearsList,
                 selectedYear,
                 selectedMonth,
-                showTagInput,
                 showTagDeletionConfirmation,
                 expensesByTagForDate,
                 multiSelectionModeActive,
@@ -112,7 +119,6 @@ class AllExpensesViewModel @Inject constructor(
             yearsList = yearsList,
             selectedYear = selectedYear,
             selectedMonth = selectedMonth,
-            showTagInput = showTagInput,
             showTagDeletionConfirmation = showTagDeletionConfirmation,
             expensesByTagForDate = expensesByTagForDate,
             multiSelectionModeActive = multiSelectionModeActive,
@@ -127,7 +133,7 @@ class AllExpensesViewModel @Inject constructor(
         collectTagOverviews()
     }
 
-    private val eventsChannel = Channel<DetailedViewEvent>()
+    private val eventsChannel = Channel<AllExpenseEvent>()
     val events get() = eventsChannel.receiveAsFlow()
 
     private fun collectExpenseYears() = viewModelScope.launch {
@@ -159,7 +165,7 @@ class AllExpensesViewModel @Inject constructor(
         if (multiSelectionModeActive.value) viewModelScope.launch {
             assignTagToExpenses(tag)
             eventsChannel.send(
-                DetailedViewEvent.ShowUiMessage(
+                AllExpenseEvent.ShowUiMessage(
                     UiText.StringResource(R.string.expenses_tagged_as, tag)
                 )
             )
@@ -184,32 +190,49 @@ class AllExpensesViewModel @Inject constructor(
             viewModelScope.launch {
                 repo.deleteTag(it)
                 savedStateHandle[KEY_SHOW_TAG_DELETE_CONFIRMATION] = false
-                eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.tag_deleted)))
+                eventsChannel.send(AllExpenseEvent.ShowUiMessage(UiText.StringResource(R.string.tag_deleted)))
             }
         }
     }
 
     override fun onNewTagClick() {
-        savedStateHandle[KEY_SHOW_TAG_INPUT] = true
+        viewModelScope.launch {
+            savedStateHandle[KEY_TAG_INPUT] = TagInput.INITIAL
+            eventsChannel.send(AllExpenseEvent.ToggleTagInput(true))
+        }
     }
 
     override fun onNewTagDismiss() {
-        savedStateHandle[KEY_SHOW_TAG_INPUT] = false
+        viewModelScope.launch {
+            savedStateHandle[KEY_TAG_INPUT] = null
+            eventsChannel.send(AllExpenseEvent.ToggleTagInput(false))
+        }
     }
 
-    override fun onNewTagConfirm(name: String, color: Color) {
+    override fun onNewTagNameChange(value: String) {
+        savedStateHandle[KEY_TAG_INPUT] = tagInput.value
+            ?.copy(name = value)
+    }
+
+    override fun onNewTagColorSelect(color: Color) {
+        savedStateHandle[KEY_TAG_INPUT] = tagInput.value
+            ?.copy(colorCode = color.toArgb())
+    }
+
+    override fun onNewTagConfirm() {
+        val tagInput = tagInput.value ?: return
         viewModelScope.launch {
-            if (name.isEmpty()) {
+            if (tagInput.name.isEmpty()) {
                 eventsChannel.send(
-                    DetailedViewEvent.ShowUiMessage(
+                    AllExpenseEvent.ShowUiMessage(
                         UiText.StringResource(R.string.error_invalid_tag_name), true
                     )
                 )
                 return@launch
             }
-            repo.createTag(name, color)
-            savedStateHandle[KEY_SHOW_TAG_INPUT] = false
-            eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.tag_created)))
+            repo.createTag(tagInput)
+            eventsChannel.send(AllExpenseEvent.ToggleTagInput(false))
+            eventsChannel.send(AllExpenseEvent.ShowUiMessage(UiText.StringResource(R.string.tag_created)))
         }
     }
 
@@ -258,11 +281,13 @@ class AllExpensesViewModel @Inject constructor(
             ToggleableState.On -> {
                 savedStateHandle[KEY_SELECTED_EXPENSE_IDS] = emptyList<Long>()
             }
+
             ToggleableState.Off -> {
                 state.value.expensesByTagForDate.firstOrNull()?.id?.let {
                     savedStateHandle[KEY_SELECTED_EXPENSE_IDS] = listOf(it)
                 }
             }
+
             ToggleableState.Indeterminate -> {
                 savedStateHandle[KEY_SELECTED_EXPENSE_IDS] = state.value.expensesByTagForDate
                     .map { it.id }
@@ -284,7 +309,7 @@ class AllExpensesViewModel @Inject constructor(
                 repo.deleteExpenses(it)
                 savedStateHandle[KEY_SHOW_EXPENSE_DELETE_CONFIRMATION] = false
                 disableMultiSelectionMode()
-                eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.selected_expenses_deleted)))
+                eventsChannel.send(AllExpenseEvent.ShowUiMessage(UiText.StringResource(R.string.selected_expenses_deleted)))
             }
         }
     }
@@ -292,13 +317,15 @@ class AllExpensesViewModel @Inject constructor(
     override fun onUntagExpensesClick() {
         viewModelScope.launch {
             assignTagToExpenses(null)
-            eventsChannel.send(DetailedViewEvent.ShowUiMessage(UiText.StringResource(R.string.expenses_untagged)))
+            eventsChannel.send(AllExpenseEvent.ShowUiMessage(UiText.StringResource(R.string.expenses_untagged)))
         }
     }
 
-    sealed class DetailedViewEvent {
+    sealed class AllExpenseEvent {
         data class ShowUiMessage(val message: UiText, val isError: Boolean = false) :
-            DetailedViewEvent()
+            AllExpenseEvent()
+
+        data class ToggleTagInput(val show: Boolean) : AllExpenseEvent()
     }
 }
 
@@ -309,4 +336,4 @@ private const val KEY_SHOW_TAG_DELETE_CONFIRMATION = "KEY_SHOW_TAG_DELETE_CONFIR
 private const val KEY_SHOW_EXPENSE_DELETE_CONFIRMATION = "KEY_SHOW_EXPENSE_DELETE_CONFIRMATION"
 private const val KEY_MULTI_SELECTION_ACTIVE = "KEY_MULTI_SELECTION_ACTIVE"
 private const val KEY_SELECTED_EXPENSE_IDS = "KEY_SELECTED_EXPENSE_IDS"
-private const val KEY_SHOW_TAG_INPUT = "KEY_SHOW_TAG_INPUT"
+private const val KEY_TAG_INPUT = "KEY_TAG_INPUT"

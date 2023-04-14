@@ -2,6 +2,9 @@ package dev.ridill.mym.core.navigation.screenSpecs
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Money
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,18 +30,33 @@ object AllExpensesScreenSpec : BottomBarSpec {
     override fun Content(navController: NavHostController, navBackStackEntry: NavBackStackEntry) {
         val viewModel: AllExpensesViewModel = hiltViewModel(navBackStackEntry)
         val state by viewModel.state.collectAsStateWithLifecycle()
+        val tagInput = viewModel.tagInput.collectAsStateWithLifecycle()
 
+        val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
+            bottomSheetState = rememberStandardBottomSheetState(
+                SheetValue.Hidden,
+                skipHiddenState = false
+            )
+        )
         val snackbarController = rememberSnackbarController()
         val context = LocalContext.current
 
         LaunchedEffect(snackbarController, context, viewModel) {
             viewModel.events.collect { event ->
                 when (event) {
-                    is AllExpensesViewModel.DetailedViewEvent.ShowUiMessage -> {
+                    is AllExpensesViewModel.AllExpenseEvent.ShowUiMessage -> {
                         snackbarController.showSnackbar(
                             event.message.asString(context),
                             event.isError
                         )
+                    }
+
+                    is AllExpensesViewModel.AllExpenseEvent.ToggleTagInput -> {
+                        if (event.show) {
+                            bottomSheetScaffoldState.bottomSheetState.expand()
+                        } else {
+                            bottomSheetScaffoldState.bottomSheetState.hide()
+                        }
                     }
                 }
             }
@@ -47,8 +65,10 @@ object AllExpensesScreenSpec : BottomBarSpec {
         AllExpensesScreenContent(
             snackbarController = snackbarController,
             state = state,
+            tagInput = { tagInput.value },
             actions = viewModel,
-            navigateUp = navController::navigateUp
+            navigateUp = navController::navigateUp,
+            bottomSheetScaffoldState = bottomSheetScaffoldState
         )
     }
 }

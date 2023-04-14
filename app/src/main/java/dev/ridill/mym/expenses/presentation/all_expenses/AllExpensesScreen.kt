@@ -1,13 +1,31 @@
 package dev.ridill.mym.expenses.presentation.all_expenses
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -19,8 +37,23 @@ import androidx.compose.material.icons.filled.DeleteForever
 import androidx.compose.material.icons.outlined.DeleteForever
 import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.rounded.DeleteForever
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TriStateCheckbox
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,156 +72,199 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
 import dev.ridill.mym.core.navigation.screenSpecs.AllExpensesScreenSpec
-import dev.ridill.mym.core.ui.components.*
-import dev.ridill.mym.core.ui.theme.*
-import dev.ridill.mym.core.util.*
+import dev.ridill.mym.core.ui.components.BackArrowButton
+import dev.ridill.mym.core.ui.components.ConfirmationDialog
+import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.NewTagSheetContent
+import dev.ridill.mym.core.ui.components.SelectableExpenseCard
+import dev.ridill.mym.core.ui.components.SnackbarController
+import dev.ridill.mym.core.ui.components.VerticalNumberSpinner
+import dev.ridill.mym.core.ui.components.VerticalProgressIndicator
+import dev.ridill.mym.core.ui.theme.ContentAlpha
+import dev.ridill.mym.core.ui.theme.ElevationLevel0
+import dev.ridill.mym.core.ui.theme.ElevationLevel1
+import dev.ridill.mym.core.ui.theme.SpacingLarge
+import dev.ridill.mym.core.ui.theme.SpacingListEnd
+import dev.ridill.mym.core.ui.theme.SpacingMedium
+import dev.ridill.mym.core.ui.theme.SpacingSmall
+import dev.ridill.mym.core.ui.theme.SpacingXSmall
+import dev.ridill.mym.core.ui.theme.defaultScreenPadding
+import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.core.util.Formatter
+import dev.ridill.mym.core.util.One
+import dev.ridill.mym.core.util.Zero
+import dev.ridill.mym.core.util.onColor
+import dev.ridill.mym.expenses.domain.model.TagInput
 import dev.ridill.mym.expenses.domain.model.TagOverview
+import kotlinx.coroutines.launch
 import java.time.Month
 import java.time.format.TextStyle
-import java.util.*
+import java.util.Locale
 
 @Composable
 fun AllExpensesScreenContent(
     snackbarController: SnackbarController,
     state: AllExpensesState,
     actions: AllExpensesActions,
-    navigateUp: () -> Unit
+    tagInput: () -> TagInput?,
+    navigateUp: () -> Unit,
+    bottomSheetScaffoldState: BottomSheetScaffoldState,
 ) {
     BackHandler(state.multiSelectionModeActive) {
         actions.onDismissMultiSelectionMode()
     }
 
-    MYMScaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (state.multiSelectionModeActive)
-                            stringResource(R.string.count_selected, state.selectedExpenseIds.size)
-                        else stringResource(AllExpensesScreenSpec.label)
-                    )
-                },
-                navigationIcon = {
-                    if (state.multiSelectionModeActive) {
-                        IconButton(onClick = actions::onDismissMultiSelectionMode) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = stringResource(R.string.content_cancel_multi_selection)
-                            )
+    val coroutineScope = rememberCoroutineScope()
+    BackHandler(bottomSheetScaffoldState.bottomSheetState.isVisible) {
+        coroutineScope.launch {
+            bottomSheetScaffoldState.bottomSheetState.hide()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .imePadding()
+    ) {
+        MYMScaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = if (state.multiSelectionModeActive)
+                                stringResource(
+                                    R.string.count_selected,
+                                    state.selectedExpenseIds.size
+                                )
+                            else stringResource(AllExpensesScreenSpec.label)
+                        )
+                    },
+                    navigationIcon = {
+                        if (state.multiSelectionModeActive) {
+                            IconButton(onClick = actions::onDismissMultiSelectionMode) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = stringResource(R.string.content_cancel_multi_selection)
+                                )
+                            }
+                        } else {
+                            BackArrowButton(onClick = navigateUp)
                         }
-                    } else {
-                        BackArrowButton(onClick = navigateUp)
                     }
-                }
-            )
-        },
-        snackbarController = snackbarController
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            TagOverviews(
-                tagOverviews = state.tagOverviews,
-                selectedTag = state.selectedTag,
-                onTagClick = actions::onTagSelect,
-                modifier = Modifier
-                    .height(TagOverviewHeight),
-                onTagDelete = actions::onTagDelete,
-                onNewTagClick = actions::onNewTagClick
-            )
-            AnimatedVisibility(visible = state.multiSelectionModeActive) {
-                Text(
-                    text = stringResource(R.string.select_tag_to_assign_to_expenses),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = ContentAlpha.PERCENT_60),
-                    modifier = Modifier
-                        .padding(horizontal = SpacingLarge, vertical = SpacingSmall)
                 )
-            }
-
-            TotalExpenditure(state.totalExpenditureForDate)
-
-            AnimatedVisibility(!state.multiSelectionModeActive) {
-                DateSelector(
-                    yearsList = state.yearsList,
-                    selectedYear = state.selectedYear,
-                    onYearSelect = actions::onYearSelect,
-                    selectedMonth = state.selectedMonth,
-                    onMonthSelect = actions::onMonthSelect
+            },
+            snackbarController = snackbarController,
+            sheetContent = {
+                NewTagSheetContent(
+                    name = { tagInput()?.name.orEmpty() },
+                    onTagNameChange = actions::onNewTagNameChange,
+                    colorCode = tagInput()?.colorCode,
+                    onTagColorSelect = actions::onNewTagColorSelect,
+                    onConfirm = actions::onNewTagConfirm,
+                    onDismiss = actions::onNewTagDismiss
                 )
-            }
-
-            Box(
+            },
+            sheetSwipeEnabled = false,
+            sheetPeekHeight = Dp.Zero,
+            scaffoldState = bottomSheetScaffoldState
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxSize(),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(paddingValues)
             ) {
-                LazyColumn(
+                TagOverviews(
+                    tagOverviews = state.tagOverviews,
+                    selectedTag = state.selectedTag,
+                    onTagClick = actions::onTagSelect,
+                    modifier = Modifier
+                        .height(TagOverviewHeight),
+                    onTagDelete = actions::onTagDelete,
+                    onNewTagClick = actions::onNewTagClick
+                )
+                AnimatedVisibility(visible = state.multiSelectionModeActive) {
+                    Text(
+                        text = stringResource(R.string.select_tag_to_assign_to_expenses),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = ContentAlpha.PERCENT_60),
+                        modifier = Modifier
+                            .padding(horizontal = SpacingLarge, vertical = SpacingSmall)
+                    )
+                }
+
+                TotalExpenditure(state.totalExpenditureForDate)
+
+                AnimatedVisibility(!state.multiSelectionModeActive) {
+                    DateSelector(
+                        yearsList = state.yearsList,
+                        selectedYear = state.selectedYear,
+                        onYearSelect = actions::onYearSelect,
+                        selectedMonth = state.selectedMonth,
+                        onMonthSelect = actions::onMonthSelect
+                    )
+                }
+
+                Box(
                     modifier = Modifier
                         .fillMaxSize(),
-                    contentPadding = defaultScreenPadding(
-                        bottom = SpacingListEnd
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(SpacingMedium)
+                    contentAlignment = Alignment.Center
                 ) {
-                    if (state.multiSelectionModeActive) {
-                        item(key = "MultiSelectionOptionsRow") {
-                            MultiSelectionOptions(
-                                selectionState = state.expenseSelectionState,
-                                onSelectionStateChange = actions::onSelectionStateChange,
-                                onUntagClick = actions::onUntagExpensesClick,
-                                onDeleteClick = actions::onDeleteExpensesClick,
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentPadding = defaultScreenPadding(
+                            bottom = SpacingListEnd
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(SpacingMedium)
+                    ) {
+                        if (state.multiSelectionModeActive) {
+                            item(key = "MultiSelectionOptionsRow") {
+                                MultiSelectionOptions(
+                                    selectionState = state.expenseSelectionState,
+                                    onSelectionStateChange = actions::onSelectionStateChange,
+                                    onUntagClick = actions::onUntagExpensesClick,
+                                    onDeleteClick = actions::onDeleteExpensesClick,
+                                    modifier = Modifier
+                                        .animateItemPlacement()
+                                )
+                            }
+                        }
+                        items(items = state.expensesByTagForDate, key = { it.id }) { expense ->
+                            ExpenseListItem(
+                                note = expense.note,
+                                date = expense.dateTime.format(DateUtil.Formatters.mmHyphenYyyy),
+                                amount = expense.amount,
+                                selected = expense.id in state.selectedExpenseIds,
+                                isClickable = state.multiSelectionModeActive,
+                                onClick = { actions.onExpenseSelectionToggle(expense.id) },
+                                onLongClick = { actions.onExpenseLongClick(expense.id) },
                                 modifier = Modifier
                                     .animateItemPlacement()
                             )
                         }
                     }
-                    items(items = state.expensesByTagForDate, key = { it.id }) { expense ->
-                        ExpenseListItem(
-                            note = expense.note,
-                            date = expense.dateTime.format(DateUtil.Formatters.mmHyphenYyyy),
-                            amount = expense.amount,
-                            selected = expense.id in state.selectedExpenseIds,
-                            isClickable = state.multiSelectionModeActive,
-                            onClick = { actions.onExpenseSelectionToggle(expense.id) },
-                            onLongClick = { actions.onExpenseLongClick(expense.id) },
-                            modifier = Modifier
-                                .animateItemPlacement()
-                        )
-                    }
+                    // TODO: Implement no data indicator
                 }
-                // TODO: Implement no data indicator
             }
-        }
 
-        /*if (state.showTagInput) {
-            TagInputDialog(
-                onDismiss = actions::onNewTagDismiss,
-                onConfirm = actions::onNewTagConfirm
-            )
-        }*/
+            if (state.showTagDeletionConfirmation) {
+                ConfirmationDialog(
+                    titleRes = R.string.dialog_delete_tag_title,
+                    messageRes = R.string.dialog_delete_tag_message,
+                    onDismiss = actions::onTagDeleteDismiss,
+                    onConfirm = actions::onTagDeleteConfirm,
+                    icon = Icons.Outlined.DeleteForever
+                )
+            }
 
-        if (state.showTagDeletionConfirmation) {
-            ConfirmationDialog(
-                titleRes = R.string.dialog_delete_tag_title,
-                messageRes = R.string.dialog_delete_tag_message,
-                onDismiss = actions::onTagDeleteDismiss,
-                onConfirm = actions::onTagDeleteConfirm,
-                icon = Icons.Outlined.DeleteForever
-            )
-        }
-
-        if (state.showExpenseDeleteConfirmation) {
-            ConfirmationDialog(
-                titleRes = R.string.dialog_delete_selected_expense_title,
-                messageRes = R.string.dialog_delete_selected_expense_message,
-                onDismiss = actions::onDeleteExpensesDismissed,
-                onConfirm = actions::onDeleteExpensesConfirmed,
-                icon = Icons.Rounded.DeleteForever
-            )
+            if (state.showExpenseDeleteConfirmation) {
+                ConfirmationDialog(
+                    titleRes = R.string.dialog_delete_selected_expense_title,
+                    messageRes = R.string.dialog_delete_selected_expense_message,
+                    onDismiss = actions::onDeleteExpensesDismissed,
+                    onConfirm = actions::onDeleteExpensesConfirmed,
+                    icon = Icons.Rounded.DeleteForever
+                )
+            }
         }
     }
 }
@@ -234,7 +310,7 @@ private fun TagOverviews(
                 shape = MaterialTheme.shapes.large,
                 onClick = onNewTagClick,
                 modifier = Modifier
-//                    .animateItemPlacement()
+                    .animateItemPlacement()
             ) {
                 Box(
                     modifier = Modifier
@@ -369,10 +445,7 @@ private fun TotalExpenditure(
             modifier = Modifier
                 .fillMaxWidth(0.60f)
         )
-        AnimatedContent(
-            targetState = amount,
-            transitionSpec = { verticalSpinner() }
-        ) { value ->
+        VerticalNumberSpinner(amount) { value ->
             Text(
                 text = Formatter.currency(value),
                 style = MaterialTheme.typography.headlineMedium,
@@ -573,27 +646,6 @@ private fun ExpenseListItem(
         selected = selected,
         modifier = modifier
     )
-    /*Card(
-        modifier = modifier
-            .clip(MaterialTheme.shapes.medium)
-            .combinedClickable(
-                onClick = {
-                    if (isClickable) onClick()
-                },
-                onLongClick = onLongClick
-            ),
-        colors = CardDefaults.cardColors(
-            containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer
-            else Color.Transparent
-        )
-    ) {
-        *//*BaseExpenseCardLayout(
-            note = note,
-            date = date,
-            amount = amount,
-            tag = null
-        )*//*
-    }*/
 }
 
 @Composable

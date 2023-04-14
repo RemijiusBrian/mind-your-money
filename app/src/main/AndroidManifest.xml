@@ -6,16 +6,17 @@
         android:name="dev.ridill.mym.application.MYMApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.ExpenseTracker"
-        tools:targetApi="31">
+        android:theme="@style/Theme.MYM"
+        tools:targetApi="tiramisu">
         <activity
             android:name="dev.ridill.mym.application.MYMActivity"
             android:exported="true"
-            android:theme="@style/Theme.ExpenseTracker"
+            android:theme="@style/Theme.MYM"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,7 +1,7 @@
 package dev.ridill.mym.expenses.domain.repository
 
-import androidx.compose.ui.graphics.Color
 import dev.ridill.mym.expenses.domain.model.Expense
+import dev.ridill.mym.expenses.domain.model.TagInput
 import dev.ridill.mym.expenses.domain.model.TagOverview
 import kotlinx.coroutines.flow.Flow
 
@@ -19,7 +19,7 @@ interface AllExpensesRepository {
 
     suspend fun tagExpenses(tag: String?, expenseIds: List<Long>)
 
-    suspend fun createTag(tag: String, color: Color)
+    suspend fun createTag(input: TagInput)
 
     suspend fun deleteExpenses(ids: List<Long>)
 }

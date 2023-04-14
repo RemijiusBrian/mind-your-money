@@ -57,12 +57,12 @@ class AddEditExpenseViewModel @Inject constructor(
                 selectedTagName,
                 showDeleteConfirmation
             ) ->
-        ExpenseDetailsState(
+        AddEditExpenseState(
             tagsList = tagsList,
             selectedTagName = selectedTagName,
             showDeleteConfirmation = showDeleteConfirmation
         )
-    }.asStateFlow(viewModelScope, ExpenseDetailsState())
+    }.asStateFlow(viewModelScope, AddEditExpenseState())
 
     init {
         onInit()

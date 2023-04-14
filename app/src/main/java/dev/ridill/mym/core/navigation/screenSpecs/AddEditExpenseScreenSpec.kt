@@ -20,7 +20,7 @@ import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_DETAILS_ACT
 
 object AddEditExpenseScreenSpec : ScreenSpec {
 
-    override val route: String = "expense_details/{$ARG_EXPENSE_ID}"
+    override val route: String = "add_edit_expense/{$ARG_EXPENSE_ID}"
 
     override val label: Int = R.string.destination_add_edit_expense
 
