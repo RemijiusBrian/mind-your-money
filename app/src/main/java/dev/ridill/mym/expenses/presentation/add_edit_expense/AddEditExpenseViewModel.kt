@@ -124,7 +124,7 @@ class AddEditExpenseViewModel @Inject constructor(
             ?.copy(colorCode = value.toArgb())
     }
 
-    override fun onNewTagDismiss() {
+    override fun dismissNewTagInput() {
         viewModelScope.launch {
             eventsChannel.send(ExpenseDetailsEvent.ToggleTagInput(false))
             savedStateHandle[NEW_TAG] = null

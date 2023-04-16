@@ -10,7 +10,7 @@ interface AllExpensesActions {
     fun onTagDeleteDismiss()
     fun onTagDeleteConfirm()
     fun onNewTagClick()
-    fun onNewTagDismiss()
+    fun dismissNewTagInput()
     fun onNewTagNameChange(value: String)
     fun onNewTagColorSelect(color: Color)
     fun onNewTagConfirm()

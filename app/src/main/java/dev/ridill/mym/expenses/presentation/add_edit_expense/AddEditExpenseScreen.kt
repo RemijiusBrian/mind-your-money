@@ -1,7 +1,16 @@
 package dev.ridill.mym.expenses.presentation.add_edit_expense
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -9,9 +18,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Save
-import androidx.compose.material3.*
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,13 +41,26 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
 import dev.ridill.mym.core.navigation.screenSpecs.AddEditExpenseScreenSpec
-import dev.ridill.mym.core.ui.components.*
-import dev.ridill.mym.core.ui.theme.*
+import dev.ridill.mym.core.ui.components.BackArrowButton
+import dev.ridill.mym.core.ui.components.ConfirmationDialog
+import dev.ridill.mym.core.ui.components.LabelText
+import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.MinWidthTextField
+import dev.ridill.mym.core.ui.components.NewTagChip
+import dev.ridill.mym.core.ui.components.NewTagSheetContent
+import dev.ridill.mym.core.ui.components.SnackbarController
+import dev.ridill.mym.core.ui.components.TagChip
+import dev.ridill.mym.core.ui.components.VerticalSpacer
+import dev.ridill.mym.core.ui.theme.ContentAlpha
+import dev.ridill.mym.core.ui.theme.FabSpacing
+import dev.ridill.mym.core.ui.theme.SpacingLargeTop
+import dev.ridill.mym.core.ui.theme.SpacingListEnd
+import dev.ridill.mym.core.ui.theme.SpacingSmall
+import dev.ridill.mym.core.ui.theme.defaultScreenPadding
 import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.expenses.domain.model.Tag
 import dev.ridill.mym.expenses.domain.model.TagInput
-import kotlinx.coroutines.launch
 
 @Composable
 fun AddEditExpenseScreenContent(
@@ -45,12 +74,10 @@ fun AddEditExpenseScreenContent(
     snackbarController: SnackbarController,
     navigateUp: () -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    BackHandler(enabled = scaffoldState.bottomSheetState.isVisible) {
-        coroutineScope.launch {
-            scaffoldState.bottomSheetState.hide()
-        }
-    }
+    BackHandler(
+        enabled = scaffoldState.bottomSheetState.isVisible,
+        onBack = actions::dismissNewTagInput
+    )
 
     Box(
         modifier = Modifier
@@ -60,11 +87,7 @@ fun AddEditExpenseScreenContent(
             topBar = {
                 TopAppBar(
                     navigationIcon = { BackArrowButton(onClick = navigateUp) },
-                    title = {
-                        Text(
-                            stringResource(AddEditExpenseScreenSpec.getTitle(isEditMode))
-                        )
-                    },
+                    title = { Text(stringResource(AddEditExpenseScreenSpec.getTitle(isEditMode))) },
                     actions = {
                         if (isEditMode) {
                             IconButton(onClick = actions::onDeleteClick) {
@@ -83,7 +106,7 @@ fun AddEditExpenseScreenContent(
                     onTagNameChange = actions::onNewTagNameChange,
                     onTagColorSelect = actions::onNewTagColorSelect,
                     onConfirm = actions::onNewTagConfirm,
-                    onDismiss = actions::onNewTagDismiss,
+                    onDismiss = actions::dismissNewTagInput,
                     name = { newTagProvider()?.name.orEmpty() },
                     colorCode = newTagProvider()?.colorCode
                 )

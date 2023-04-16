@@ -202,7 +202,7 @@ class AllExpensesViewModel @Inject constructor(
         }
     }
 
-    override fun onNewTagDismiss() {
+    override fun dismissNewTagInput() {
         viewModelScope.launch {
             savedStateHandle[KEY_TAG_INPUT] = null
             eventsChannel.send(AllExpenseEvent.ToggleTagInput(false))

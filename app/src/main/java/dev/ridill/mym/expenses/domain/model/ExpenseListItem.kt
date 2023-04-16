@@ -15,5 +15,5 @@ data class ExpenseListItem(
         get() = date.format(DateUtil.Formatters.dayDetails)
 
     val amountFormatted: String
-        get() = Formatter.currency(amount)
+        get() = Formatter.compactCurrency(amount)
 }

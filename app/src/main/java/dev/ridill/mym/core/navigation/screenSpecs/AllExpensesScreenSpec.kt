@@ -34,7 +34,7 @@ object AllExpensesScreenSpec : BottomBarSpec {
 
         val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
             bottomSheetState = rememberStandardBottomSheetState(
-                SheetValue.Hidden,
+                initialValue = SheetValue.Hidden,
                 skipHiddenState = false
             )
         )
@@ -52,11 +52,8 @@ object AllExpensesScreenSpec : BottomBarSpec {
                     }
 
                     is AllExpensesViewModel.AllExpenseEvent.ToggleTagInput -> {
-                        if (event.show) {
-                            bottomSheetScaffoldState.bottomSheetState.expand()
-                        } else {
-                            bottomSheetScaffoldState.bottomSheetState.hide()
-                        }
+                        if (event.show) bottomSheetScaffoldState.bottomSheetState.expand()
+                        else bottomSheetScaffoldState.bottomSheetState.hide()
                     }
                 }
             }

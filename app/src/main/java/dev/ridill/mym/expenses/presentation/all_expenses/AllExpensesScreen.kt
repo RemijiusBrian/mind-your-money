@@ -52,7 +52,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -96,7 +95,6 @@ import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.core.util.onColor
 import dev.ridill.mym.expenses.domain.model.TagInput
 import dev.ridill.mym.expenses.domain.model.TagOverview
-import kotlinx.coroutines.launch
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
@@ -110,16 +108,15 @@ fun AllExpensesScreenContent(
     navigateUp: () -> Unit,
     bottomSheetScaffoldState: BottomSheetScaffoldState,
 ) {
-    BackHandler(state.multiSelectionModeActive) {
-        actions.onDismissMultiSelectionMode()
-    }
+    BackHandler(
+        enabled = state.multiSelectionModeActive,
+        onBack = actions::onDismissMultiSelectionMode
+    )
 
-    val coroutineScope = rememberCoroutineScope()
-    BackHandler(bottomSheetScaffoldState.bottomSheetState.isVisible) {
-        coroutineScope.launch {
-            bottomSheetScaffoldState.bottomSheetState.hide()
-        }
-    }
+    BackHandler(
+        enabled = bottomSheetScaffoldState.bottomSheetState.isVisible,
+        onBack = actions::dismissNewTagInput
+    )
 
     Box(
         modifier = Modifier
@@ -130,11 +127,10 @@ fun AllExpensesScreenContent(
                 TopAppBar(
                     title = {
                         Text(
-                            text = if (state.multiSelectionModeActive)
-                                stringResource(
-                                    R.string.count_selected,
-                                    state.selectedExpenseIds.size
-                                )
+                            text = if (state.multiSelectionModeActive) stringResource(
+                                R.string.count_selected,
+                                state.selectedExpenseIds.size
+                            )
                             else stringResource(AllExpensesScreenSpec.label)
                         )
                     },
@@ -160,7 +156,7 @@ fun AllExpensesScreenContent(
                     colorCode = tagInput()?.colorCode,
                     onTagColorSelect = actions::onNewTagColorSelect,
                     onConfirm = actions::onNewTagConfirm,
-                    onDismiss = actions::onNewTagDismiss
+                    onDismiss = actions::dismissNewTagInput
                 )
             },
             sheetSwipeEnabled = false,
@@ -191,7 +187,9 @@ fun AllExpensesScreenContent(
                     )
                 }
 
-                TotalExpenditure(state.totalExpenditureForDate)
+                TotalExpenditure(
+                    amount = state.totalExpenditureForDate
+                )
 
                 AnimatedVisibility(!state.multiSelectionModeActive) {
                     DateSelector(

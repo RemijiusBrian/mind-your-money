@@ -11,7 +11,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.*
+import androidx.navigation.NamedNavArgument
+import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
 import dev.ridill.mym.expenses.presentation.add_edit_expense.AddEditExpenseScreenContent
@@ -64,7 +68,7 @@ object AddEditExpenseScreenSpec : ScreenSpec {
         val snackbarController = rememberSnackbarController()
         val context = LocalContext.current
 
-        LaunchedEffect(snackbarController, context, viewModel) {
+        LaunchedEffect(snackbarController, context, viewModel, bottomSheetScaffoldState) {
             viewModel.events.collect { event ->
                 when (event) {
                     is AddEditExpenseViewModel.ExpenseDetailsEvent.NavigateBackWithResult -> {
@@ -73,15 +77,14 @@ object AddEditExpenseScreenSpec : ScreenSpec {
                             ?.set(EXPENSE_DETAILS_ACTION, event.result)
                         navController.navigateUp()
                     }
+
                     is AddEditExpenseViewModel.ExpenseDetailsEvent.ShowUiMessage -> {
                         snackbarController.showSnackbar(event.uiText.asString(context), event.error)
                     }
+
                     is AddEditExpenseViewModel.ExpenseDetailsEvent.ToggleTagInput -> {
-                        if (event.show) {
-                            bottomSheetScaffoldState.bottomSheetState.expand()
-                        } else {
-                            bottomSheetScaffoldState.bottomSheetState.hide()
-                        }
+                        if (event.show) bottomSheetScaffoldState.bottomSheetState.expand()
+                        else bottomSheetScaffoldState.bottomSheetState.hide()
                     }
                 }
             }

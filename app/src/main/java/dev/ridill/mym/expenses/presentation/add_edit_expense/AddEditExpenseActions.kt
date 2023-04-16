@@ -13,7 +13,7 @@ interface AddEditExpenseActions {
     fun onNewTagClick()
     fun onNewTagNameChange(value: String)
     fun onNewTagColorSelect(value: Color)
-    fun onNewTagDismiss()
+    fun dismissNewTagInput()
     fun onNewTagConfirm()
     fun onSave()
 }
