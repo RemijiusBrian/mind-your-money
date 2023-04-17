@@ -10,7 +10,6 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import dev.ridill.mym.R
-import dev.ridill.mym.core.util.logD
 import dev.ridill.mym.core.util.tryOrNull
 import kotlinx.coroutines.tasks.await
 
@@ -36,11 +35,9 @@ class GoogleAuthClient(
         return tryOrNull {
             val result = auth.signInWithCredential(googleCredential).await()
             val data = result.user
-            logD { "User Name - ${data?.displayName}" }
-            logD { "User Email - ${data?.email}" }
             SignedInUserData(
                 name = data?.displayName.orEmpty(),
-                email = data?.email.orEmpty()
+                email = data?.email ?: data?.displayName.orEmpty()
             )
         }
     }
@@ -48,7 +45,7 @@ class GoogleAuthClient(
     fun getSignedInUser(): SignedInUserData? = auth.currentUser?.let { data ->
         SignedInUserData(
             name = data.displayName.orEmpty(),
-            email = data.email.orEmpty()
+            email = data.email ?: data.displayName.orEmpty()
         )
     }
 

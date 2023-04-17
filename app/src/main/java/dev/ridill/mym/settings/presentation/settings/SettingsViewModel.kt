@@ -30,7 +30,7 @@ class SettingsViewModel @Inject constructor(
     private val preferences = preferencesManager.preferences
     private val appTheme = preferences.map { it.theme }.distinctUntilChanged()
     private val monthlyLimit = preferences.map { it.monthlyLimit }.distinctUntilChanged()
-    private val loggedInUserEmail = preferences.map { it.loggedInUserEmail }.distinctUntilChanged()
+    private val loggedInUserEmail = savedStateHandle.getStateFlow<String?>(SIGNED_IN_USER, null)
 
     private val showThemeSelection = savedStateHandle
         .getStateFlow(SHOW_THEME_SELECTION, false)
@@ -67,6 +67,16 @@ class SettingsViewModel @Inject constructor(
             showAutoAddExpenseDescription = showAutoAddExpenseDescription
         )
     }.asStateFlow(viewModelScope, SettingsState.INITIAL)
+
+    init {
+        updateSignedInUser()
+    }
+
+    private fun updateSignedInUser() = viewModelScope.launch {
+        googleAuthClient.getSignedInUser()?.let {
+            savedStateHandle[SIGNED_IN_USER] = it.email
+        }
+    }
 
     override fun onThemePreferenceClick() {
         savedStateHandle[SHOW_THEME_SELECTION] = true
@@ -135,8 +145,12 @@ class SettingsViewModel @Inject constructor(
     fun onGoogleAccountSelected(result: ActivityResult) {
         val data = result.data ?: return
         viewModelScope.launch {
-            val userData = googleAuthClient.signInWithIntent(data) ?: return@launch
-            preferencesManager.updateGoogleUserData(userData)
+            val userData = googleAuthClient.signInWithIntent(data)
+            if (userData == null) {
+                eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.error_google_account_linking_failed)))
+                return@launch
+            }
+            updateSignedInUser()
             eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.google_account_added)))
         }
     }
@@ -158,3 +172,4 @@ class SettingsViewModel @Inject constructor(
 private const val SHOW_THEME_SELECTION = "SHOW_THEME_SELECTION"
 private const val SHOW_MONTHLY_LIMIT_INPUT = "SHOW_MONTHLY_LIMIT_INPUT"
 private const val KEY_SHOW_AUTO_ADD_EXPENSE_DESC = "KEY_SHOW_AUTO_ADD_EXPENSE_DESC"
+private const val SIGNED_IN_USER = "SIGNED_IN_USER"

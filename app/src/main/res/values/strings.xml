@@ -18,6 +18,7 @@
     <string name="error_invalid_note">Please enter a valid note</string>
     <string name="error_invalid_description">Please enter a valid description</string>
     <string name="error_invalid_tag_name">Please enter a valid tag name</string>
+    <string name="error_google_account_linking_failed">Failed to link google Account</string>
 
     <!-- Content Description -->
     <string name="content_error">Error</string>

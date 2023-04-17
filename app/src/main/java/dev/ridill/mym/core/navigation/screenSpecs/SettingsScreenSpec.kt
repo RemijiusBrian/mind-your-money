@@ -3,6 +3,7 @@ package dev.ridill.mym.core.navigation.screenSpecs
 import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,7 +20,6 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
-import dev.ridill.mym.core.util.logI
 import dev.ridill.mym.settings.presentation.settings.SettingsScreenContent
 import dev.ridill.mym.settings.presentation.settings.SettingsViewModel
 
@@ -44,7 +44,11 @@ object SettingsScreenSpec : BottomBarSpec {
                 if (it.resultCode == Activity.RESULT_OK) {
                     viewModel.onGoogleAccountSelected(it)
                 } else {
-                    logI { "Login Failed" }
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.error_google_account_linking_failed),
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         )
