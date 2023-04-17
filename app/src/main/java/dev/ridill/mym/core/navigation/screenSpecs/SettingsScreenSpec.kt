@@ -1,7 +1,11 @@
 package dev.ridill.mym.core.navigation.screenSpecs
 
+import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
@@ -15,6 +19,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
+import dev.ridill.mym.core.util.logI
 import dev.ridill.mym.settings.presentation.settings.SettingsScreenContent
 import dev.ridill.mym.settings.presentation.settings.SettingsViewModel
 
@@ -33,12 +38,35 @@ object SettingsScreenSpec : BottomBarSpec {
         val snackbarController = rememberSnackbarController()
         val context = LocalContext.current
 
+        val googleAccountSelectionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult(),
+            onResult = {
+                if (it.resultCode == Activity.RESULT_OK) {
+                    viewModel.onGoogleAccountSelected(it)
+                } else {
+                    logI { "Login Failed" }
+                }
+            }
+        )
+
         LaunchedEffect(snackbarController, context, viewModel) {
             viewModel.events.collect { event ->
                 when (event) {
-                    SettingsViewModel.SettingsEvent.LaunchBackupExportPathSelector -> {}
-                    is SettingsViewModel.SettingsEvent.LaunchGoogleAccountSelection -> {}
-                    SettingsViewModel.SettingsEvent.RequestSmsPermission -> {}
+                    SettingsViewModel.SettingsEvent.LaunchBackupExportPathSelector -> {
+
+                    }
+
+                    is SettingsViewModel.SettingsEvent.LaunchGoogleAccountSelection -> {
+                        googleAccountSelectionLauncher.launch(
+                            IntentSenderRequest.Builder(event.intent)
+                                .build()
+                        )
+                    }
+
+                    SettingsViewModel.SettingsEvent.RequestSmsPermission -> {
+
+                    }
+
                     is SettingsViewModel.SettingsEvent.ShowUiMessage -> {
                         snackbarController.showSnackbar(
                             event.message.asString(context),

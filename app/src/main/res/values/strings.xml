@@ -74,6 +74,9 @@
     <string name="pref_source_code">Source Code</string>
     <string name="pref_title_info">Info</string>
     <string name="pref_app_version">App Version</string>
+    <string name="pref_title_backup">Backup</string>
+    <string name="pref_google_account">Google Account</string>
+    <string name="pref_backup_now">Backup Now</string>
 
     <!-- Dialog Messages -->
     <string name="dialog_delete_expense_title">Delete Expense?</string>
@@ -137,4 +140,5 @@
     <string name="count_selected">%s selected</string>
     <string name="selected_expenses_deleted">Expenses Deleted</string>
     <string name="expenses_untagged">Expenses Untagged</string>
+    <string name="google_account_added">Google Account Added Successfully!</string>
 </resources>

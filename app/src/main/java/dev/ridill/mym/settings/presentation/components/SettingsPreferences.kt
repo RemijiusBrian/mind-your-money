@@ -2,7 +2,12 @@ package dev.ridill.mym.settings.presentation.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -57,7 +62,7 @@ fun BasicPreference(
                 text = stringResource(title),
                 style = MaterialTheme.typography.bodyLarge
             )
-            if (summary != null) {
+            if (!summary.isNullOrBlank()) {
                 Text(
                     text = summary,
                     style = MaterialTheme.typography.bodyMedium,

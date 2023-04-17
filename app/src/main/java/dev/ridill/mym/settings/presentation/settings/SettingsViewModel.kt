@@ -1,6 +1,7 @@
 package dev.ridill.mym.settings.presentation.settings
 
-import android.content.Intent
+import android.content.IntentSender
+import androidx.activity.result.ActivityResult
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,7 @@ import dev.ridill.mym.core.data.preferences.PreferencesManager
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.domain.model.UiText
 import dev.ridill.mym.core.util.asStateFlow
+import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -22,11 +24,13 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val preferencesManager: PreferencesManager,
+    private val googleAuthClient: GoogleAuthClient
 ) : ViewModel(), SettingsActions {
 
     private val preferences = preferencesManager.preferences
     private val appTheme = preferences.map { it.theme }.distinctUntilChanged()
     private val monthlyLimit = preferences.map { it.monthlyLimit }.distinctUntilChanged()
+    private val loggedInUserEmail = preferences.map { it.loggedInUserEmail }.distinctUntilChanged()
 
     private val showThemeSelection = savedStateHandle
         .getStateFlow(SHOW_THEME_SELECTION, false)
@@ -42,12 +46,14 @@ class SettingsViewModel @Inject constructor(
     val state = combineTuple(
         appTheme,
         monthlyLimit,
+        loggedInUserEmail,
         showThemeSelection,
         showMonthlyLimitInput,
         showAutoAddExpenseDescription
     ).map { (
                 appTheme,
                 monthlyLimit,
+                loggedInUserEmail,
                 showThemeSelection,
                 showMonthlyLimitInput,
                 showAutoAddExpenseDescription
@@ -55,9 +61,10 @@ class SettingsViewModel @Inject constructor(
         SettingsState(
             appTheme = appTheme,
             monthlyLimit = monthlyLimit,
+            loggedInUserEmail = loggedInUserEmail,
             showThemeSelection = showThemeSelection,
             showMonthlyLimitInput = showMonthlyLimitInput,
-            showAutoAddExpenseDescription = showAutoAddExpenseDescription,
+            showAutoAddExpenseDescription = showAutoAddExpenseDescription
         )
     }.asStateFlow(viewModelScope, SettingsState.INITIAL)
 
@@ -118,6 +125,20 @@ class SettingsViewModel @Inject constructor(
     }
 
     override fun onGoogleAccountSelectionClick() {
+        viewModelScope.launch {
+            googleAuthClient.signIn()?.let {
+                eventsChannel.send(SettingsEvent.LaunchGoogleAccountSelection(it))
+            }
+        }
+    }
+
+    fun onGoogleAccountSelected(result: ActivityResult) {
+        val data = result.data ?: return
+        viewModelScope.launch {
+            val userData = googleAuthClient.signInWithIntent(data) ?: return@launch
+            preferencesManager.updateGoogleUserData(userData)
+            eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.google_account_added)))
+        }
     }
 
     override fun onPerformBackupClick() {
@@ -128,7 +149,7 @@ class SettingsViewModel @Inject constructor(
 
     sealed class SettingsEvent {
         data class ShowUiMessage(val message: UiText, val error: Boolean = false) : SettingsEvent()
-        data class LaunchGoogleAccountSelection(val intent: Intent) : SettingsEvent()
+        data class LaunchGoogleAccountSelection(val intent: IntentSender) : SettingsEvent()
         object RequestSmsPermission : SettingsEvent()
         object LaunchBackupExportPathSelector : SettingsEvent()
     }

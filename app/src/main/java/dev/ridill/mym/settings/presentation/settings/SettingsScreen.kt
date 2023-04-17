@@ -10,12 +10,23 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrightnessMedium
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.BrightnessMedium
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -26,7 +37,12 @@ import dev.ridill.mym.BuildConfig
 import dev.ridill.mym.R
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.navigation.screenSpecs.SettingsScreenSpec
-import dev.ridill.mym.core.ui.components.*
+import dev.ridill.mym.core.ui.components.BackArrowButton
+import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.PermissionRationaleDialog
+import dev.ridill.mym.core.ui.components.RadioButtonWithLabel
+import dev.ridill.mym.core.ui.components.SnackbarController
+import dev.ridill.mym.core.ui.components.VerticalSpacer
 import dev.ridill.mym.core.ui.theme.SpacingMedium
 import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.launchUrl
@@ -90,18 +106,18 @@ fun SettingsScreenContent(
             )
 
             // Backup Section
-            /*SectionTitle(title = R.string.backup)
+            SectionTitle(title = R.string.pref_title_backup)
             BasicPreference(
-                title = R.string.google_account,
-                summary = state.backupAccount,
-                icon = ImageVector.vectorResource(R.drawable.ic_google),
+                title = R.string.pref_google_account,
+                summary = state.loggedInUserEmail,
+//                icon = ImageVector.vectorResource(R.drawable.ic_google),
                 onClick = actions::onGoogleAccountSelectionClick
             )
             BasicPreference(
-                title = R.string.perform_data_backup,
+                title = R.string.pref_backup_now,
                 icon = Icons.Default.CloudUpload,
                 onClick = actions::onPerformBackupClick
-            )*/
+            )
 
             // Links Section
             SectionTitle(title = R.string.links)
