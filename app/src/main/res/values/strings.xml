@@ -19,6 +19,7 @@
     <string name="error_invalid_description">Please enter a valid description</string>
     <string name="error_invalid_tag_name">Please enter a valid tag name</string>
     <string name="error_google_account_linking_failed">Failed to link google Account</string>
+    <string name="error_backup_failed">Failed to complete backup</string>
 
     <!-- Content Description -->
     <string name="content_error">Error</string>
@@ -50,6 +51,9 @@
     <string name="content_notification_status">Notification Status</string>-->
 
     <!-- Notifications -->
+    <string name="notif_channel_backup">Backup</string>
+    <string name="notif_backup_in_progress">Backup In Progress</string>
+
     <string name="notification_channel_group_payment_plans">Payment Plans</string>
     <string name="notification_channel_group_bills_desc">All \'Payment Plans\' notifications</string>
     <string name="notification_channel_payment_plan_reminder">Payment Reminders</string>
@@ -78,6 +82,7 @@
     <string name="pref_title_backup">Backup</string>
     <string name="pref_google_account">Google Account</string>
     <string name="pref_backup_now">Backup Now</string>
+    <string name="pref_restore_backup">Restore Backup</string>
 
     <!-- Dialog Messages -->
     <string name="dialog_delete_expense_title">Delete Expense?</string>
@@ -92,11 +97,7 @@
     <string name="dialog_discard_changes_message">You appear to have some unsaved changes. Do you want to discard the changes made?</string>
 
     <!-- Additional -->
-    <plurals name="repeat_period">
-        <item quantity="zero">One time payment</item>
-        <item quantity="one">Repeats every month</item>
-        <item quantity="other">Repeats every %d months</item>
-    </plurals>
+    <string name="google_web_client_id">495457392128-h88p1rf3dep9k0g4jm08sbgsbddt3kpc.apps.googleusercontent.com</string>
 
     <!-- Texts -->
     <string name="action_confirm">Confirm</string>

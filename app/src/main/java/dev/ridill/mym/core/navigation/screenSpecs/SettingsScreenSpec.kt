@@ -5,7 +5,6 @@ import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
@@ -39,7 +38,7 @@ object SettingsScreenSpec : BottomBarSpec {
         val context = LocalContext.current
 
         val googleAccountSelectionLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartIntentSenderForResult(),
+            contract = ActivityResultContracts.StartActivityForResult(),
             onResult = {
                 if (it.resultCode == Activity.RESULT_OK) {
                     viewModel.onGoogleAccountSelected(it)
@@ -61,10 +60,7 @@ object SettingsScreenSpec : BottomBarSpec {
                     }
 
                     is SettingsViewModel.SettingsEvent.LaunchGoogleAccountSelection -> {
-                        googleAccountSelectionLauncher.launch(
-                            IntentSenderRequest.Builder(event.intent)
-                                .build()
-                        )
+                        googleAccountSelectionLauncher.launch(event.intent)
                     }
 
                     SettingsViewModel.SettingsEvent.RequestSmsPermission -> {

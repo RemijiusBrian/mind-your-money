@@ -17,5 +17,4 @@ interface SettingsActions {
 
     fun onGoogleAccountSelectionClick()
     fun onPerformBackupClick()
-    fun onCancelOngoingBackupClick()
 }

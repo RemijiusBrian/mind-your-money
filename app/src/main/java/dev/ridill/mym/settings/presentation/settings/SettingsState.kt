@@ -9,7 +9,8 @@ data class SettingsState(
     val loggedInUserEmail: String? = null,
     val showThemeSelection: Boolean = false,
     val showMonthlyLimitInput: Boolean = false,
-    val showAutoAddExpenseDescription: Boolean = false
+    val showAutoAddExpenseDescription: Boolean = false,
+    val isBackupInProgress: Boolean = false
 ) {
     companion object {
         val INITIAL = SettingsState()

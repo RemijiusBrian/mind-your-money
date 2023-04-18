@@ -18,6 +18,7 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -110,13 +111,24 @@ fun SettingsScreenContent(
             BasicPreference(
                 title = R.string.pref_google_account,
                 summary = state.loggedInUserEmail,
-//                icon = ImageVector.vectorResource(R.drawable.ic_google),
+                icon = ImageVector.vectorResource(R.drawable.ic_google),
                 onClick = actions::onGoogleAccountSelectionClick
             )
             BasicPreference(
                 title = R.string.pref_backup_now,
                 icon = Icons.Default.CloudUpload,
-                onClick = actions::onPerformBackupClick
+                onClick = actions::onPerformBackupClick.takeIf { !state.isBackupInProgress },
+                secondaryContent = {
+                    if (state.isBackupInProgress) {
+                        LinearProgressIndicator(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
+                }
+            )
+            BasicPreference(
+                title = R.string.pref_restore_backup
             )
 
             // Links Section

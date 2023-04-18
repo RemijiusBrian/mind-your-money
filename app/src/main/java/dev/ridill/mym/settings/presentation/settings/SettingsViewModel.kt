@@ -1,10 +1,12 @@
 package dev.ridill.mym.settings.presentation.settings
 
-import android.content.IntentSender
+import android.content.Intent
 import androidx.activity.result.ActivityResult
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
 import com.zhuinden.flowcombinetuplekt.combineTuple
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.ridill.mym.R
@@ -12,11 +14,17 @@ import dev.ridill.mym.core.data.preferences.PreferencesManager
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.domain.model.UiText
 import dev.ridill.mym.core.util.asStateFlow
+import dev.ridill.mym.settings.domain.back_up.BackupManager
 import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -24,7 +32,8 @@ import javax.inject.Inject
 class SettingsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val preferencesManager: PreferencesManager,
-    private val googleAuthClient: GoogleAuthClient
+    private val googleAuthClient: GoogleAuthClient,
+    private val backupManager: BackupManager
 ) : ViewModel(), SettingsActions {
 
     private val preferences = preferencesManager.preferences
@@ -40,6 +49,8 @@ class SettingsViewModel @Inject constructor(
     private val showAutoAddExpenseDescription =
         savedStateHandle.getStateFlow(KEY_SHOW_AUTO_ADD_EXPENSE_DESC, false)
 
+    private val isBackupInProgress = MutableStateFlow(false)
+
     private val eventsChannel = Channel<SettingsEvent>()
     val events get() = eventsChannel.receiveAsFlow()
 
@@ -49,14 +60,16 @@ class SettingsViewModel @Inject constructor(
         loggedInUserEmail,
         showThemeSelection,
         showMonthlyLimitInput,
-        showAutoAddExpenseDescription
+        showAutoAddExpenseDescription,
+        isBackupInProgress
     ).map { (
                 appTheme,
                 monthlyLimit,
                 loggedInUserEmail,
                 showThemeSelection,
                 showMonthlyLimitInput,
-                showAutoAddExpenseDescription
+                showAutoAddExpenseDescription,
+                isBackupInProgress
             ) ->
         SettingsState(
             appTheme = appTheme,
@@ -64,17 +77,27 @@ class SettingsViewModel @Inject constructor(
             loggedInUserEmail = loggedInUserEmail,
             showThemeSelection = showThemeSelection,
             showMonthlyLimitInput = showMonthlyLimitInput,
-            showAutoAddExpenseDescription = showAutoAddExpenseDescription
+            showAutoAddExpenseDescription = showAutoAddExpenseDescription,
+            isBackupInProgress = isBackupInProgress
         )
     }.asStateFlow(viewModelScope, SettingsState.INITIAL)
 
     init {
         updateSignedInUser()
+        checkActiveBackupJob()
     }
 
     private fun updateSignedInUser() = viewModelScope.launch {
         googleAuthClient.getSignedInUser()?.let {
             savedStateHandle[SIGNED_IN_USER] = it.email
+        }
+    }
+
+    private fun checkActiveBackupJob() = viewModelScope.launch {
+        backupManager.getActiveWorks().firstOrNull()?.let {
+            backupManager.getWorkInfoById(it.id).asFlow().collectLatest { info ->
+                isBackupInProgress.update { info.state == WorkInfo.State.RUNNING }
+            }
         }
     }
 
@@ -136,9 +159,11 @@ class SettingsViewModel @Inject constructor(
 
     override fun onGoogleAccountSelectionClick() {
         viewModelScope.launch {
-            googleAuthClient.signIn()?.let {
-                eventsChannel.send(SettingsEvent.LaunchGoogleAccountSelection(it))
-            }
+            eventsChannel.send(
+                SettingsEvent.LaunchGoogleAccountSelection(
+                    googleAuthClient.getSignInIntent()
+                )
+            )
         }
     }
 
@@ -155,15 +180,38 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    private var backupJob: Job? = null
     override fun onPerformBackupClick() {
-    }
+        if (backupJob?.isActive == true) return
+        backupJob = viewModelScope.launch {
+            backupManager.performRemoteBackup().asFlow().collectLatest { info ->
+                isBackupInProgress.update {
+                    info?.state == WorkInfo.State.RUNNING
+                }
+                when (info?.state) {
+//                    WorkInfo.State.ENQUEUED -> {}
+//                    WorkInfo.State.RUNNING -> {}
+//                    WorkInfo.State.SUCCEEDED -> {}
+                    WorkInfo.State.FAILED -> {
+                        eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.error_backup_failed)))
+                    }
+//                    WorkInfo.State.BLOCKED -> {}
+//                    WorkInfo.State.CANCELLED -> {}
+//                    null -> {}
+                    else -> {}
+                }
 
-    override fun onCancelOngoingBackupClick() {
+                if (info?.state == WorkInfo.State.SUCCEEDED
+                    || info?.state == WorkInfo.State.CANCELLED
+                    || info?.state == WorkInfo.State.FAILED
+                ) this.cancel()
+            }
+        }
     }
 
     sealed class SettingsEvent {
         data class ShowUiMessage(val message: UiText, val error: Boolean = false) : SettingsEvent()
-        data class LaunchGoogleAccountSelection(val intent: IntentSender) : SettingsEvent()
+        data class LaunchGoogleAccountSelection(val intent: Intent) : SettingsEvent()
         object RequestSmsPermission : SettingsEvent()
         object LaunchBackupExportPathSelector : SettingsEvent()
     }
