@@ -5,7 +5,7 @@ import android.content.Intent
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import dev.ridill.mym.R
+import dev.ridill.mym.BuildConfig
 import dev.ridill.mym.core.util.tryOrNull
 import dev.ridill.mym.settings.domain.back_up.GDriveService
 import kotlinx.coroutines.Dispatchers
@@ -24,12 +24,15 @@ class GoogleAuthClient(
 
     suspend fun signInWithIntent(intent: Intent): SignedInUserData? = withContext(Dispatchers.IO) {
         tryOrNull {
-            GoogleSignIn.getSignedInAccountFromIntent(intent).await()?.let {
-                SignedInUserData(
-                    name = it.displayName.orEmpty(),
-                    email = it.email.orEmpty()
-                )
-            }
+            val account = GoogleSignIn.getSignedInAccountFromIntent(intent).await()
+                ?: throw SignInFailedThrowable()
+
+            val data = SignedInUserData(
+                name = account.displayName.orEmpty(),
+                email = account.email.orEmpty()
+            )
+
+            data
         }
     }
 
@@ -37,19 +40,19 @@ class GoogleAuthClient(
         .getLastSignedInAccount(context)?.let { data ->
             SignedInUserData(
                 name = data.displayName.orEmpty(),
-                email = data.email ?: data.displayName.orEmpty()
+                email = data.email.orEmpty()
             )
         }
 
     fun getSignedInAccount(): GoogleSignInAccount? = GoogleSignIn
         .getLastSignedInAccount(context)
 
-    private fun buildSignInOptions(): GoogleSignInOptions = GoogleSignInOptions.Builder()
-        .requestProfile()
+    private fun buildSignInOptions(): GoogleSignInOptions = GoogleSignInOptions
+        .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
-        .requestId()
-        .requestIdToken(context.getString(R.string.google_web_client_id))
-        .requestScopes(GDriveService.driveScopes.first(), *GDriveService.driveScopes.toTypedArray())
+        .requestIdToken(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+        .requestScopes(GDriveService.Scope)
         .build()
 }
 
+class SignInFailedThrowable : Throwable("Sign In Failed")

@@ -19,6 +19,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
+import dev.ridill.mym.core.util.logD
 import dev.ridill.mym.settings.presentation.settings.SettingsScreenContent
 import dev.ridill.mym.settings.presentation.settings.SettingsViewModel
 
@@ -40,6 +41,8 @@ object SettingsScreenSpec : BottomBarSpec {
         val googleAccountSelectionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult(),
             onResult = {
+                logD { "Activity Result - ${it.resultCode}" }
+                logD { "Activity Result - ${it.data?.extras.toString()}" }
                 if (it.resultCode == Activity.RESULT_OK) {
                     viewModel.onGoogleAccountSelected(it)
                 } else {

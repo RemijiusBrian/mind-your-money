@@ -13,7 +13,7 @@ import androidx.work.await
 import java.util.UUID
 
 class BackupManager(
-    private val context: Context
+    context: Context
 ) {
     private val workManager = WorkManager.getInstance(context)
 
@@ -30,7 +30,7 @@ class BackupManager(
             )
             .build()
 
-        workManager.beginUniqueWork(BACKUP_WORK_NAME, ExistingWorkPolicy.APPEND, workRequest)
+        workManager.beginUniqueWork(BACKUP_WORK_NAME, ExistingWorkPolicy.REPLACE, workRequest)
             .enqueue()
 
         return workManager.getWorkInfoByIdLiveData(workRequest.id)

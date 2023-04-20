@@ -1,30 +1,29 @@
 package dev.ridill.mym.expenses.data.repository
 
-import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.expenses.data.local.TagsDao
 import dev.ridill.mym.expenses.data.local.entity.TagEntity
 import dev.ridill.mym.expenses.data.local.relation.TagWithExpenditureRelation
 import dev.ridill.mym.expenses.domain.model.Tag
 import dev.ridill.mym.expenses.domain.model.TagInput
 import dev.ridill.mym.expenses.domain.repository.TagsRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 class TagsRepositoryImpl(
-    private val dao: TagsDao,
-    private val dispatcherProvider: DispatcherProvider
+    private val dao: TagsDao
 ) : TagsRepository {
 
     override fun getAllTags(): Flow<List<Tag>> = dao.getAllTags().map { entities ->
         entities.map(TagEntity::toTag)
     }
 
-    override suspend fun insert(tag: TagInput) = withContext(dispatcherProvider.io) {
+    override suspend fun insert(tag: TagInput) = withContext(Dispatchers.IO) {
         dao.insert(tag.toEntity())
     }
 
-    override suspend fun delete(tag: String) = withContext(dispatcherProvider.io) {
+    override suspend fun delete(tag: String) = withContext(Dispatchers.IO) {
         dao.untagAndDeleteTag(tag)
     }
 

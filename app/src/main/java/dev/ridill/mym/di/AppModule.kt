@@ -17,8 +17,6 @@ import dev.ridill.mym.core.data.db.MYMDatabase
 import dev.ridill.mym.core.data.preferences.PreferencesManager
 import dev.ridill.mym.core.data.preferences.PreferencesManagerImpl
 import dev.ridill.mym.core.domain.util.Validator
-import dev.ridill.mym.core.util.DispatcherProvider
-import dev.ridill.mym.core.util.DispatcherProviderImpl
 import javax.inject.Singleton
 
 @Module
@@ -51,12 +49,8 @@ object AppModule {
 
     @Provides
     fun providePreferencesManager(
-        dataStore: DataStore<Preferences>,
-        dispatcherProvider: DispatcherProvider
-    ): PreferencesManager = PreferencesManagerImpl(dataStore, dispatcherProvider)
-
-    @Provides
-    fun provideDispatcherProvider(): DispatcherProvider = DispatcherProviderImpl()
+        dataStore: DataStore<Preferences>
+    ): PreferencesManager = PreferencesManagerImpl(dataStore)
 
     @Provides
     fun provideValidator(): Validator = Validator()

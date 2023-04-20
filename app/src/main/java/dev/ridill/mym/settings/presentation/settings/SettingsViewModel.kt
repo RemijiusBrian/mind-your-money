@@ -15,6 +15,7 @@ import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.domain.model.UiText
 import dev.ridill.mym.core.util.asStateFlow
 import dev.ridill.mym.settings.domain.back_up.BackupManager
+import dev.ridill.mym.settings.domain.back_up.WORK_ERROR_RES_ID
 import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -182,6 +183,7 @@ class SettingsViewModel @Inject constructor(
 
     private var backupJob: Job? = null
     override fun onPerformBackupClick() {
+        backupJob?.cancel()
         if (backupJob?.isActive == true) return
         backupJob = viewModelScope.launch {
             backupManager.performRemoteBackup().asFlow().collectLatest { info ->
@@ -191,9 +193,20 @@ class SettingsViewModel @Inject constructor(
                 when (info?.state) {
 //                    WorkInfo.State.ENQUEUED -> {}
 //                    WorkInfo.State.RUNNING -> {}
-//                    WorkInfo.State.SUCCEEDED -> {}
+                    WorkInfo.State.SUCCEEDED -> {
+                        eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.backup_completed)))
+                    }
+
                     WorkInfo.State.FAILED -> {
-                        eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.error_backup_failed)))
+                        val errorRes = info.outputData.getInt(WORK_ERROR_RES_ID, -1)
+                        if (errorRes != -1) {
+                            eventsChannel.send(
+                                SettingsEvent.ShowUiMessage(
+                                    UiText.StringResource(errorRes),
+                                    true
+                                )
+                            )
+                        }
                     }
 //                    WorkInfo.State.BLOCKED -> {}
 //                    WorkInfo.State.CANCELLED -> {}

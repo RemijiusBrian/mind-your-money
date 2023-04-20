@@ -7,7 +7,7 @@ import timber.log.Timber
 inline fun <T> tryOrNull(block: () -> T): T? = try {
     block()
 } catch (t: Throwable) {
-    t.printStackTrace()
+    logE(t) { "tryOrNull Error" }
     null
 }
 

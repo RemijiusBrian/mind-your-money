@@ -64,9 +64,7 @@ fun SettingsScreenContent(
             .fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Text(stringResource(SettingsScreenSpec.label))
-                },
+                title = { Text(stringResource(SettingsScreenSpec.label)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) }
             )
         },
@@ -127,10 +125,6 @@ fun SettingsScreenContent(
                     }
                 }
             )
-            BasicPreference(
-                title = R.string.pref_restore_backup
-            )
-
             // Links Section
             SectionTitle(title = R.string.links)
             BasicPreference(

@@ -8,9 +8,9 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.domain.model.MYMPreferences
-import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.core.util.orZero
 import dev.ridill.mym.settings.presentation.sign_in.SignedInUserData
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
@@ -18,8 +18,7 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 
 class PreferencesManagerImpl(
-    private val dataStore: DataStore<Preferences>,
-    private val dispatcherProvider: DispatcherProvider
+    private val dataStore: DataStore<Preferences>
 ) : PreferencesManager {
 
     override val preferences: Flow<MYMPreferences> = dataStore.data
@@ -44,7 +43,7 @@ class PreferencesManagerImpl(
         }
 
     override suspend fun updateAppTheme(theme: AppTheme) {
-        withContext(dispatcherProvider.io) {
+        withContext(Dispatchers.IO) {
             dataStore.edit { preferences ->
                 preferences[Keys.APP_THEME] = theme.name
             }
@@ -52,7 +51,7 @@ class PreferencesManagerImpl(
     }
 
     override suspend fun updateMonthlyLimit(limit: Long) {
-        withContext(dispatcherProvider.io) {
+        withContext(Dispatchers.IO) {
             dataStore.edit { preferences ->
                 preferences[Keys.MONTHLY_LIMIT] = limit
             }
@@ -60,7 +59,7 @@ class PreferencesManagerImpl(
     }
 
     override suspend fun updateGoogleUserData(userData: SignedInUserData) {
-        withContext(dispatcherProvider.io) {
+        withContext(Dispatchers.IO) {
             dataStore.edit { preferences ->
                 preferences[Keys.USER_NAME] = userData.name
                 preferences[Keys.USER_EMAIL] = userData.email

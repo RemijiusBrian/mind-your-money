@@ -6,10 +6,12 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import dev.ridill.mym.BuildConfig
 import dev.ridill.mym.settings.data.remote.GDriveApi
 import dev.ridill.mym.settings.domain.back_up.BackupManager
 import dev.ridill.mym.settings.domain.back_up.BackupNotificationManager
 import dev.ridill.mym.settings.domain.back_up.BackupService
+import dev.ridill.mym.settings.domain.back_up.GDriveService
 import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -25,7 +27,7 @@ object SettingsModule {
 
     @Provides
     fun provideGDriveApi(): GDriveApi = Retrofit.Builder()
-        .baseUrl("https://www.googleapis.com/")
+        .baseUrl(BuildConfig.GOOGLE_APIS_BASE_URL)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(GDriveApi::class.java)
@@ -44,4 +46,10 @@ object SettingsModule {
     fun provideBackupNotificationManager(
         @ApplicationContext context: Context
     ): BackupNotificationManager = BackupNotificationManager(context)
+
+    @Provides
+    fun provideGDriveService(
+        @ApplicationContext context: Context,
+        api: GDriveApi
+    ): GDriveService = GDriveService(context, api)
 }

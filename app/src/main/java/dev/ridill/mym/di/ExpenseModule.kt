@@ -5,7 +5,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.ridill.mym.core.data.db.MYMDatabase
-import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.expenses.data.local.ExpenseDao
 import dev.ridill.mym.expenses.data.local.TagsDao
 import dev.ridill.mym.expenses.data.repository.AllExpensesRepositoryImpl
@@ -27,15 +26,13 @@ object ExpenseModule {
 
     @Provides
     fun provideExpenseRepository(
-        dao: ExpenseDao,
-        dispatcherProvider: DispatcherProvider
-    ): ExpenseRepository = ExpenseRepositoryImpl(dao, dispatcherProvider)
+        dao: ExpenseDao
+    ): ExpenseRepository = ExpenseRepositoryImpl(dao)
 
     @Provides
     fun provideTagsRepository(
-        dao: TagsDao,
-        dispatcherProvider: DispatcherProvider
-    ): TagsRepository = TagsRepositoryImpl(dao, dispatcherProvider)
+        dao: TagsDao
+    ): TagsRepository = TagsRepositoryImpl(dao)
 
     @Provides
     fun provideAllExpensesRepository(

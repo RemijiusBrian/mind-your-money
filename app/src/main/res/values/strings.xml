@@ -19,6 +19,8 @@
     <string name="error_invalid_description">Please enter a valid description</string>
     <string name="error_invalid_tag_name">Please enter a valid tag name</string>
     <string name="error_google_account_linking_failed">Failed to link google Account</string>
+    <string name="error_backup_creation_failed">Failed to create backup</string>
+    <string name="error_google_account_access_failed">Could not access your google Account</string>
     <string name="error_backup_failed">Failed to complete backup</string>
 
     <!-- Content Description -->
@@ -82,7 +84,6 @@
     <string name="pref_title_backup">Backup</string>
     <string name="pref_google_account">Google Account</string>
     <string name="pref_backup_now">Backup Now</string>
-    <string name="pref_restore_backup">Restore Backup</string>
 
     <!-- Dialog Messages -->
     <string name="dialog_delete_expense_title">Delete Expense?</string>
@@ -97,7 +98,7 @@
     <string name="dialog_discard_changes_message">You appear to have some unsaved changes. Do you want to discard the changes made?</string>
 
     <!-- Additional -->
-    <string name="google_web_client_id">495457392128-h88p1rf3dep9k0g4jm08sbgsbddt3kpc.apps.googleusercontent.com</string>
+    <string name="google_web_client_id">263230614705-mgptps798npkn7ci4mr2hv83nlp3vpea.apps.googleusercontent.com</string>
 
     <!-- Texts -->
     <string name="action_confirm">Confirm</string>
@@ -143,4 +144,5 @@
     <string name="selected_expenses_deleted">Expenses Deleted</string>
     <string name="expenses_untagged">Expenses Untagged</string>
     <string name="google_account_added">Google Account Added Successfully!</string>
+    <string name="backup_completed">Backup successfully uploaded</string>
 </resources>
