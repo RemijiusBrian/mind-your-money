@@ -17,8 +17,6 @@ import dev.ridill.mym.core.util.asStateFlow
 import dev.ridill.mym.settings.domain.back_up.BackupWorkManager
 import dev.ridill.mym.settings.domain.back_up.WORK_ERROR_RES_ID
 import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -84,21 +82,43 @@ class SettingsViewModel @Inject constructor(
     }.asStateFlow(viewModelScope, SettingsState.INITIAL)
 
     init {
-        updateSignedInUser()
-        checkActiveBackupJob()
+        collectActiveBackupWork()
     }
 
-    private fun updateSignedInUser() = viewModelScope.launch {
-        googleAuthClient.getSignedInUser()?.let {
-            savedStateHandle[SIGNED_IN_USER] = it.email
+    private fun collectActiveBackupWork() = viewModelScope.launch {
+        backupWorkManager.getActiveWorks().asFlow().collectLatest { info ->
+            isBackupInProgress.update {
+                info?.state == WorkInfo.State.RUNNING
+            }
+            when (info?.state) {
+//                    WorkInfo.State.ENQUEUED -> {}
+//                    WorkInfo.State.RUNNING -> {}
+                WorkInfo.State.SUCCEEDED -> {
+                    eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.backup_completed)))
+                }
+
+                WorkInfo.State.FAILED -> {
+                    val errorRes = info.outputData.getInt(WORK_ERROR_RES_ID, -1)
+                    if (errorRes != -1) {
+                        eventsChannel.send(
+                            SettingsEvent.ShowUiMessage(
+                                UiText.StringResource(errorRes),
+                                true
+                            )
+                        )
+                    }
+                }
+//                    WorkInfo.State.BLOCKED -> {}
+//                    WorkInfo.State.CANCELLED -> {}
+//                    null -> {}
+                else -> {}
+            }
         }
     }
 
-    private fun checkActiveBackupJob() = viewModelScope.launch {
-        backupWorkManager.getActiveWorks().firstOrNull()?.let {
-            backupWorkManager.getWorkInfoById(it.id).asFlow().collectLatest { info ->
-                isBackupInProgress.update { info.state == WorkInfo.State.RUNNING }
-            }
+    override fun getSignedInAccountDetails() {
+        googleAuthClient.getSignedInUser()?.let {
+            savedStateHandle[SIGNED_IN_USER] = it.email
         }
     }
 
@@ -176,50 +196,13 @@ class SettingsViewModel @Inject constructor(
                 eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.error_google_account_linking_failed)))
                 return@launch
             }
-            updateSignedInUser()
+            savedStateHandle[SIGNED_IN_USER] = userData.email
             eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.google_account_added)))
         }
     }
 
-    private var backupJob: Job? = null
     override fun onPerformBackupClick() {
-        backupJob?.cancel()
-        if (backupJob?.isActive == true) return
-        backupJob = viewModelScope.launch {
-            backupWorkManager.performRemoteBackup().asFlow().collectLatest { info ->
-                isBackupInProgress.update {
-                    info?.state == WorkInfo.State.RUNNING
-                }
-                when (info?.state) {
-//                    WorkInfo.State.ENQUEUED -> {}
-//                    WorkInfo.State.RUNNING -> {}
-                    WorkInfo.State.SUCCEEDED -> {
-                        eventsChannel.send(SettingsEvent.ShowUiMessage(UiText.StringResource(R.string.backup_completed)))
-                    }
-
-                    WorkInfo.State.FAILED -> {
-                        val errorRes = info.outputData.getInt(WORK_ERROR_RES_ID, -1)
-                        if (errorRes != -1) {
-                            eventsChannel.send(
-                                SettingsEvent.ShowUiMessage(
-                                    UiText.StringResource(errorRes),
-                                    true
-                                )
-                            )
-                        }
-                    }
-//                    WorkInfo.State.BLOCKED -> {}
-//                    WorkInfo.State.CANCELLED -> {}
-//                    null -> {}
-                    else -> {}
-                }
-
-                if (info?.state == WorkInfo.State.SUCCEEDED
-                    || info?.state == WorkInfo.State.CANCELLED
-                    || info?.state == WorkInfo.State.FAILED
-                ) this.cancel()
-            }
-        }
+        backupWorkManager.startBackupWork()
     }
 
     sealed class SettingsEvent {
