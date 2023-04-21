@@ -1,6 +1,7 @@
 package dev.ridill.mym.settings.presentation.settings
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +41,7 @@ import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.navigation.screenSpecs.SettingsScreenSpec
 import dev.ridill.mym.core.ui.components.BackArrowButton
 import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.OnLifecycleStartEffect
 import dev.ridill.mym.core.ui.components.PermissionRationaleDialog
 import dev.ridill.mym.core.ui.components.RadioButtonWithLabel
 import dev.ridill.mym.core.ui.components.SnackbarController
@@ -59,6 +61,8 @@ fun SettingsScreenContent(
     navigateUp: () -> Unit,
     navigateToNotificationSettings: () -> Unit
 ) {
+    OnLifecycleStartEffect(onStart = actions::getSignedInAccountDetails)
+
     MYMScaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -112,19 +116,22 @@ fun SettingsScreenContent(
                 icon = ImageVector.vectorResource(R.drawable.ic_google),
                 onClick = actions::onGoogleAccountSelectionClick
             )
-            BasicPreference(
-                title = R.string.pref_backup_now,
-                icon = Icons.Default.CloudUpload,
-                onClick = actions::onPerformBackupClick.takeIf { !state.isBackupInProgress },
-                secondaryContent = {
-                    if (state.isBackupInProgress) {
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        )
+            AnimatedVisibility(!state.loggedInUserEmail.isNullOrEmpty()) {
+                BasicPreference(
+                    title = R.string.pref_backup_now,
+                    icon = Icons.Default.CloudUpload,
+                    onClick = actions::onPerformBackupClick.takeIf { !state.isBackupInProgress },
+                    secondaryContent = {
+                        if (state.isBackupInProgress) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
+
             // Links Section
             SectionTitle(title = R.string.links)
             BasicPreference(

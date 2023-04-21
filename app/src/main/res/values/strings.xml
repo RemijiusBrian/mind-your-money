@@ -145,4 +145,5 @@
     <string name="expenses_untagged">Expenses Untagged</string>
     <string name="google_account_added">Google Account Added Successfully!</string>
     <string name="backup_completed">Backup successfully uploaded</string>
+    <string name="greeting_with_time_of_day">Good %s,</string>
 </resources>

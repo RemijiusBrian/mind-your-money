@@ -7,34 +7,77 @@ import androidx.compose.animation.core.TargetBasedAnimation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.ridill.mym.R
 import dev.ridill.mym.core.navigation.screenSpecs.BottomBarSpec
 import dev.ridill.mym.core.navigation.screenSpecs.DashboardScreenSpec
-import dev.ridill.mym.core.ui.components.*
-import dev.ridill.mym.core.ui.theme.*
+import dev.ridill.mym.core.ui.components.ExpenseCard
+import dev.ridill.mym.core.ui.components.HorizontalSpacer
+import dev.ridill.mym.core.ui.components.LabelText
+import dev.ridill.mym.core.ui.components.ListEmptyIndicator
+import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.OnLifecycleStartEffect
+import dev.ridill.mym.core.ui.components.SnackbarController
+import dev.ridill.mym.core.ui.components.VerticalNumberSpinner
+import dev.ridill.mym.core.ui.components.VerticalSpacer
+import dev.ridill.mym.core.ui.components.rememberSnackbarController
+import dev.ridill.mym.core.ui.theme.ContentAlpha
+import dev.ridill.mym.core.ui.theme.CornerRadiusMedium
+import dev.ridill.mym.core.ui.theme.ElevationLevel1
+import dev.ridill.mym.core.ui.theme.MYMTheme
+import dev.ridill.mym.core.ui.theme.SpacingListEnd
+import dev.ridill.mym.core.ui.theme.SpacingMedium
+import dev.ridill.mym.core.ui.theme.SpacingSmall
+import dev.ridill.mym.core.ui.theme.SpacingXSmall
+import dev.ridill.mym.core.ui.theme.defaultScreenPadding
+import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.One
 import dev.ridill.mym.core.util.Zero
@@ -42,48 +85,25 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToLong
 
 @Composable
-fun DashboardScreen(
-    viewModel: DashboardViewModel,
-    navigateToExpenseDetails: (Long?) -> Unit,
-    navigateToBottomBarSpec: (BottomBarSpec) -> Unit
-) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    val snackbarController = rememberSnackbarController()
-    val context = LocalContext.current
-
-    LaunchedEffect(snackbarController, context, viewModel) {
-        viewModel.events.collect { event ->
-            when (event) {
-                is DashboardViewModel.DashboardEvents.ShowUiMessage -> {
-                    snackbarController.showSnackbar(event.uiText.asString(context))
-                }
-            }
-        }
-    }
-
-    ScreenContent(
-        snackbarController = snackbarController,
-        state = state,
-        onAddFabClick = { navigateToExpenseDetails(null) },
-        onExpenseClick = navigateToExpenseDetails,
-        onBottomBarActionClick = navigateToBottomBarSpec
-    )
-}
-
-@Composable
-private fun ScreenContent(
+fun DashboardScreenContent(
     snackbarController: SnackbarController,
     state: DashboardState,
     onAddFabClick: () -> Unit,
     onExpenseClick: (Long) -> Unit,
-    onBottomBarActionClick: (BottomBarSpec) -> Unit
+    onBottomBarActionClick: (BottomBarSpec) -> Unit,
+    onLifecycleStart: () -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     val showScrollUpButton by remember {
         derivedStateOf { lazyListState.firstVisibleItemIndex > 3 }
     }
     val coroutineScope = rememberCoroutineScope()
+
+    val timeOfDay = remember { mutableStateOf("") }
+    OnLifecycleStartEffect {
+        timeOfDay.value = DateUtil.currentDateTime().format(DateUtil.Formatters.partOfDay)
+        onLifecycleStart()
+    }
 
     MYMScaffold(
         topBar = {
@@ -120,8 +140,16 @@ private fun ScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(defaultScreenPadding())
+                .padding(defaultScreenPadding(bottom = Dp.Zero)),
+            verticalArrangement = Arrangement.spacedBy(SpacingMedium)
         ) {
+            if (!state.username.isNullOrEmpty()) {
+                Greeting(
+                    timeOfDayProvider = { timeOfDay.value },
+                    username = state.username
+                )
+            }
+
             ExpenditureOverview(
                 isLimitSet = state.isMonthlyLimitSet,
                 monthlyLimit = state.monthlyLimit,
@@ -129,9 +157,7 @@ private fun ScreenContent(
                 balance = state.balanceFromLimit,
                 balancePercentOfLimit = state.balancePercent
             )
-            VerticalSpacer(spacing = SpacingMedium)
             LabelText(labelRes = R.string.expenses)
-            VerticalSpacer(spacing = SpacingMedium)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -145,7 +171,10 @@ private fun ScreenContent(
                     state = lazyListState,
                     verticalArrangement = Arrangement.spacedBy(SpacingSmall),
                     modifier = Modifier
-                        .matchParentSize()
+                        .matchParentSize(),
+                    contentPadding = PaddingValues(
+                        bottom = SpacingListEnd
+                    )
                 ) {
                     items(items = state.expenses, key = { it.id }) { expense ->
                         ExpenseCard(
@@ -184,6 +213,28 @@ private fun ScreenContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun Greeting(
+    timeOfDayProvider: () -> String,
+    username: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Text(
+            text = stringResource(R.string.greeting_with_time_of_day, timeOfDayProvider()),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+            text = username,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.tertiary
+        )
     }
 }
 
@@ -348,12 +399,13 @@ private fun BalanceCard(
 @Composable
 private fun PreviewScreenContent() {
     MYMTheme {
-        ScreenContent(
+        DashboardScreenContent(
             state = DashboardState(),
             onAddFabClick = {},
             onExpenseClick = {},
             onBottomBarActionClick = {},
-            snackbarController = rememberSnackbarController()
+            snackbarController = rememberSnackbarController(),
+            onLifecycleStart = {}
         )
     }
 }

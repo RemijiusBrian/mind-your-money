@@ -9,5 +9,6 @@ data class DashboardState(
     val monthlyLimit: Long = Long.Zero,
     val balanceFromLimit: Double = Double.Zero,
     val balancePercent: Float = Float.Zero,
-    val expenses: List<ExpenseListItem> = emptyList()
+    val expenses: List<ExpenseListItem> = emptyList(),
+    val username: String? = null
 )

@@ -16,16 +16,20 @@ import dev.ridill.mym.dashboard.model.repository.DashboardRepository
 import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_ADDED
 import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_DELETED
 import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_UPDATED
+import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
     repo: DashboardRepository,
-    preferencesManager: PreferencesManager
+    preferencesManager: PreferencesManager,
+    private val authClient: GoogleAuthClient
 ) : ViewModel() {
 
     private val expenditure = repo.getExpenditureForCurrentMonth()
@@ -37,15 +41,19 @@ class DashboardViewModel @Inject constructor(
 
     private val expenses = repo.getExpensesForCurrentMonth()
 
+    private val username = MutableStateFlow<String?>(null)
+
     val state = combineTuple(
         expenditure,
         monthlyLimit,
         balanceFromLimit,
-        expenses
+        expenses,
+        username
     ).map { (expenditure,
                 monthlyLimit,
                 balanceFromLimit,
-                expenses
+                expenses,
+                username
             ) ->
         DashboardState(
             expenditure = expenditure,
@@ -54,12 +62,19 @@ class DashboardViewModel @Inject constructor(
             balanceFromLimit = balanceFromLimit,
             balancePercent = (balanceFromLimit / monthlyLimit)
                 .coerceIn(Double.Zero, Double.One).toFloat().ifNaN { Float.Zero },
-            expenses = expenses
+            expenses = expenses,
+            username = username
         )
     }.asStateFlow(viewModelScope, DashboardState())
 
     private val eventsChannel = Channel<DashboardEvents>()
     val events get() = eventsChannel.receiveAsFlow()
+
+    fun getSignedInUserDetails() {
+        username.update {
+            authClient.getSignedInUser()?.name
+        }
+    }
 
     fun onExpenseDetailsActionResult(result: String) = viewModelScope.launch {
         when (result) {

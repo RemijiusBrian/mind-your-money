@@ -3,6 +3,8 @@ package dev.ridill.mym.settings.presentation.settings
 import dev.ridill.mym.core.domain.model.AppTheme
 
 interface SettingsActions {
+    fun getSignedInAccountDetails()
+
     fun onThemePreferenceClick()
     fun onAppThemeSelectionDismiss()
     fun onAppThemeSelectionConfirm(theme: AppTheme)

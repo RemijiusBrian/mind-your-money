@@ -24,13 +24,13 @@ object DateUtil {
 
     object Formatters {
         private val ordinalMap: Map<Long, String> = buildMap {
-            put(1L, "1st");
-            put(2L, "2nd");
-            put(3L, "3rd");
-            put(21L, "21st");
-            put(22L, "22nd");
-            put(23L, "23rd");
-            put(31L, "31st");
+            put(1L, "1st")
+            put(2L, "2nd")
+            put(3L, "3rd")
+            put(21L, "21st")
+            put(22L, "22nd")
+            put(23L, "23rd")
+            put(31L, "31st")
             repeat(31) {
                 val day = it + 1L
                 putIfAbsent(day, "${day}th")
@@ -41,6 +41,22 @@ object DateUtil {
         val dayDetails: DateTimeFormatter = DateTimeFormatterBuilder()
             .appendPattern("EEE, ")
             .appendText(ChronoField.DAY_OF_MONTH, ordinalMap)
+            .toFormatter()
+
+        private val partOfDayMap: Map<Long, String> = buildMap {
+            (0L..11L).forEach {
+                put(it, "Morning")
+            }
+            put(12L, "Noon")
+            (13L..15L).forEach {
+                put(it, "Afternoon")
+            }
+            (14L..23L).forEach {
+                put(it, "Evening")
+            }
+        }
+        val partOfDay: DateTimeFormatter = DateTimeFormatterBuilder()
+            .appendText(ChronoField.HOUR_OF_DAY, partOfDayMap)
             .toFormatter()
     }
 }
