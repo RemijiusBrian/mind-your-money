@@ -12,7 +12,7 @@ import androidx.work.WorkQuery
 import androidx.work.await
 import java.util.UUID
 
-class BackupManager(
+class BackupWorkManager(
     context: Context
 ) {
     private val workManager = WorkManager.getInstance(context)
@@ -34,10 +34,6 @@ class BackupManager(
             .enqueue()
 
         return workManager.getWorkInfoByIdLiveData(workRequest.id)
-    }
-
-    fun cancelOnGoingBackupWork() {
-        workManager.cancelUniqueWork(BACKUP_WORK_NAME)
     }
 
     fun getWorkInfoById(id: UUID): LiveData<WorkInfo> =

@@ -3,6 +3,7 @@ package dev.ridill.mym.core.util
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
+import com.google.gson.Gson
 import dev.ridill.mym.core.domain.model.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -34,4 +35,12 @@ fun Context.launchUrl(url: String, onError: (UiText?) -> Unit) {
     } catch (t: Throwable) {
         onError(t.message?.let { UiText.DynamicText(it) })
     }
+}
+
+fun <T> T.toJson(): String? = tryOrNull {
+    Gson().toJson(this)
+}
+
+inline fun <reified T> String.fromJson(): T? = tryOrNull {
+    Gson().fromJson(this, T::class.java)
 }

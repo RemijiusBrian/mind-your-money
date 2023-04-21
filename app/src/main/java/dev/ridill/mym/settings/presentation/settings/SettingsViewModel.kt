@@ -14,7 +14,7 @@ import dev.ridill.mym.core.data.preferences.PreferencesManager
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.domain.model.UiText
 import dev.ridill.mym.core.util.asStateFlow
-import dev.ridill.mym.settings.domain.back_up.BackupManager
+import dev.ridill.mym.settings.domain.back_up.BackupWorkManager
 import dev.ridill.mym.settings.domain.back_up.WORK_ERROR_RES_ID
 import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
 import kotlinx.coroutines.Job
@@ -34,7 +34,7 @@ class SettingsViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val preferencesManager: PreferencesManager,
     private val googleAuthClient: GoogleAuthClient,
-    private val backupManager: BackupManager
+    private val backupWorkManager: BackupWorkManager
 ) : ViewModel(), SettingsActions {
 
     private val preferences = preferencesManager.preferences
@@ -95,8 +95,8 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun checkActiveBackupJob() = viewModelScope.launch {
-        backupManager.getActiveWorks().firstOrNull()?.let {
-            backupManager.getWorkInfoById(it.id).asFlow().collectLatest { info ->
+        backupWorkManager.getActiveWorks().firstOrNull()?.let {
+            backupWorkManager.getWorkInfoById(it.id).asFlow().collectLatest { info ->
                 isBackupInProgress.update { info.state == WorkInfo.State.RUNNING }
             }
         }
@@ -186,7 +186,7 @@ class SettingsViewModel @Inject constructor(
         backupJob?.cancel()
         if (backupJob?.isActive == true) return
         backupJob = viewModelScope.launch {
-            backupManager.performRemoteBackup().asFlow().collectLatest { info ->
+            backupWorkManager.performRemoteBackup().asFlow().collectLatest { info ->
                 isBackupInProgress.update {
                     info?.state == WorkInfo.State.RUNNING
                 }
