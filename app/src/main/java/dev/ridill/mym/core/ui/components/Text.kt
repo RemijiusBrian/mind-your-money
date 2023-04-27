@@ -16,7 +16,7 @@ fun LabelText(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.labelLarge,
     fontWeight: FontWeight = FontWeight.Medium,
-    color: Color = MaterialTheme.colorScheme.tertiary
+    color: Color = MaterialTheme.colorScheme.primary
 ) {
     Text(
         text = stringResource(labelRes),
