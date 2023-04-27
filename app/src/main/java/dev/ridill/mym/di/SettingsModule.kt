@@ -7,12 +7,13 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.ridill.mym.BuildConfig
+import dev.ridill.mym.core.data.db.MYMDatabase
 import dev.ridill.mym.settings.data.remote.GDriveApi
 import dev.ridill.mym.settings.domain.back_up.BackupNotificationManager
 import dev.ridill.mym.settings.domain.back_up.BackupService
 import dev.ridill.mym.settings.domain.back_up.BackupWorkManager
 import dev.ridill.mym.settings.domain.back_up.GDriveService
-import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
+import dev.ridill.mym.settings.presentation.backup.GoogleAuthClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -36,8 +37,14 @@ object SettingsModule {
     fun provideBackupService(
         @ApplicationContext context: Context,
         gDriveService: GDriveService,
-        googleAuthClient: GoogleAuthClient
-    ): BackupService = BackupService(context, gDriveService, googleAuthClient)
+        googleAuthClient: GoogleAuthClient,
+        database: MYMDatabase
+    ): BackupService = BackupService(
+        context = context,
+        gDriveService = gDriveService,
+        authClient = googleAuthClient,
+        db = database
+    )
 
     @Provides
     fun provideBackupWorkManager(

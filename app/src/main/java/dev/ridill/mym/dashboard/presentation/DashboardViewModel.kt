@@ -16,7 +16,7 @@ import dev.ridill.mym.dashboard.model.repository.DashboardRepository
 import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_ADDED
 import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_DELETED
 import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_UPDATED
-import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
+import dev.ridill.mym.settings.presentation.backup.GoogleAuthClient
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map

@@ -8,6 +8,7 @@
     <string name="destination_payment_plans">Payment Plans</string>
     <string name="destination_add_edit_payment_plan">Add/Edit Payment Plan</string>
     <string name="destination_settings">Settings</string>
+    <string name="destination_backup_settings">Backup</string>
 
     <!-- Permission Rationals -->
     <string name="permission_receive_sms_rationale">needs permission to view your SMS messages so that it can try to add expenses automatically.</string>
@@ -55,6 +56,7 @@
     <!-- Notifications -->
     <string name="notif_channel_backup">Backup</string>
     <string name="notif_backup_in_progress">Backup In Progress</string>
+    <string name="notif_backup_restoration_in_progress">Backup Restoration In Progress</string>
 
     <string name="notification_channel_group_payment_plans">Payment Plans</string>
     <string name="notification_channel_group_bills_desc">All \'Payment Plans\' notifications</string>
@@ -81,9 +83,9 @@
     <string name="pref_source_code">Source Code</string>
     <string name="pref_title_info">Info</string>
     <string name="pref_app_version">App Version</string>
-    <string name="pref_title_backup">Backup</string>
+    <string name="pref_backup">Backup</string>
+    <string name="pref_title_backup_account">Google Account</string>
     <string name="pref_google_account">Google Account</string>
-    <string name="pref_backup_now">Backup Now</string>
 
     <!-- Dialog Messages -->
     <string name="dialog_delete_expense_title">Delete Expense?</string>
@@ -146,4 +148,7 @@
     <string name="google_account_added">Google Account Added Successfully!</string>
     <string name="backup_completed">Backup successfully uploaded</string>
     <string name="greeting_with_time_of_day">Good %s,</string>
+    <string name="backup_message">MYM uses Google Drive Services to backup app data.\n*You might be asked to provide authorization in order to upload backup data to your google drive.</string>
+    <string name="backup_now">Backup Now</string>
+    <string name="restore_last_backup">Restore last backup</string>
 </resources>

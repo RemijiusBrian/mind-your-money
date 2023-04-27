@@ -38,7 +38,8 @@ class GDriveService(
     suspend fun uploadFile(
         metadataDto: BackupFileMetadataDto,
         file: File,
-        authToken: String
+        authToken: String,
+        uploadType: String,
     ): GDriveFile = withContext(Dispatchers.IO) {
         val metadataBody = metadataDto.toJson()?.let { json ->
             RequestBody.create(
@@ -53,7 +54,7 @@ class GDriveService(
 
         api.uploadBackupFileToDrive(
             authToken = authToken,
-            uploadType = UPLOAD_TYPE_MULTIPART,
+            uploadType = uploadType,
             backupFile = requestBody,
             metadataDto = metadataBody
         )
@@ -61,14 +62,15 @@ class GDriveService(
 
     suspend fun getFilesList(
         authToken: String,
-        orderBy: String = DEFAULT_ORDER_BY,
-        spaces: String = DEFAULT_BACKUP_SPACES
-    ): List<GDriveFile> =
-        api.getFilesList(
-            userToken = authToken,
-            orderBy = orderBy,
-            spaces = spaces
-        ).gDriveFiles
+        orderBy: String,
+        spaces: String,
+        query: String
+    ): List<GDriveFile> = api.getFilesList(
+        userToken = authToken,
+        orderBy = orderBy,
+        spaces = spaces,
+        query = query
+    ).gDriveFiles
 
     suspend fun downloadFile(
         authToken: String,
@@ -78,7 +80,3 @@ class GDriveService(
         fileId = id
     )
 }
-
-private const val UPLOAD_TYPE_MULTIPART = "multipart"
-private const val DEFAULT_ORDER_BY = "recency desc"
-private const val DEFAULT_BACKUP_SPACES = "appDataFolder"

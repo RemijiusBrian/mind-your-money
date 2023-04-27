@@ -27,7 +27,8 @@ interface GDriveApi {
     suspend fun getFilesList(
         @Header("Authorization") userToken: String,
         @Query("orderBy") orderBy: String,
-        @Query("spaces") spaces: String
+        @Query("spaces") spaces: String,
+        @Query("q") query: String
     ): GDriveFilesListResponse
 
     @GET("drive/v3/files/{fileId}?alt=media")

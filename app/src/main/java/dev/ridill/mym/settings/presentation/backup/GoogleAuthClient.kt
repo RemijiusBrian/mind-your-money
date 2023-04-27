@@ -1,13 +1,15 @@
-package dev.ridill.mym.settings.presentation.sign_in
+package dev.ridill.mym.settings.presentation.backup
 
 import android.content.Context
 import android.content.Intent
+import androidx.activity.result.ActivityResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import dev.ridill.mym.BuildConfig
 import dev.ridill.mym.core.util.tryOrNull
 import dev.ridill.mym.settings.domain.back_up.GDriveService
+import dev.ridill.mym.settings.domain.model.SignedInUserData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -22,8 +24,11 @@ class GoogleAuthClient(
         return signInClient.signInIntent
     }
 
-    suspend fun signInWithIntent(intent: Intent): SignedInUserData? = withContext(Dispatchers.IO) {
+    suspend fun signInWithResult(
+        result: ActivityResult
+    ): SignedInUserData? = withContext(Dispatchers.IO) {
         tryOrNull {
+            val intent = result.data ?: throw SignInFailedThrowable()
             val account = GoogleSignIn.getSignedInAccountFromIntent(intent).await()
                 ?: throw SignInFailedThrowable()
 

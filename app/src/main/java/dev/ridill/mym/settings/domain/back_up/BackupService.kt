@@ -7,7 +7,8 @@ import dev.ridill.mym.core.util.logD
 import dev.ridill.mym.core.util.logI
 import dev.ridill.mym.core.util.tryOrNull
 import dev.ridill.mym.settings.data.remote.dto.BackupFileMetadataDto
-import dev.ridill.mym.settings.presentation.sign_in.GoogleAuthClient
+import dev.ridill.mym.settings.data.remote.dto.GDriveFile
+import dev.ridill.mym.settings.presentation.backup.GoogleAuthClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -16,18 +17,32 @@ import java.time.ZoneId
 class BackupService(
     private val context: Context,
     private val gDriveService: GDriveService,
-    private val authClient: GoogleAuthClient
+    private val authClient: GoogleAuthClient,
+    private val db: MYMDatabase
 ) {
+    @Throws(BackupCreationThrowable::class)
     private suspend fun getBackupFile(): File? = withContext(Dispatchers.IO) {
         tryOrNull {
             val backupFile = File(
                 context.cacheDir,
                 "MYM-backup-temp.backup"
             )
-            val dbFile = context.getDatabasePath(MYMDatabase.NAME)
-            dbFile.inputStream()
+            val dbFilePath = db.openHelper.readableDatabase.path ?: throw BackupCreationThrowable()
+//                context.getDatabasePath(MYMDatabase.NAME)
+            logD { "DB File Path - $dbFilePath" }
+
+            if (backupFile.exists()) {
+                backupFile.delete()
+                backupFile.createNewFile()
+            }
+
+            File(dbFilePath).inputStream()
                 .copyTo(backupFile.outputStream())
 
+            backupFile.inputStream().use {
+                val data = it.readBytes()
+                logD { "DB Content - ${data.contentToString()}" }
+            }
             backupFile
         }
     }
@@ -47,12 +62,12 @@ class BackupService(
         BackupThrowable::class,
         Throwable::class
     )
-    suspend fun uploadBackup() = withContext(Dispatchers.IO) {
+    suspend fun uploadBackup(): GDriveFile = withContext(Dispatchers.IO) {
         val backupFile = getBackupFile() ?: throw BackupCreationThrowable()
         val authToken = getAuthToken()
 
         val epochSecond = DateUtil.currentDateTime().atZone(ZoneId.systemDefault()).toEpochSecond()
-        val fileName = "MYM-${epochSecond}.backup"
+        val fileName = "$BACKUP_FILE_PREFIX${epochSecond}.backup"
         val metadata = BackupFileMetadataDto(
             name = fileName,
             mimeType = MimeType.OCTET_STREAM,
@@ -62,26 +77,45 @@ class BackupService(
         val result = gDriveService.uploadFile(
             authToken = authToken,
             metadataDto = metadata,
-            file = backupFile
+            file = backupFile,
+            uploadType = UPLOAD_TYPE_MULTIPART
         )
         logI { "Uploaded - ${result.name}" }
+        result
     }
 
     @Throws(AccountAccessThrowable::class, NoBackupFoundThrowable::class)
-    suspend fun downloadLatestBackupFile() {
+    suspend fun restoreLatestBackup() = withContext(Dispatchers.IO) {
         val token = getAuthToken()
-        val filesList = gDriveService.getFilesList(
-            authToken = token
-        )
-        logD { "Files List - $filesList" }
-        val latestBackup = filesList.firstOrNull() ?: throw NoBackupFoundThrowable()
+        val latestBackup = getLatestBackup(token)
         logD { "Latest Backup - ${latestBackup.name}" }
-        val backupFile = gDriveService.downloadFile(
+        val response = gDriveService.downloadFile(
             authToken = token,
             id = latestBackup.id
         )
-        val bytes = backupFile.bytes()
-        logD { "Bytes - ${bytes.decodeToString()}" }
+        db.close()
+        val dbPath = db.openHelper.writableDatabase.path ?: throw RestoreFailureThrowable()
+//        db.openHelper.setWriteAheadLoggingEnabled(false)
+        response.byteStream().use { inputStream ->
+            logD { "Downloaded Content - ${inputStream.readBytes().contentToString()}" }
+            File(dbPath).outputStream().use { outputStream ->
+                outputStream.channel.truncate(0L)
+                inputStream.copyTo(outputStream)
+            }
+        }
+        logI { "Data Copied" }
+    }
+
+    @kotlin.jvm.Throws(NoBackupFoundThrowable::class)
+    private suspend fun getLatestBackup(authToken: String): GDriveFile {
+        val filesList = gDriveService.getFilesList(
+            authToken = authToken,
+            orderBy = ORDER_BY_RECENCY_DESC,
+            spaces = GDriveService.APP_DATA_FOLDER,
+            query = "name contains \'${BACKUP_FILE_PREFIX}\'"
+        )
+        logD { "Files List - $filesList" }
+        return filesList.firstOrNull() ?: throw NoBackupFoundThrowable()
     }
 
     object MimeType {
@@ -91,7 +125,12 @@ class BackupService(
     }
 }
 
+private const val UPLOAD_TYPE_MULTIPART = "multipart"
+private const val ORDER_BY_RECENCY_DESC = "recency desc"
+private const val BACKUP_FILE_PREFIX = "MYM-"
+
 class BackupCreationThrowable : Throwable("Failed to create backup")
 class AccountAccessThrowable : Throwable("Could not access your google Account")
 class BackupThrowable : Throwable("Backup Failed")
 class NoBackupFoundThrowable : Throwable("No Backup File Found")
+class RestoreFailureThrowable : Throwable("Restoration Failed")

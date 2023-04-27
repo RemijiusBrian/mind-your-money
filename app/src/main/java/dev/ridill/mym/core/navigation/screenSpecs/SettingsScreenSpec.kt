@@ -1,11 +1,7 @@
 package dev.ridill.mym.core.navigation.screenSpecs
 
-import android.app.Activity
 import android.content.Intent
 import android.provider.Settings
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
@@ -19,7 +15,6 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
-import dev.ridill.mym.core.util.logD
 import dev.ridill.mym.settings.presentation.settings.SettingsScreenContent
 import dev.ridill.mym.settings.presentation.settings.SettingsViewModel
 
@@ -38,36 +33,11 @@ object SettingsScreenSpec : BottomBarSpec {
         val snackbarController = rememberSnackbarController()
         val context = LocalContext.current
 
-        val googleAccountSelectionLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult(),
-            onResult = {
-                logD { "Activity Result - ${it.resultCode}" }
-                logD { "Activity Result - ${it.data?.extras.toString()}" }
-                if (it.resultCode == Activity.RESULT_OK) {
-                    viewModel.onGoogleAccountSelected(it)
-                } else {
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.error_google_account_linking_failed),
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        )
-
         LaunchedEffect(snackbarController, context, viewModel) {
             viewModel.events.collect { event ->
                 when (event) {
-                    SettingsViewModel.SettingsEvent.LaunchBackupExportPathSelector -> {
-
-                    }
-
-                    is SettingsViewModel.SettingsEvent.LaunchGoogleAccountSelection -> {
-                        googleAccountSelectionLauncher.launch(event.intent)
-                    }
-
                     SettingsViewModel.SettingsEvent.RequestSmsPermission -> {
-
+                        // TODO: Request SMS Permission
                     }
 
                     is SettingsViewModel.SettingsEvent.ShowUiMessage -> {
@@ -91,6 +61,9 @@ object SettingsScreenSpec : BottomBarSpec {
                     putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
                 }
                 context.startActivity(intent)
+            },
+            navigateToBackupSettings = {
+                navController.navigate(BackupSettingsScreenSpec.route)
             }
         )
     }

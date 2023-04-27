@@ -16,25 +16,18 @@ import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
 @HiltWorker
-class GDriveBackupWorker @AssistedInject constructor(
-    @Assisted context: Context,
+class BackupRestoreWorker @AssistedInject constructor(
+    @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
     private val backupService: BackupService,
     private val notificationManager: BackupNotificationManager
-) : CoroutineWorker(context, params) {
+) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+        startForegroundService()
         try {
-            startForegroundService()
-            logI { "Starting Backup Work" }
-            backupService.uploadBackup()
+            logI { "Starting Restore Job" }
+            backupService.restoreLatestBackup()
             Result.success()
-        } catch (t: BackupCreationThrowable) {
-            logE(t) { "Backup Error" }
-            Result.failure(
-                workDataOf(
-                    WORK_ERROR_RES_ID to R.string.error_backup_creation_failed
-                )
-            )
         } catch (t: AccountAccessThrowable) {
             logE(t) { "Backup Error" }
             Result.failure(
@@ -63,10 +56,8 @@ class GDriveBackupWorker @AssistedInject constructor(
         setForeground(
             ForegroundInfo(
                 Random.nextInt(),
-                notificationManager.buildForegroundNotification()
+                notificationManager.buildForegroundNotification(R.string.notif_backup_restoration_in_progress)
             )
         )
     }
 }
-
-const val WORK_ERROR_RES_ID = "WORK_ERROR_RES_ID"

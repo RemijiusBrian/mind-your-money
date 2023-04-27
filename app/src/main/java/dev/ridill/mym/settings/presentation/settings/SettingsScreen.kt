@@ -1,7 +1,6 @@
 package dev.ridill.mym.settings.presentation.settings
 
 import android.content.Context
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,7 +10,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrightnessMedium
-import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.BrightnessMedium
 import androidx.compose.material.icons.outlined.Message
@@ -19,7 +17,6 @@ import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,7 +38,6 @@ import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.navigation.screenSpecs.SettingsScreenSpec
 import dev.ridill.mym.core.ui.components.BackArrowButton
 import dev.ridill.mym.core.ui.components.MYMScaffold
-import dev.ridill.mym.core.ui.components.OnLifecycleStartEffect
 import dev.ridill.mym.core.ui.components.PermissionRationaleDialog
 import dev.ridill.mym.core.ui.components.RadioButtonWithLabel
 import dev.ridill.mym.core.ui.components.SnackbarController
@@ -59,10 +55,9 @@ fun SettingsScreenContent(
     state: SettingsState,
     actions: SettingsActions,
     navigateUp: () -> Unit,
-    navigateToNotificationSettings: () -> Unit
+    navigateToNotificationSettings: () -> Unit,
+    navigateToBackupSettings: () -> Unit
 ) {
-    OnLifecycleStartEffect(onStart = actions::getSignedInAccountDetails)
-
     MYMScaffold(
         modifier = Modifier
             .fillMaxSize(),
@@ -93,6 +88,11 @@ fun SettingsScreenContent(
                 icon = Icons.Outlined.Notifications,
                 onClick = navigateToNotificationSettings
             )
+            BasicPreference(
+                title = R.string.pref_backup,
+                icon = ImageVector.vectorResource(R.drawable.ic_backup),
+                onClick = navigateToBackupSettings
+            )
 
             // Expense Section
             SectionTitle(title = R.string.pref_title_expense)
@@ -107,30 +107,6 @@ fun SettingsScreenContent(
                 summary = stringResource(R.string.pref_summary_auto_add_expense),
                 onClick = actions::onAutoAddExpenseClick
             )
-
-            // Backup Section
-            SectionTitle(title = R.string.pref_title_backup)
-            BasicPreference(
-                title = R.string.pref_google_account,
-                summary = state.loggedInUserEmail,
-                icon = ImageVector.vectorResource(R.drawable.ic_google),
-                onClick = actions::onGoogleAccountSelectionClick
-            )
-            AnimatedVisibility(!state.loggedInUserEmail.isNullOrEmpty()) {
-                BasicPreference(
-                    title = R.string.pref_backup_now,
-                    icon = Icons.Default.CloudUpload,
-                    onClick = actions::onPerformBackupClick.takeIf { !state.isBackupInProgress },
-                    secondaryContent = {
-                        if (state.isBackupInProgress) {
-                            LinearProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                            )
-                        }
-                    }
-                )
-            }
 
             // Links Section
             SectionTitle(title = R.string.links)

@@ -1,4 +1,4 @@
-package dev.ridill.mym.settings.presentation.sign_in
+package dev.ridill.mym.settings.domain.model
 
 data class SignedInUserData(
     val name: String,
