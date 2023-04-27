@@ -21,7 +21,7 @@ object DashboardScreenSpec : ScreenSpec {
     override fun Content(navController: NavHostController, navBackStackEntry: NavBackStackEntry) {
         val viewModel: DashboardViewModel = hiltViewModel(navBackStackEntry)
 
-        // Expense Details Result
+        // Add/Edit Expense Result
         val addEditExpenseResult = navBackStackEntry
             .savedStateHandle.getLiveData<String>(EXPENSE_DETAILS_ACTION).observeAsState()
         LaunchedEffect(addEditExpenseResult) {
@@ -36,7 +36,10 @@ object DashboardScreenSpec : ScreenSpec {
                 navController.navigate(AddEditExpenseScreenSpec.routeWithArgs(expenseId))
             },
             navigateToBottomBarSpec = {
-                navController.navigate(it.route)
+                navController.navigate(it.navRoute)
+            },
+            navigateToSettingsWithAction = {
+                navController.navigate(SettingsScreenSpec.routeWithArg(it))
             }
         )
     }

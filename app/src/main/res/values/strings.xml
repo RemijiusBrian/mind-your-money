@@ -137,4 +137,5 @@
     <string name="count_selected">%s selected</string>
     <string name="selected_expenses_deleted">Expenses Deleted</string>
     <string name="expenses_untagged">Expenses Untagged</string>
+    <string name="click_to_set_limit">Click to set limit</string>
 </resources>

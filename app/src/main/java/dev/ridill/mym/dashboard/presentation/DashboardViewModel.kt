@@ -49,14 +49,13 @@ class DashboardViewModel @Inject constructor(
             ) ->
         DashboardState(
             expenditure = expenditure,
-            isMonthlyLimitSet = monthlyLimit > Long.Zero,
             monthlyLimit = monthlyLimit,
             balanceFromLimit = balanceFromLimit,
             balancePercent = (balanceFromLimit / monthlyLimit)
                 .coerceIn(Double.Zero, Double.One).toFloat().ifNaN { Float.Zero },
             expenses = expenses
         )
-    }.asStateFlow(viewModelScope, DashboardState())
+    }.asStateFlow(viewModelScope, DashboardState.INITIAL)
 
     private val eventsChannel = Channel<DashboardEvents>()
     val events get() = eventsChannel.receiveAsFlow()

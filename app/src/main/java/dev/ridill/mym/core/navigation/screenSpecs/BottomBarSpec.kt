@@ -5,9 +5,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 sealed interface BottomBarSpec : ScreenSpec {
 
     companion object {
-        val bottomBarDestinations = NavDestination.allDestinations.values
-            .filterIsInstance<BottomBarSpec>()
+        val bottomBarDestinations: List<BottomBarSpec>
+            get() = NavDestination.allDestinations.values
+                .filterIsInstance<BottomBarSpec>()
     }
+
+    val navRoute: String get() = route
 
     val icon: ImageVector
 }
