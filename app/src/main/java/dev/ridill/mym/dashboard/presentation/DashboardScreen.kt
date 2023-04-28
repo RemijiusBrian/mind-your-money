@@ -4,7 +4,11 @@ import androidx.annotation.FloatRange
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.VectorConverter
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.TargetBasedAnimation
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -18,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -36,6 +41,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -47,7 +53,10 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -147,6 +156,7 @@ fun DashboardScreenContent(
                         amountSpent = state.expenditure,
                         balance = state.balanceFromLimit,
                         balancePercentOfLimit = state.balancePercent,
+                        showBalanceLowWarning = state.showBalanceLowWarning,
                         onLimitCardClick = {
                             navigateToSettingsWithAction(ARG_QUICK_ACTION_LIMIT_UPDATE)
                         },
@@ -209,6 +219,7 @@ private fun ExpenditureOverview(
     amountSpent: Double,
     balance: Double,
     balancePercentOfLimit: Float,
+    showBalanceLowWarning: Boolean,
     onLimitCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -259,7 +270,8 @@ private fun ExpenditureOverview(
                 balanceAmount = balance,
                 balancePercentOfLimit = balancePercentOfLimit,
                 modifier = Modifier
-                    .weight(Float.One)
+                    .weight(Float.One),
+                showBalanceLowWarning = showBalanceLowWarning
             )
         }
     }
@@ -339,16 +351,15 @@ private fun ClickableOverviewStat(
 private fun BalanceCard(
     balanceAmount: Double,
     @FloatRange(0.0, 1.0) balancePercentOfLimit: Float,
+    showBalanceLowWarning: Boolean,
     modifier: Modifier = Modifier,
     cornerRadius: Dp = CornerRadiusMedium
 ) {
     val balanceSafeColor = MaterialTheme.colorScheme.secondary
-    val onBalanceSafeColor = MaterialTheme.colorScheme.onSecondary
-//        contentColorFor(balanceSafeColor)
+    val onBalanceSafeColor = contentColorFor(balanceSafeColor)
     val balanceErrorColor = MaterialTheme.colorScheme.errorContainer
-    val onBalanceErrorColor = MaterialTheme.colorScheme.onErrorContainer
-//        contentColorFor(balanceErrorColor)
-    val containerColorAnimatable = remember {
+    val onBalanceErrorColor = contentColorFor(balanceErrorColor)
+    val containerColorAnimatable = remember(balanceSafeColor, balanceErrorColor) {
         TargetBasedAnimation(
             animationSpec = tween(),
             typeConverter = Color.VectorConverter(ColorSpaces.Srgb),
@@ -357,7 +368,7 @@ private fun BalanceCard(
             initialVelocity = balanceErrorColor
         )
     }
-    val contentColorAnimatable = remember {
+    val contentColorAnimatable = remember(onBalanceSafeColor, onBalanceErrorColor) {
         TargetBasedAnimation(
             animationSpec = tween(),
             typeConverter = Color.VectorConverter(ColorSpaces.Srgb),
@@ -367,17 +378,70 @@ private fun BalanceCard(
         )
     }
 
-    OverviewStat(
-        title = R.string.balance,
+    Card(
+        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent,
             contentColor = contentColorAnimatable.getValueFromNanos(
-                (contentColorAnimatable.durationNanos * balancePercentOfLimit).roundToLong()
+                (contentColorAnimatable.durationNanos * balancePercentOfLimit.roundToLong())
             )
         ),
         modifier = modifier.drawBehind {
             val containerColor = containerColorAnimatable.getValueFromNanos(
-                (containerColorAnimatable.durationNanos * balancePercentOfLimit).roundToLong()
+                (containerColorAnimatable.durationNanos * balancePercentOfLimit.roundToLong())
+            )
+            drawRoundRect(
+                color = containerColor.copy(alpha = ContentAlpha.PERCENT_16),
+                cornerRadius = CornerRadius(cornerRadius.toPx())
+            )
+
+            drawRoundRect(
+                color = containerColor,
+                size = size.copy(
+                    width = size.width * balancePercentOfLimit
+                ),
+                cornerRadius = CornerRadius(cornerRadius.toPx())
+            )
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(SpacingSmall),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row {
+                Text(
+                    text = stringResource(R.string.balance),
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                if (showBalanceLowWarning) {
+                    HorizontalSpacer(spacing = SpacingXSmall)
+                    AnimatedWarning()
+                }
+            }
+            Spacer(Modifier.height(SpacingXSmall))
+            VerticalNumberSpinner(targetState = balanceAmount) {
+                Text(
+                    text = Formatter.currency(it),
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }
+        }
+    }
+
+    /*OverviewStat(
+        title = R.string.balance,
+        colors = CardDefaults.cardColors(
+            containerColor = Color.Transparent,
+            contentColor = contentColorAnimatable.getValueFromNanos(
+                (contentColorAnimatable.durationNanos * balancePercentOfLimit.roundToLong())
+            )
+        ),
+        modifier = modifier.drawBehind {
+            val containerColor = containerColorAnimatable.getValueFromNanos(
+                (containerColorAnimatable.durationNanos * balancePercentOfLimit.roundToLong())
             )
             drawRoundRect(
                 color = containerColor.copy(alpha = ContentAlpha.PERCENT_16),
@@ -396,8 +460,41 @@ private fun BalanceCard(
         VerticalNumberSpinner(targetState = balanceAmount) {
             Text(Formatter.currency(it))
         }
-    }
+    }*/
 }
+
+@Composable
+private fun AnimatedWarning(
+    modifier: Modifier = Modifier
+) {
+    val transition = rememberInfiniteTransition()
+    val alpha by transition.animateFloat(
+        initialValue = ContentAlpha.PERCENT_100,
+        targetValue = ContentAlpha.PERCENT_32,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = WARNING_ANIM_DURATION,
+                delayMillis = WARNING_ANIM_DELAY
+            ),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Icon(
+        imageVector = ImageVector.vectorResource(R.drawable.ic_warning),
+        contentDescription = stringResource(R.string.content_balance_low_warning),
+        tint = Color.Yellow,
+        modifier = modifier
+            .size(WarningSize)
+            .graphicsLayer {
+                this.alpha = alpha
+            }
+    )
+}
+
+private const val WARNING_ANIM_DURATION = 1000
+private const val WARNING_ANIM_DELAY = 1000
+private val WarningSize = 8.dp
 
 @Preview(showBackground = true)
 @Composable

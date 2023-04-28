@@ -12,6 +12,7 @@ interface PreferencesManager {
 
     val preferences: Flow<MYMPreferences>
 
+    suspend fun updateAppFirstLaunch(isFirst: Boolean)
     suspend fun updateAppTheme(theme: AppTheme)
     suspend fun updateMonthlyLimit(limit: Long)
 }

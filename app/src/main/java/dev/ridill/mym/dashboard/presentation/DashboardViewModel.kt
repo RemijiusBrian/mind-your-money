@@ -17,6 +17,7 @@ import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_ADDED
 import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_DELETED
 import dev.ridill.mym.expenses.presentation.add_edit_expense.EXPENSE_UPDATED
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -34,6 +35,19 @@ class DashboardViewModel @Inject constructor(
         monthlyLimit,
         expenditure
     ).map { (limit, expenditure) -> limit - expenditure }
+        .distinctUntilChanged()
+    private val balancePercent = combineTuple(
+        balanceFromLimit,
+        monthlyLimit
+    ).map { (balance, limit) ->
+        (balance / limit)
+            .coerceIn(Double.Zero, Double.One)
+            .toFloat()
+            .ifNaN { Float.Zero }
+    }.distinctUntilChanged()
+    private val showBalanceLowWarning = balancePercent.map {
+        it <= BALANCE_LOW_FLOAT
+    }.distinctUntilChanged()
 
     private val expenses = repo.getExpensesForCurrentMonth()
 
@@ -41,18 +55,23 @@ class DashboardViewModel @Inject constructor(
         expenditure,
         monthlyLimit,
         balanceFromLimit,
+        balancePercent,
+        showBalanceLowWarning,
         expenses
-    ).map { (expenditure,
+    ).map { (
+                expenditure,
                 monthlyLimit,
                 balanceFromLimit,
+                balancePercent,
+                showBalanceLowWarning,
                 expenses
             ) ->
         DashboardState(
             expenditure = expenditure,
             monthlyLimit = monthlyLimit,
             balanceFromLimit = balanceFromLimit,
-            balancePercent = (balanceFromLimit / monthlyLimit)
-                .coerceIn(Double.Zero, Double.One).toFloat().ifNaN { Float.Zero },
+            balancePercent = balancePercent,
+            showBalanceLowWarning = showBalanceLowWarning,
             expenses = expenses
         )
     }.asStateFlow(viewModelScope, DashboardState.INITIAL)
@@ -75,3 +94,5 @@ class DashboardViewModel @Inject constructor(
         data class ShowUiMessage(val uiText: UiText) : DashboardEvents()
     }
 }
+
+private const val BALANCE_LOW_FLOAT = 0.10f

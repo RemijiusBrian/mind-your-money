@@ -8,6 +8,7 @@ data class DashboardState(
     val monthlyLimit: Long = Long.Zero,
     val balanceFromLimit: Double = Double.Zero,
     val balancePercent: Float = Float.Zero,
+    val showBalanceLowWarning: Boolean = false,
     val expenses: List<ExpenseListItem> = emptyList()
 ) {
     companion object {

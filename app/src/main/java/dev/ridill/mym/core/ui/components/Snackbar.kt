@@ -4,7 +4,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material3.*
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarVisuals
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,7 +55,7 @@ fun ETSnackbar(
 ) {
     val containerColor = when (visuals) {
         is ETSnackbarVisuals.Error -> MaterialTheme.colorScheme.errorContainer
-        is ETSnackbarVisuals.Message -> MaterialTheme.colorScheme.inverseSurface
+        is ETSnackbarVisuals.Message -> MaterialTheme.colorScheme.surfaceVariant
     }
     Snackbar(
         action = visuals.actionLabel?.let { label ->
