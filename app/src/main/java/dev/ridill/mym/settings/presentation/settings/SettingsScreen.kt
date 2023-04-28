@@ -14,8 +14,19 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.BrightnessMedium
 import androidx.compose.material.icons.outlined.Message
 import androidx.compose.material.icons.outlined.Notifications
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -26,7 +37,12 @@ import dev.ridill.mym.BuildConfig
 import dev.ridill.mym.R
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.navigation.screenSpecs.SettingsScreenSpec
-import dev.ridill.mym.core.ui.components.*
+import dev.ridill.mym.core.ui.components.BackArrowButton
+import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.PermissionRationaleDialog
+import dev.ridill.mym.core.ui.components.RadioButtonWithLabel
+import dev.ridill.mym.core.ui.components.SnackbarController
+import dev.ridill.mym.core.ui.components.VerticalSpacer
 import dev.ridill.mym.core.ui.theme.SpacingMedium
 import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.launchUrl
@@ -47,9 +63,7 @@ fun SettingsScreenContent(
             .fillMaxSize(),
         topBar = {
             CenterAlignedTopAppBar(
-                title = {
-                    Text(stringResource(SettingsScreenSpec.label))
-                },
+                title = { Text(stringResource(SettingsScreenSpec.label)) },
                 navigationIcon = { BackArrowButton(onClick = navigateUp) }
             )
         },
@@ -196,24 +210,16 @@ private fun MonthlyLimitInputDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
-            TextButton(onClick = { onConfirm(input) }) {
+            Button(onClick = { onConfirm(input) }) {
                 Text(stringResource(R.string.action_confirm))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            OutlinedButton(onClick = onDismiss) {
                 Text(stringResource(R.string.action_cancel))
             }
         },
-        icon = {
-//            Icon(
-//                painter = painterResource(R.drawable.ic_piggy_bank),
-//                contentDescription = null
-//            )
-        },
-        title = {
-            Text(stringResource(R.string.enter_monthly_limit))
-        },
+        title = { Text(stringResource(R.string.enter_monthly_limit)) },
         text = {
             Column {
                 Text(text = stringResource(R.string.monthly_limit_input_message))
