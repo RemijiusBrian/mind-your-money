@@ -75,11 +75,11 @@ fun SettingsScreenContent(
             contentPadding = paddingValues
         ) {
             // General Section
-            item {
+            item(key = "Section Title General") {
                 SectionTitle(title = R.string.pref_title_general)
             }
 
-            item {
+            item(key = "Preference Theme") {
                 BasicPreference(
                     title = R.string.pref_theme,
                     summary = stringResource(state.appTheme.label),
@@ -89,7 +89,7 @@ fun SettingsScreenContent(
             }
 
             if (isAtLeastVersionCodeS()) {
-                item {
+                item(key = "Preference Material You") {
                     BasicPreference(
                         title = R.string.pref_material_you,
                         summary = stringResource(R.string.pref_summary_material_you),
@@ -103,7 +103,7 @@ fun SettingsScreenContent(
                 }
             }
 
-            item {
+            item(key = "Preference Notifications") {
                 BasicPreference(
                     title = R.string.pref_notifications,
                     icon = Icons.Outlined.Notifications,
@@ -112,11 +112,11 @@ fun SettingsScreenContent(
             }
 
             // Expense Section
-            item {
+            item(key = "Section Title Expense") {
                 SectionTitle(title = R.string.pref_title_expense)
             }
 
-            item {
+            item(key = "Preference Monthly Limit") {
                 BasicPreference(
                     title = R.string.pref_monthly_limit,
                     summary = if (state.monthlyLimit <= 0) stringResource(R.string.disabled)
@@ -125,7 +125,7 @@ fun SettingsScreenContent(
                 )
             }
 
-            item {
+            item(key = "Preference Auto Add Expenses") {
                 BasicPreference(
                     title = R.string.pref_auto_add_expense,
                     summary = stringResource(R.string.pref_summary_auto_add_expense),
@@ -148,10 +148,10 @@ fun SettingsScreenContent(
             )*/
 
             // Links Section
-            item {
+            item(key = "Section Title Links") {
                 SectionTitle(title = R.string.links)
             }
-            item {
+            item(key = "Preference Source Code") {
                 BasicPreference(
                     title = R.string.pref_source_code,
                     onClick = {
@@ -166,10 +166,10 @@ fun SettingsScreenContent(
             }
 
             // Info Section
-            item {
+            item(key = "Section Title Info") {
                 SectionTitle(title = R.string.pref_title_info)
             }
-            item {
+            item(key = "Preference App Version") {
                 BasicPreference(
                     title = R.string.pref_app_version,
                     summary = BuildConfig.VERSION_NAME,
