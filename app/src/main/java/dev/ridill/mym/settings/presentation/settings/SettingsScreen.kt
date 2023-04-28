@@ -93,6 +93,7 @@ fun SettingsScreenContent(
                     BasicPreference(
                         title = R.string.pref_material_you,
                         summary = stringResource(R.string.pref_summary_material_you),
+                        icon = ImageVector.vectorResource(R.drawable.ic_color_palette),
                         onClick = { actions.toggleMaterialYou(!state.materialYouThemeEnabled) }
                     ) {
                         Switch(
