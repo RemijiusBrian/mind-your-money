@@ -6,6 +6,7 @@ interface SettingsActions {
     fun onThemePreferenceClick()
     fun onAppThemeSelectionDismiss()
     fun onAppThemeSelectionConfirm(theme: AppTheme)
+    fun toggleMaterialYou(enabled: Boolean)
 
     fun onMonthlyLimitPreferenceClick()
     fun onMonthlyLimitInputDismiss()

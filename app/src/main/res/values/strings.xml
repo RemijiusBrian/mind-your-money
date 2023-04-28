@@ -66,6 +66,8 @@
     <!-- Preferences -->
     <string name="pref_title_general">General</string>
     <string name="pref_theme">Theme</string>
+    <string name="pref_material_you">Material You</string>
+    <string name="pref_summary_material_you">Set app theme dynamically</string>
     <string name="pref_notifications">Notifications</string>
     <string name="pref_title_expense">Expense</string>
     <string name="pref_monthly_limit">Monthly Limit</string>
@@ -103,7 +105,6 @@
     <string name="action_undo">Undo</string>
     <string name="action_agree">Agree</string>
 
-    <string name="theme_dynamic">Dynamic</string>
     <string name="theme_system_default">System Default</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>

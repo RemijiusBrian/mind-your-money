@@ -4,10 +4,8 @@ import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrightnessMedium
 import androidx.compose.material.icons.filled.Info
@@ -21,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,6 +44,7 @@ import dev.ridill.mym.core.ui.components.SnackbarController
 import dev.ridill.mym.core.ui.components.VerticalSpacer
 import dev.ridill.mym.core.ui.theme.SpacingMedium
 import dev.ridill.mym.core.util.Formatter
+import dev.ridill.mym.core.util.isAtLeastVersionCodeS
 import dev.ridill.mym.core.util.launchUrl
 import dev.ridill.mym.settings.presentation.components.BasicPreference
 import dev.ridill.mym.settings.presentation.components.SectionTitle
@@ -69,39 +69,69 @@ fun SettingsScreenContent(
         },
         snackbarController = snackbarController,
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
+                .fillMaxSize(),
+            contentPadding = paddingValues
         ) {
             // General Section
-            SectionTitle(title = R.string.pref_title_general)
-            BasicPreference(
-                title = R.string.pref_theme,
-                summary = stringResource(state.appTheme.label),
-                icon = Icons.Default.BrightnessMedium,
-                onClick = actions::onThemePreferenceClick
-            )
-            BasicPreference(
-                title = R.string.pref_notifications,
-                icon = Icons.Outlined.Notifications,
-                onClick = navigateToNotificationSettings
-            )
+            item {
+                SectionTitle(title = R.string.pref_title_general)
+            }
+
+            item {
+                BasicPreference(
+                    title = R.string.pref_theme,
+                    summary = stringResource(state.appTheme.label),
+                    icon = Icons.Default.BrightnessMedium,
+                    onClick = actions::onThemePreferenceClick
+                )
+            }
+
+            if (isAtLeastVersionCodeS()) {
+                item {
+                    BasicPreference(
+                        title = R.string.pref_material_you,
+                        summary = stringResource(R.string.pref_summary_material_you),
+                        onClick = { actions.toggleMaterialYou(!state.materialYouThemeEnabled) }
+                    ) {
+                        Switch(
+                            checked = state.materialYouThemeEnabled,
+                            onCheckedChange = actions::toggleMaterialYou
+                        )
+                    }
+                }
+            }
+
+            item {
+                BasicPreference(
+                    title = R.string.pref_notifications,
+                    icon = Icons.Outlined.Notifications,
+                    onClick = navigateToNotificationSettings
+                )
+            }
 
             // Expense Section
-            SectionTitle(title = R.string.pref_title_expense)
-            BasicPreference(
-                title = R.string.pref_monthly_limit,
-                summary = if (state.monthlyLimit <= 0) stringResource(R.string.disabled)
-                else Formatter.currency(state.monthlyLimit),
-                onClick = actions::onMonthlyLimitPreferenceClick
-            )
-            BasicPreference(
-                title = R.string.pref_auto_add_expense,
-                summary = stringResource(R.string.pref_summary_auto_add_expense),
-                onClick = actions::onAutoAddExpenseClick
-            )
+            item {
+                SectionTitle(title = R.string.pref_title_expense)
+            }
+
+            item {
+                BasicPreference(
+                    title = R.string.pref_monthly_limit,
+                    summary = if (state.monthlyLimit <= 0) stringResource(R.string.disabled)
+                    else Formatter.currency(state.monthlyLimit),
+                    onClick = actions::onMonthlyLimitPreferenceClick
+                )
+            }
+
+            item {
+                BasicPreference(
+                    title = R.string.pref_auto_add_expense,
+                    summary = stringResource(R.string.pref_summary_auto_add_expense),
+                    onClick = actions::onAutoAddExpenseClick
+                )
+            }
 
             // Backup Section
             /*SectionTitle(title = R.string.backup)
@@ -118,26 +148,34 @@ fun SettingsScreenContent(
             )*/
 
             // Links Section
-            SectionTitle(title = R.string.links)
-            BasicPreference(
-                title = R.string.pref_source_code,
-                onClick = {
-                    context.launchUrl(BuildConfig.REPO_URL) { uiText ->
-                        uiText?.let {
-                            snackbarController.showSnackbar(it.asString(context))
+            item {
+                SectionTitle(title = R.string.links)
+            }
+            item {
+                BasicPreference(
+                    title = R.string.pref_source_code,
+                    onClick = {
+                        context.launchUrl(BuildConfig.REPO_URL) { uiText ->
+                            uiText?.let {
+                                snackbarController.showSnackbar(it.asString(context))
+                            }
                         }
-                    }
-                },
-                icon = ImageVector.vectorResource(R.drawable.ic_github)
-            )
+                    },
+                    icon = ImageVector.vectorResource(R.drawable.ic_github)
+                )
+            }
 
             // Info Section
-            SectionTitle(title = R.string.pref_title_info)
-            BasicPreference(
-                title = R.string.pref_app_version,
-                summary = BuildConfig.VERSION_NAME,
-                icon = Icons.Default.Info
-            )
+            item {
+                SectionTitle(title = R.string.pref_title_info)
+            }
+            item {
+                BasicPreference(
+                    title = R.string.pref_app_version,
+                    summary = BuildConfig.VERSION_NAME,
+                    icon = Icons.Default.Info
+                )
+            }
         }
 
         if (state.showThemeSelection) {

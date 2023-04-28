@@ -22,44 +22,49 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-        private val savedStateHandle: SavedStateHandle,
-        private val preferencesManager: PreferencesManager,
+    private val savedStateHandle: SavedStateHandle,
+    private val preferencesManager: PreferencesManager,
 ) : ViewModel(), SettingsActions {
 
     private val preferences = preferencesManager.preferences
     private val appTheme = preferences.map { it.theme }.distinctUntilChanged()
+    private val materialYouThemeEnabled = preferences.map { it.materialYouTheme }
+        .distinctUntilChanged()
     private val monthlyLimit = preferences.map { it.monthlyLimit }.distinctUntilChanged()
 
     private val showThemeSelection = savedStateHandle
-            .getStateFlow(SHOW_THEME_SELECTION, false)
+        .getStateFlow(SHOW_THEME_SELECTION, false)
     private val showMonthlyLimitInput = savedStateHandle
-            .getStateFlow(SHOW_MONTHLY_LIMIT_INPUT, false)
+        .getStateFlow(SHOW_MONTHLY_LIMIT_INPUT, false)
 
     private val showAutoAddExpenseDescription =
-            savedStateHandle.getStateFlow(KEY_SHOW_AUTO_ADD_EXPENSE_DESC, false)
+        savedStateHandle.getStateFlow(KEY_SHOW_AUTO_ADD_EXPENSE_DESC, false)
 
     private val eventsChannel = Channel<SettingsEvent>()
     val events get() = eventsChannel.receiveAsFlow()
 
     val state = combineTuple(
-            appTheme,
-            monthlyLimit,
-            showThemeSelection,
-            showMonthlyLimitInput,
-            showAutoAddExpenseDescription
+        appTheme,
+        materialYouThemeEnabled,
+        monthlyLimit,
+        showThemeSelection,
+        showMonthlyLimitInput,
+        showAutoAddExpenseDescription
     ).map { (
-                    appTheme,
-                    monthlyLimit,
-                    showThemeSelection,
-                    showMonthlyLimitInput,
-                    showAutoAddExpenseDescription
+                appTheme,
+                materialYouThemeEnabled,
+                monthlyLimit,
+                showThemeSelection,
+                showMonthlyLimitInput,
+                showAutoAddExpenseDescription
             ) ->
         SettingsState(
-                appTheme = appTheme,
-                monthlyLimit = monthlyLimit,
-                showThemeSelection = showThemeSelection,
-                showMonthlyLimitInput = showMonthlyLimitInput,
-                showAutoAddExpenseDescription = showAutoAddExpenseDescription,
+            appTheme = appTheme,
+            materialYouThemeEnabled = materialYouThemeEnabled,
+            monthlyLimit = monthlyLimit,
+            showThemeSelection = showThemeSelection,
+            showMonthlyLimitInput = showMonthlyLimitInput,
+            showAutoAddExpenseDescription = showAutoAddExpenseDescription,
         )
     }.asStateFlow(viewModelScope, SettingsState.INITIAL)
 
@@ -69,7 +74,7 @@ class SettingsViewModel @Inject constructor(
 
     private fun checkQuickAction() {
         val action = SettingsScreenSpec.getQuickActionFromSavedStateHandle(savedStateHandle)
-                ?: return
+            ?: return
 
         when (action) {
             ARG_QUICK_ACTION_LIMIT_UPDATE -> {
@@ -93,6 +98,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    override fun toggleMaterialYou(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesManager.toggleMaterialYou(enabled)
+        }
+    }
+
     override fun onMonthlyLimitPreferenceClick() {
         savedStateHandle[SHOW_MONTHLY_LIMIT_INPUT] = true
     }
@@ -106,10 +117,10 @@ class SettingsViewModel @Inject constructor(
         viewModelScope.launch {
             if (parsedAmount < 0L) {
                 eventsChannel.send(
-                        SettingsEvent.ShowUiMessage(
-                                UiText.StringResource(R.string.error_invalid_amount),
-                                true
-                        )
+                    SettingsEvent.ShowUiMessage(
+                        UiText.StringResource(R.string.error_invalid_amount),
+                        true
+                    )
                 )
                 return@launch
             }

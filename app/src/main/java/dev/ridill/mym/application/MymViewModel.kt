@@ -12,6 +12,7 @@ class MymViewModel @Inject constructor(
     preferencesManager: PreferencesManager
 ) : ViewModel() {
 
-    val appTheme = preferencesManager.preferences.map { it.theme }
-        .distinctUntilChanged()
+    private val preferences = preferencesManager.preferences
+    val appTheme = preferences.map { it.theme }.distinctUntilChanged()
+    val materialYouTheme = preferences.map { it.materialYouTheme }.distinctUntilChanged()
 }

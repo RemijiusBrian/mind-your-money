@@ -5,6 +5,7 @@ import dev.ridill.mym.core.util.Zero
 
 data class SettingsState(
     val appTheme: AppTheme = AppTheme.SYSTEM_DEFAULT,
+    val materialYouThemeEnabled: Boolean = false,
     val monthlyLimit: Long = Long.Zero,
     val showThemeSelection: Boolean = false,
     val showMonthlyLimitInput: Boolean = false,

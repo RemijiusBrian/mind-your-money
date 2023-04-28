@@ -1,5 +1,6 @@
 package dev.ridill.mym.core.util
 
+import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import timber.log.Timber
@@ -15,6 +16,8 @@ fun Color.onColor(
     onBrightColor: Color = Color.Black,
     onDarkColor: Color = Color.White
 ): Color = if (luminance() > 0.25f) onBrightColor else onDarkColor
+
+fun isAtLeastVersionCodeS(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
 inline fun logD(vararg args: Any = emptyArray(), statement: () -> Any) =
     Timber.d("AppDebug: ${statement()}", *args)

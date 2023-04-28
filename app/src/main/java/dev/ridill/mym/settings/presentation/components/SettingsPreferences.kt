@@ -2,7 +2,10 @@ package dev.ridill.mym.settings.presentation.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,9 +15,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import dev.ridill.mym.core.ui.components.HorizontalSpacer
 import dev.ridill.mym.core.ui.theme.ContentAlpha
 import dev.ridill.mym.core.ui.theme.SpacingLarge
 import dev.ridill.mym.core.ui.theme.SpacingMedium
+import dev.ridill.mym.core.util.One
 
 @Composable
 fun SectionTitle(
@@ -38,7 +43,8 @@ fun BasicPreference(
     modifier: Modifier = Modifier,
     summary: String? = null,
     onClick: (() -> Unit)? = null,
-    icon: ImageVector? = null
+    icon: ImageVector? = null,
+    trailingContent: @Composable (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
@@ -50,9 +56,12 @@ fun BasicPreference(
     ) {
         if (icon != null) {
             Icon(imageVector = icon, contentDescription = null)
-            Spacer(Modifier.width(SpacingMedium))
+            HorizontalSpacer(SpacingMedium)
         }
-        Column {
+        Column(
+            modifier = Modifier
+                .weight(Float.One)
+        ) {
             Text(
                 text = stringResource(title),
                 style = MaterialTheme.typography.bodyLarge
@@ -65,6 +74,11 @@ fun BasicPreference(
                         .copy(alpha = ContentAlpha.PERCENT_60)
                 )
             }
+        }
+
+        trailingContent?.let { content ->
+            HorizontalSpacer(SpacingMedium)
+            content()
         }
     }
 }
