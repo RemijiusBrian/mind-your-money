@@ -14,6 +14,7 @@ import dev.ridill.mym.expenses.data.repository.TagsRepositoryImpl
 import dev.ridill.mym.expenses.domain.repository.AllExpensesRepository
 import dev.ridill.mym.expenses.domain.repository.ExpenseRepository
 import dev.ridill.mym.expenses.domain.repository.TagsRepository
+import dev.ridill.mym.expenses.domain.sms.PaymentSmsService
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -42,4 +43,7 @@ object ExpenseModule {
         expenseRepo: ExpenseRepository,
         tagsRepo: TagsRepository
     ): AllExpensesRepository = AllExpensesRepositoryImpl(expenseRepo, tagsRepo)
+
+    @Provides
+    fun providePaymentSmsService(): PaymentSmsService = PaymentSmsService()
 }

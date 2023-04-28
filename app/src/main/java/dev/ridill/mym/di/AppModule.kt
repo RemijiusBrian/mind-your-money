@@ -19,6 +19,9 @@ import dev.ridill.mym.core.data.preferences.PreferencesManagerImpl
 import dev.ridill.mym.core.domain.util.Validator
 import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.core.util.DispatcherProviderImpl
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 @Module
@@ -60,4 +63,13 @@ object AppModule {
 
     @Provides
     fun provideValidator(): Validator = Validator()
+
+    @ApplicationScope
+    @Singleton
+    @Provides
+    fun provideApplicationScope(): CoroutineScope = CoroutineScope(SupervisorJob())
 }
+
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class ApplicationScope

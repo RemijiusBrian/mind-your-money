@@ -20,8 +20,10 @@ class TagsRepositoryImpl(
         entities.map(TagEntity::toTag)
     }
 
-    override suspend fun insert(tag: TagInput) = withContext(dispatcherProvider.io) {
-        dao.insert(tag.toEntity())
+    override suspend fun insert(tag: TagInput) {
+        withContext(dispatcherProvider.io) {
+            dao.insert(tag.toEntity())
+        }
     }
 
     override suspend fun delete(tag: String) = withContext(dispatcherProvider.io) {

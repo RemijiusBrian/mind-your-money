@@ -24,8 +24,8 @@ class ExpenseRepositoryImpl(
     override fun getExpenditureForDate(monthHyphenYearString: String): Flow<Double> =
         dao.getExpenditureForDate(monthHyphenYearString)
 
-    override suspend fun insert(expense: Expense) = withContext(dispatcher.io) {
-        dao.insert(expense.toEntity())
+    override suspend fun insert(expense: Expense): Long = withContext(dispatcher.io) {
+        dao.insert(expense.toEntity()).first()
     }
 
     override suspend fun getExpenseById(id: Long): Expense? = withContext(dispatcher.io) {

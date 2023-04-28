@@ -1,19 +1,25 @@
 package dev.ridill.mym.core.notification
 
+import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 
-interface NotificationHelper<T> {
+interface NotificationHelper {
+
+    fun createNotificationChannelGroup(
+        id: String,
+        @StringRes nameRes: Int,
+        @StringRes descriptionRes: Int
+    )
 
     fun createNotificationChannel()
 
     fun getBaseNotification(): NotificationCompat.Builder
 
-    fun showNotification(vararg data: T)
+    fun showNotification(vararg notifications: NotificationCompat.Builder)
 
     fun updateNotification(
-        data: T,
         update: (updateNotification: NotificationCompat.Builder) -> NotificationCompat.Builder
-    ) = Unit
+    )
 
     fun dismissNotification(id: Int)
 

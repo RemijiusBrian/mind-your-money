@@ -14,7 +14,7 @@ interface ExpenseRepository {
         monthHyphenYearString: String
     ): Flow<Double>
 
-    suspend fun insert(expense: Expense)
+    suspend fun insert(expense: Expense): Long
 
     suspend fun getExpenseById(id: Long): Expense?
 

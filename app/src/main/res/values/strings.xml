@@ -58,7 +58,7 @@
 
     <string name="notification_channel_group_expenses">Expenses</string>
     <string name="notification_channel_group_expenses_desc">All \'Expense\' notifications</string>
-    <string name="notification_channel_expenses_added">Auto Add Expenses</string>
+    <string name="notification_channel_auto_add_expenses">Auto Add Expenses</string>
     <string name="expense_notification_title">Expense Added</string>
     <string name="expense_notification_text">Expense added for %s</string>
     <string name="expenses_added_notification_summary">%d New Expenses</string>
