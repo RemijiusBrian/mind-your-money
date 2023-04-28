@@ -45,8 +45,12 @@ class DashboardViewModel @Inject constructor(
             .toFloat()
             .ifNaN { Float.Zero }
     }.distinctUntilChanged()
-    private val showBalanceLowWarning = balancePercent.map {
-        it <= BALANCE_LOW_FLOAT
+    private val showBalanceLowWarning = combineTuple(
+        monthlyLimit,
+        balancePercent
+    ).map { (limit, percent) ->
+        limit > Long.Zero
+                && percent <= BALANCE_LOW_FLOAT
     }.distinctUntilChanged()
 
     private val expenses = repo.getExpensesForCurrentMonth()
