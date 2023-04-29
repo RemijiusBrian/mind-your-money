@@ -1,8 +1,11 @@
 package dev.ridill.mym.core.util
 
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.core.content.ContextCompat
 import timber.log.Timber
 
 inline fun <T> tryOrNull(block: () -> T): T? = try {
@@ -18,6 +21,9 @@ fun Color.onColor(
 ): Color = if (luminance() > 0.25f) onBrightColor else onDarkColor
 
 fun isAtLeastVersionCodeS(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
+fun isPermissionGranted(context: Context, permission: String): Boolean =
+    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
 
 inline fun logD(vararg args: Any = emptyArray(), statement: () -> Any) =
     Timber.d("AppDebug: ${statement()}", *args)

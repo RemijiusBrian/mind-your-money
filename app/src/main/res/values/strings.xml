@@ -141,4 +141,5 @@
     <string name="expenses_untagged">Expenses Untagged</string>
     <string name="click_to_set_limit">Click to set limit</string>
     <string name="delete">Delete</string>
+    <string name="expense_added_from_sms">Expense Added From SMS</string>
 </resources>

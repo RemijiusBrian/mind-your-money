@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import dagger.hilt.android.AndroidEntryPoint
+import dev.ridill.mym.core.notification.NotificationHelper
 import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.core.util.logI
@@ -26,8 +27,8 @@ class SMSBroadcastReceiver : BroadcastReceiver() {
     @Inject
     lateinit var applicationScope: CoroutineScope
 
-//    @Inject
-//    lateinit var notificationHelper: NotificationHelper<Expense>
+    @Inject
+    lateinit var notificationHelper: NotificationHelper<Expense>
 
     @Inject
     lateinit var smsService: PaymentSmsService
@@ -39,15 +40,15 @@ class SMSBroadcastReceiver : BroadcastReceiver() {
             .ifEmpty { return }
 
         applicationScope.launch {
-            for (message in messages) {
-                if (!smsService.isMerchantSms(message.originatingAddress)) continue
+            messages.map { message ->
+                if (!smsService.isMerchantSms(message.originatingAddress)) return@map null
 
                 val body = message.messageBody
-                if (!smsService.isSmsForMonetaryDebit(body)) continue
-                val paymentDetails = tryOrNull { smsService.extractPaymentDetails(body) }
-                    ?: continue
-                savePaymentDetails(paymentDetails)
-            }
+                if (!smsService.isSmsForMonetaryDebit(body)) return@map null
+
+                tryOrNull { smsService.extractPaymentDetails(body) }
+            }.filterNotNull()
+                .forEach { savePaymentDetails(it) }
         }
     }
 
@@ -60,6 +61,6 @@ class SMSBroadcastReceiver : BroadcastReceiver() {
             tagName = null
         )
         val insertedId = expenseRepository.insert(expense)
-//        notificationHelper.showNotification(expense.copy(id = insertedId))
+        notificationHelper.showNotification(expense.copy(id = insertedId))
     }
 }
