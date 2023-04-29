@@ -17,7 +17,6 @@ interface NotificationHelper<T> {
     fun dismissAllNotifications()
 
     object ChannelGroups {
-        const val BILLS = "NOTIFICATION_CHANNEL_GROUP_BILLS"
         const val EXPENSES = "NOTIFICATION_CHANNEL_GROUP_EXPENSES"
     }
 }

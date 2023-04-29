@@ -1,5 +1,7 @@
 package dev.ridill.mym.expenses.domain.sms
 
+import dev.ridill.mym.core.util.logD
+
 class PaymentSmsService {
 
     fun isMerchantSms(address: String?): Boolean =
@@ -11,14 +13,15 @@ class PaymentSmsService {
     private fun extractAmount(body: String): String? =
         AMOUNT_PATTERN.toRegex().find(body)?.groups?.get(1)?.value
 
-    private fun extractMerchantName(content: String): String =
-        MERCHANT_PATTERN.toRegex().find(content)?.value.orEmpty()
-            .ifEmpty { "at Merchant" }.trim()
+    private fun extractMerchantName(content: String): String? =
+        MERCHANT_PATTERN.toRegex().find(content)?.value
 
     @Throws(AmountExtractionThrowable::class)
     fun extractPaymentDetails(content: String): PaymentDetails {
         val amount = extractAmount(content) ?: throw AmountExtractionThrowable()
-        val merchant = extractMerchantName(content)
+        logD { "Amount extracted from sms - $amount" }
+        val merchant = extractMerchantName(content) ?: "at Merchant"
+        logD { "Merchant extracted from sms - $merchant" }
 
         return PaymentDetails(
             amount = amount,

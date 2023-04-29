@@ -12,7 +12,6 @@ import dev.ridill.mym.R
 import dev.ridill.mym.core.notification.NotificationHelper
 import dev.ridill.mym.core.util.isPermissionGranted
 import dev.ridill.mym.expenses.domain.model.Expense
-import kotlin.random.Random
 
 class ExpenseAutoAddNotificationHelper(
     private val context: Context
@@ -56,30 +55,23 @@ class ExpenseAutoAddNotificationHelper(
             if (!areNotificationsEnabled()) return
             data.forEach { expense ->
                 val notification = getBaseNotification()
-                    .setStyle(
-                        NotificationCompat.BigTextStyle()
-                            .setBigContentTitle(context.getString(R.string.expense_added_from_sms))
-                            .bigText(expense.note)
-                            .setSummaryText(expense.amount)
-                    )
+                    .setContentTitle(expense.note)
+                    .setContentText(context.getString(R.string.expense_from_sms))
                     .build()
                 notify(expense.id.toInt(), notification)
-            }
-
-            if (data.size > 1) {
-                notify(Random.nextInt(), buildSummaryNotification(data.size))
+                notify(NOTIFICATION_GROUP_ID, buildSummaryNotification())
             }
         }
     }
 
-    private fun buildSummaryNotification(dataSize: Int): Notification =
-        NotificationCompat.Builder(context, CHANNEL_ID)
+    private fun buildSummaryNotification(): Notification =
+        getBaseNotification()
             .setGroup(NOTIFICATION_GROUP)
-            .setGroupSummary(true)
             .setStyle(
                 NotificationCompat.InboxStyle()
-                    .setBigContentTitle("$dataSize Expenses added automatically")
+                    .setBigContentTitle("Expenses added from SMS")
             )
+            .setGroupSummary(true)
             .build()
 
     override fun dismissNotification(id: Int) {
@@ -93,3 +85,4 @@ class ExpenseAutoAddNotificationHelper(
 
 private const val CHANNEL_ID = "mym.notifications.expenses"
 private const val NOTIFICATION_GROUP = "EXPENSE_AUTO_ADDED_GROUP"
+private const val NOTIFICATION_GROUP_ID = 1_000_000
