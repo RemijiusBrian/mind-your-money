@@ -23,13 +23,19 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -44,7 +50,7 @@ import dev.ridill.mym.core.navigation.screenSpecs.AddEditExpenseScreenSpec
 import dev.ridill.mym.core.ui.components.BackArrowButton
 import dev.ridill.mym.core.ui.components.ConfirmationDialog
 import dev.ridill.mym.core.ui.components.LabelText
-import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.MYMBottomSheetScaffold
 import dev.ridill.mym.core.ui.components.MinWidthTextField
 import dev.ridill.mym.core.ui.components.NewTagChip
 import dev.ridill.mym.core.ui.components.NewTagSheetContent
@@ -61,6 +67,7 @@ import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.expenses.domain.model.Tag
 import dev.ridill.mym.expenses.domain.model.TagInput
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AddEditExpenseScreenContent(
@@ -79,11 +86,42 @@ fun AddEditExpenseScreenContent(
         onBack = actions::dismissNewTagInput
     )
 
+    val amountFocusRequester = remember { FocusRequester() }
+    val tagInputFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(scaffoldState.bottomSheetState) {
+        snapshotFlow { scaffoldState.bottomSheetState.currentValue }
+            .collectLatest { sheetValue ->
+                if (sheetValue == SheetValue.Expanded) {
+                    tagInputFocusRequester.requestFocus()
+                }
+            }
+    }
+
+    LaunchedEffect(Unit) {
+        amountFocusRequester.requestFocus()
+    }
+
     Box(
         modifier = Modifier
             .imePadding()
     ) {
-        MYMScaffold(
+        MYMBottomSheetScaffold(
+            scaffoldState = scaffoldState,
+            sheetContent = {
+                NewTagSheetContent(
+                    onTagNameChange = actions::onNewTagNameChange,
+                    onTagColorSelect = actions::onNewTagColorSelect,
+                    onConfirm = actions::onNewTagConfirm,
+                    onDismiss = actions::dismissNewTagInput,
+                    name = { newTagProvider()?.name.orEmpty() },
+                    colorCode = newTagProvider()?.colorCode,
+                    inputFocusRequester = tagInputFocusRequester
+                )
+            },
+            sheetPeekHeight = Dp.Zero,
+            sheetDragHandle = null,
+            sheetSwipeEnabled = false,
             topBar = {
                 TopAppBar(
                     navigationIcon = { BackArrowButton(onClick = navigateUp) },
@@ -100,20 +138,7 @@ fun AddEditExpenseScreenContent(
                     }
                 )
             },
-            scaffoldState = scaffoldState,
-            sheetContent = {
-                NewTagSheetContent(
-                    onTagNameChange = actions::onNewTagNameChange,
-                    onTagColorSelect = actions::onNewTagColorSelect,
-                    onConfirm = actions::onNewTagConfirm,
-                    onDismiss = actions::dismissNewTagInput,
-                    name = { newTagProvider()?.name.orEmpty() },
-                    colorCode = newTagProvider()?.colorCode
-                )
-            },
-            snackbarController = snackbarController,
-            sheetPeekHeight = Dp.Zero,
-            sheetSwipeEnabled = false
+            snackbarController = snackbarController
         ) { paddingValues ->
             Box(
                 modifier = Modifier
@@ -148,7 +173,11 @@ fun AddEditExpenseScreenContent(
                         keyboardOptions = KeyboardOptions(
                             keyboardType = KeyboardType.Number,
                             imeAction = ImeAction.Next
-                        )
+                        ),
+                        singleLine = false,
+                        maxLines = 3,
+                        modifier = Modifier
+                            .focusRequester(amountFocusRequester)
                     )
 
                     NoteEntryField(

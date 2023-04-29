@@ -12,13 +12,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,31 +34,40 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowLeft
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.DeleteForever
-import androidx.compose.material.icons.outlined.DoNotDisturbOn
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
@@ -68,17 +77,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
 import dev.ridill.mym.core.navigation.screenSpecs.AllExpensesScreenSpec
 import dev.ridill.mym.core.ui.components.BackArrowButton
 import dev.ridill.mym.core.ui.components.ConfirmationDialog
-import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.MYMBottomSheetScaffold
 import dev.ridill.mym.core.ui.components.NewTagSheetContent
 import dev.ridill.mym.core.ui.components.SelectableExpenseCard
 import dev.ridill.mym.core.ui.components.SnackbarController
 import dev.ridill.mym.core.ui.components.VerticalNumberSpinner
-import dev.ridill.mym.core.ui.components.VerticalProgressIndicator
 import dev.ridill.mym.core.ui.theme.ContentAlpha
 import dev.ridill.mym.core.ui.theme.ElevationLevel0
 import dev.ridill.mym.core.ui.theme.ElevationLevel1
@@ -95,6 +104,7 @@ import dev.ridill.mym.core.util.Zero
 import dev.ridill.mym.core.util.onColor
 import dev.ridill.mym.expenses.domain.model.TagInput
 import dev.ridill.mym.expenses.domain.model.TagOverview
+import kotlinx.coroutines.flow.collectLatest
 import java.time.Month
 import java.time.format.TextStyle
 import java.util.Locale
@@ -106,7 +116,7 @@ fun AllExpensesScreenContent(
     actions: AllExpensesActions,
     tagInput: () -> TagInput?,
     navigateUp: () -> Unit,
-    bottomSheetScaffoldState: BottomSheetScaffoldState,
+    scaffoldState: BottomSheetScaffoldState,
 ) {
     BackHandler(
         enabled = state.multiSelectionModeActive,
@@ -114,15 +124,41 @@ fun AllExpensesScreenContent(
     )
 
     BackHandler(
-        enabled = bottomSheetScaffoldState.bottomSheetState.isVisible,
+        enabled = scaffoldState.bottomSheetState.isVisible,
         onBack = actions::dismissNewTagInput
     )
+
+    val tagInputFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(scaffoldState.bottomSheetState) {
+        snapshotFlow { scaffoldState.bottomSheetState.currentValue }
+            .collectLatest { sheetValue ->
+                if (sheetValue == SheetValue.Expanded) {
+                    tagInputFocusRequester.requestFocus()
+                }
+            }
+    }
 
     Box(
         modifier = Modifier
             .imePadding()
     ) {
-        MYMScaffold(
+        MYMBottomSheetScaffold(
+            scaffoldState = scaffoldState,
+            sheetContent = {
+                NewTagSheetContent(
+                    name = { tagInput()?.name.orEmpty() },
+                    onTagNameChange = actions::onNewTagNameChange,
+                    colorCode = tagInput()?.colorCode,
+                    onTagColorSelect = actions::onNewTagColorSelect,
+                    onConfirm = actions::onNewTagConfirm,
+                    onDismiss = actions::dismissNewTagInput,
+                    inputFocusRequester = tagInputFocusRequester
+                )
+            },
+            sheetPeekHeight = Dp.Zero,
+            sheetDragHandle = null,
+            sheetSwipeEnabled = false,
             topBar = {
                 TopAppBar(
                     title = {
@@ -148,20 +184,7 @@ fun AllExpensesScreenContent(
                     }
                 )
             },
-            snackbarController = snackbarController,
-            sheetContent = {
-                NewTagSheetContent(
-                    name = { tagInput()?.name.orEmpty() },
-                    onTagNameChange = actions::onNewTagNameChange,
-                    colorCode = tagInput()?.colorCode,
-                    onTagColorSelect = actions::onNewTagColorSelect,
-                    onConfirm = actions::onNewTagConfirm,
-                    onDismiss = actions::dismissNewTagInput
-                )
-            },
-            sheetSwipeEnabled = false,
-            sheetPeekHeight = Dp.Zero,
-            scaffoldState = bottomSheetScaffoldState
+            snackbarController = snackbarController
         ) { paddingValues ->
             Column(
                 modifier = Modifier
@@ -240,7 +263,6 @@ fun AllExpensesScreenContent(
                             )
                         }
                     }
-                    // TODO: Implement no data indicator
                 }
             }
 
@@ -316,15 +338,10 @@ private fun TagOverviews(
                         .width(TagOverviewCardBaseWidth),
                     contentAlignment = Alignment.Center
                 ) {
-                    FilledTonalIconButton(
-                        onClick = onNewTagClick,
-                        enabled = false
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(R.string.content_new_tag)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(R.string.content_new_tag)
+                    )
                 }
             }
         }
@@ -349,11 +366,28 @@ private fun TagOverviewCard(
         targetValueByState = { if (it) SpacingMedium else SpacingSmall }
     )
     val animatedPercent by animateFloatAsState(percentOfTotal)
+    var showMenu by rememberSaveable { mutableStateOf(false) }
+    var longPressOffset by remember { mutableStateOf(DpOffset.Zero) }
+    var itemHeight by remember { mutableStateOf(Dp.Zero) }
+    val density = LocalDensity.current
 
     Card(
         onClick = onClick,
         modifier = Modifier
             .width(TagOverviewCardBaseWidth * (if (expanded) 2f else 1f))
+            .onSizeChanged {
+                itemHeight = with(density) { it.height.toDp() }
+            }
+            .pointerInput(expanded) {
+                if (expanded) {
+                    detectTapGestures(
+                        onLongPress = {
+                            showMenu = true
+                            longPressOffset = DpOffset(it.x.toDp(), it.y.toDp())
+                        }
+                    )
+                }
+            }
             .then(modifier),
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
@@ -390,7 +424,9 @@ private fun TagOverviewCard(
                 if (expanded) {
                     Text(
                         text = amount,
-                        style = MaterialTheme.typography.headlineSmall
+                        style = MaterialTheme.typography.headlineSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
             }
@@ -401,13 +437,31 @@ private fun TagOverviewCard(
                         .align(Alignment.Top)
                 ) {
                     Icon(
-                        imageVector = Icons.Outlined.DoNotDisturbOn,
+                        imageVector = Icons.Outlined.Close,
                         contentDescription = stringResource(R.string.content_delete),
                         tint = contentColor.copy(alpha = ContentAlpha.PERCENT_60)
                     )
                 }
             }
-            VerticalProgressIndicator(
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false },
+                offset = longPressOffset.copy(
+                    y = longPressOffset.y - itemHeight
+                )
+            ) {
+                TagOverviewOptions.values().forEach { option ->
+                    DropdownMenuItem(
+                        text = { Text(stringResource(option.label)) },
+                        onClick = {
+                            if (option == TagOverviewOptions.DELETE) {
+                                onDeleteClick()
+                            }
+                        }
+                    )
+                }
+            }
+            /*VerticalProgressIndicator(
                 progress = animatedPercent,
                 width = OverviewProgressBarBaseWidth * (if (expanded) 2f else 1f),
                 modifier = Modifier
@@ -415,7 +469,7 @@ private fun TagOverviewCard(
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
                     .copy(alpha = ContentAlpha.PERCENT_32),
                 indicatorColor = color.copy(alpha = ContentAlpha.PERCENT_60)
-            )
+            )*/
         }
     }
 }

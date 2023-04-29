@@ -59,6 +59,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -239,12 +240,15 @@ private fun ExpenditureOverview(
         ) {
             Column {
                 VerticalNumberSpinner(targetState = monthlyLimit) {
-                    Text(Formatter.currency(it))
+                    Text(
+                        text = Formatter.currency(it),
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
                 if (monthlyLimit <= Long.Zero) {
                     Text(
                         text = stringResource(R.string.click_to_set_limit),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }
@@ -262,7 +266,10 @@ private fun ExpenditureOverview(
                 valueStyle = MaterialTheme.typography.titleLarge
             ) {
                 VerticalNumberSpinner(targetState = amountSpent) {
-                    Text(Formatter.currency(it))
+                    Text(
+                        text = Formatter.currency(it),
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
             VerticalSpacer(SpacingSmall)
@@ -411,21 +418,21 @@ private fun BalanceCard(
             verticalArrangement = Arrangement.Center
         ) {
             Row {
+                if (showBalanceLowWarning) {
+                    AnimatedWarning()
+                    HorizontalSpacer(spacing = SpacingXSmall)
+                }
                 Text(
                     text = stringResource(R.string.balance),
                     style = MaterialTheme.typography.titleMedium
                 )
-
-                if (showBalanceLowWarning) {
-                    HorizontalSpacer(spacing = SpacingXSmall)
-                    AnimatedWarning()
-                }
             }
             Spacer(Modifier.height(SpacingXSmall))
             VerticalNumberSpinner(targetState = balanceAmount) {
                 Text(
                     text = Formatter.currency(it),
-                    style = MaterialTheme.typography.titleLarge
+                    style = MaterialTheme.typography.titleLarge,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

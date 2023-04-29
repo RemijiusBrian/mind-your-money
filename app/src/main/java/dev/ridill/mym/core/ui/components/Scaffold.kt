@@ -3,7 +3,18 @@ package dev.ridill.mym.core.ui.components
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.BottomSheetScaffoldState
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.contentColorFor
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,8 +50,8 @@ fun MYMScaffold(
 }
 
 @Composable
-fun MYMScaffold(
-    sheetContent: @Composable ColumnScope.() -> Unit,
+fun MYMBottomSheetScaffold(
+    sheetContent: @Composable() (ColumnScope.() -> Unit),
     modifier: Modifier = Modifier,
     scaffoldState: BottomSheetScaffoldState = rememberBottomSheetScaffoldState(),
     sheetPeekHeight: Dp = BottomSheetDefaults.SheetPeekHeight,
@@ -49,18 +60,21 @@ fun MYMScaffold(
     sheetContentColor: Color = contentColorFor(sheetContainerColor),
     sheetTonalElevation: Dp = BottomSheetDefaults.Elevation,
     sheetShadowElevation: Dp = BottomSheetDefaults.Elevation,
-    sheetDragHandle: @Composable (() -> Unit)? = { BottomSheetDefaults.DragHandle() },
+    sheetDragHandle: @Composable() (() -> Unit)? = { BottomSheetDefaults.DragHandle() },
     sheetSwipeEnabled: Boolean = true,
     topBar: @Composable (() -> Unit)? = null,
     snackbarController: SnackbarController = rememberSnackbarController(),
     snackbarHost: @Composable (SnackbarHostState) -> Unit = { ETSnackbarHost(snackbarController) },
     containerColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(containerColor),
+    windowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     content: @Composable (PaddingValues) -> Unit
 ) {
     BottomSheetScaffold(
         sheetContent = sheetContent,
-        modifier = modifier,
+        modifier = Modifier
+            .padding(windowInsets.asPaddingValues())
+            .then(modifier),
         scaffoldState = scaffoldState,
         sheetPeekHeight = sheetPeekHeight,
         sheetShape = sheetShape,

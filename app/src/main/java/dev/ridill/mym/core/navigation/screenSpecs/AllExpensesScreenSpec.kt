@@ -65,7 +65,7 @@ object AllExpensesScreenSpec : BottomBarSpec {
             tagInput = { tagInput.value },
             actions = viewModel,
             navigateUp = navController::navigateUp,
-            bottomSheetScaffoldState = bottomSheetScaffoldState
+            scaffoldState = bottomSheetScaffoldState
         )
     }
 }
