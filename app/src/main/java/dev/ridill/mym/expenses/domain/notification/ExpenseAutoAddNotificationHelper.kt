@@ -20,7 +20,7 @@ class ExpenseAutoAddNotificationHelper(
     private val notificationManager = NotificationManagerCompat.from(context)
 
     init {
-        createNotificationChannel()
+        helperInit()
     }
 
     override fun createNotificationChannelGroup() {

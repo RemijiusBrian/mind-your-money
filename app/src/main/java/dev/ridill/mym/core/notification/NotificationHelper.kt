@@ -8,6 +8,11 @@ interface NotificationHelper<T> {
 
     fun createNotificationChannel()
 
+    fun helperInit() {
+        createNotificationChannelGroup()
+        createNotificationChannel()
+    }
+
     fun getBaseNotification(): NotificationCompat.Builder
 
     fun showNotification(vararg data: T)
