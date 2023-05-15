@@ -1,5 +1,6 @@
 package dev.ridill.mym.settings.presentation.settings
 
+import android.Manifest
 import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,13 +39,15 @@ import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.navigation.screenSpecs.SettingsScreenSpec
 import dev.ridill.mym.core.ui.components.BackArrowButton
 import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.OnLifecycleStartEffect
 import dev.ridill.mym.core.ui.components.PermissionRationaleDialog
 import dev.ridill.mym.core.ui.components.RadioButtonWithLabel
 import dev.ridill.mym.core.ui.components.SnackbarController
 import dev.ridill.mym.core.ui.components.VerticalSpacer
 import dev.ridill.mym.core.ui.theme.SpacingMedium
 import dev.ridill.mym.core.util.Formatter
-import dev.ridill.mym.core.util.isAtLeastVersionCodeS
+import dev.ridill.mym.core.util.isBuildAtLeastVersionCodeS
+import dev.ridill.mym.core.util.isPermissionGranted
 import dev.ridill.mym.core.util.launchUrl
 import dev.ridill.mym.settings.presentation.components.BasicPreference
 import dev.ridill.mym.settings.presentation.components.SectionTitle
@@ -58,6 +61,11 @@ fun SettingsScreenContent(
     navigateUp: () -> Unit,
     navigateToNotificationSettings: () -> Unit
 ) {
+    var isSMSPermissionGranted by remember { mutableStateOf(false) }
+
+    OnLifecycleStartEffect {
+        isSMSPermissionGranted = isPermissionGranted(context, Manifest.permission.READ_SMS)
+    }
 
     MYMScaffold(
         modifier = Modifier
@@ -89,7 +97,7 @@ fun SettingsScreenContent(
                 )
             }
 
-            if (isAtLeastVersionCodeS()) {
+            if (isBuildAtLeastVersionCodeS()) {
                 item(key = "Preference Material You") {
                     BasicPreference(
                         title = R.string.pref_material_you,
@@ -202,7 +210,8 @@ fun SettingsScreenContent(
                 icon = Icons.Outlined.Message,
 //                ImageVector.vectorResource(R.drawable.ic_message),
                 onDismiss = actions::onAutoAddExpenseDismiss,
-                onConfirm = actions::onAutoAddExpenseConfirm
+                onConfirm = actions::onAutoAddExpenseConfirm,
+                permissionGranted = isSMSPermissionGranted
             )
         }
     }

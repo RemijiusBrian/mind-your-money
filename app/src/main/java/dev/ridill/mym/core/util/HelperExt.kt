@@ -3,6 +3,9 @@ package dev.ridill.mym.core.util
 import android.content.Context
 import android.content.Intent
 import androidx.core.net.toUri
+import com.google.accompanist.permissions.PermissionStatus
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.shouldShowRationale
 import dev.ridill.mym.core.domain.model.UiText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -35,3 +38,6 @@ fun Context.launchUrl(url: String, onError: (UiText?) -> Unit) {
         onError(t.message?.let { UiText.DynamicText(it) })
     }
 }
+
+fun PermissionStatus.isPermanentlyDenied(): Boolean =
+    !isGranted && !shouldShowRationale

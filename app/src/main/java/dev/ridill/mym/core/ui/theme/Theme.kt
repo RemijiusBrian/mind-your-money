@@ -12,7 +12,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import dev.ridill.mym.core.util.isAtLeastVersionCodeS
+import dev.ridill.mym.core.util.isBuildAtLeastVersionCodeS
 
 private val DarkColorScheme = darkColorScheme(
     primary = DarkPrimary,
@@ -85,7 +85,7 @@ fun MYMTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && isAtLeastVersionCodeS() -> {
+        dynamicColor && isBuildAtLeastVersionCodeS() -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }

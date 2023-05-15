@@ -2,9 +2,8 @@ package dev.ridill.mym.core.navigation.screenSpecs
 
 import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.provider.Settings
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
@@ -20,8 +19,10 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.google.accompanist.permissions.rememberPermissionState
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
+import dev.ridill.mym.core.util.isPermanentlyDenied
 import dev.ridill.mym.settings.presentation.settings.SettingsScreenContent
 import dev.ridill.mym.settings.presentation.settings.SettingsViewModel
 
@@ -62,18 +63,29 @@ object SettingsScreenSpec : BottomBarSpec {
         val snackbarController = rememberSnackbarController()
         val context = LocalContext.current
 
-        val permissionLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission(),
-            onResult = {}
-        )
+        val smsPermissionState = rememberPermissionState(permission = Manifest.permission.READ_SMS)
 
         LaunchedEffect(snackbarController, context, viewModel) {
             viewModel.events.collect { event ->
                 when (event) {
-                    SettingsViewModel.SettingsEvent.LaunchBackupExportPathSelector -> {}
-                    is SettingsViewModel.SettingsEvent.LaunchGoogleAccountSelection -> {}
+                    SettingsViewModel.SettingsEvent.LaunchBackupExportPathSelector -> {
+
+                    }
+
+                    is SettingsViewModel.SettingsEvent.LaunchGoogleAccountSelection -> {
+
+                    }
+
                     SettingsViewModel.SettingsEvent.RequestSmsPermission -> {
-                        permissionLauncher.launch(Manifest.permission.READ_SMS)
+                        if (!smsPermissionState.status.isPermanentlyDenied()) {
+                            val intent = Intent(
+                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.fromParts("package", context.packageName, null)
+                            )
+                            context.startActivity(intent)
+                        } else {
+                            smsPermissionState.launchPermissionRequest()
+                        }
                     }
 
                     is SettingsViewModel.SettingsEvent.ShowUiMessage -> {

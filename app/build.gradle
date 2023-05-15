@@ -57,9 +57,9 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     kotlinOptions.freeCompilerArgs += ["-opt-in=androidx.compose.foundation.ExperimentalFoundationApi"]
     kotlinOptions.freeCompilerArgs += ["-opt-in=androidx.compose.foundation.layout.ExperimentalLayoutApi"]
     kotlinOptions.freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+    kotlinOptions.freeCompilerArgs += ["-opt-in=com.google.accompanist.permissions.ExperimentalPermissionsApi"]
 //    kotlinOptions.freeCompilerArgs += ["-opt-in=androidx.compose.ui.ExperimentalComposeUiApi"]
 //    kotlinOptions.freeCompilerArgs += ["-opt-in=androidx.compose.ui.unit.ExperimentalUnitApi"]
-//    kotlinOptions.freeCompilerArgs += ["-opt-in=com.google.accompanist.permissions.ExperimentalPermissionsApi"]
 }
 
 dependencies {
@@ -87,6 +87,7 @@ dependencies {
     // Accompanist
     def accompanist_version = "0.30.0"
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanist_version")
+    implementation "com.google.accompanist:accompanist-permissions:$accompanist_version"
 
     // Compose UI Tests
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")

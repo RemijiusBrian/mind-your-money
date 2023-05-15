@@ -18,7 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.navigation.MYMNavHost
 import dev.ridill.mym.core.ui.theme.MYMTheme
-import dev.ridill.mym.core.util.isAtLeastVersionCodeS
+import dev.ridill.mym.core.util.isBuildAtLeastVersionCodeS
 
 @AndroidEntryPoint
 class MYMActivity : ComponentActivity() {
@@ -31,7 +31,7 @@ class MYMActivity : ComponentActivity() {
         installSplashScreen()
         setContent {
             val theme by viewModel.appTheme.collectAsStateWithLifecycle(AppTheme.SYSTEM_DEFAULT)
-            val dynamicTheme by viewModel.materialYouTheme.collectAsStateWithLifecycle(isAtLeastVersionCodeS())
+            val dynamicTheme by viewModel.materialYouTheme.collectAsStateWithLifecycle(isBuildAtLeastVersionCodeS())
             val darkTheme = when (theme) {
                 AppTheme.SYSTEM_DEFAULT -> isSystemInDarkTheme()
                 AppTheme.LIGHT -> false

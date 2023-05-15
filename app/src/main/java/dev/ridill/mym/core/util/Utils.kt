@@ -20,7 +20,7 @@ fun Color.onColor(
     onDarkColor: Color = Color.White
 ): Color = if (luminance() > 0.25f) onBrightColor else onDarkColor
 
-fun isAtLeastVersionCodeS(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+fun isBuildAtLeastVersionCodeS(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
 fun isPermissionGranted(context: Context, permission: String): Boolean =
     ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED

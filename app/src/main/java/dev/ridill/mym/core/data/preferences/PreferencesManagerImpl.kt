@@ -10,7 +10,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import dev.ridill.mym.core.domain.model.AppTheme
 import dev.ridill.mym.core.domain.model.MYMPreferences
 import dev.ridill.mym.core.util.DispatcherProvider
-import dev.ridill.mym.core.util.isAtLeastVersionCodeS
+import dev.ridill.mym.core.util.isBuildAtLeastVersionCodeS
 import dev.ridill.mym.core.util.orZero
 import dev.ridill.mym.core.util.tryOrNull
 import kotlinx.coroutines.Dispatchers
@@ -37,7 +37,7 @@ class PreferencesManagerImpl(
                     preferences[Keys.APP_THEME] ?: AppTheme.SYSTEM_DEFAULT.name
                 )
             } ?: AppTheme.SYSTEM_DEFAULT
-            val materialYouTheme = preferences[Keys.MATERIAL_YOU_THEME] ?: isAtLeastVersionCodeS()
+            val materialYouTheme = preferences[Keys.MATERIAL_YOU_THEME] ?: isBuildAtLeastVersionCodeS()
             val monthlyLimit = preferences[Keys.MONTHLY_LIMIT].orZero()
 
             MYMPreferences(
