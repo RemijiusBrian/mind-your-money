@@ -58,6 +58,7 @@ fun SettingsScreenContent(
     navigateUp: () -> Unit,
     navigateToNotificationSettings: () -> Unit
 ) {
+
     MYMScaffold(
         modifier = Modifier
             .fillMaxSize(),

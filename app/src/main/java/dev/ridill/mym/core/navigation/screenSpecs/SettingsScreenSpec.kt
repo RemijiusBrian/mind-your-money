@@ -1,7 +1,10 @@
 package dev.ridill.mym.core.navigation.screenSpecs
 
+import android.Manifest
 import android.content.Intent
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
@@ -59,12 +62,20 @@ object SettingsScreenSpec : BottomBarSpec {
         val snackbarController = rememberSnackbarController()
         val context = LocalContext.current
 
+        val permissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission(),
+            onResult = {}
+        )
+
         LaunchedEffect(snackbarController, context, viewModel) {
             viewModel.events.collect { event ->
                 when (event) {
                     SettingsViewModel.SettingsEvent.LaunchBackupExportPathSelector -> {}
                     is SettingsViewModel.SettingsEvent.LaunchGoogleAccountSelection -> {}
-                    SettingsViewModel.SettingsEvent.RequestSmsPermission -> {}
+                    SettingsViewModel.SettingsEvent.RequestSmsPermission -> {
+                        permissionLauncher.launch(Manifest.permission.READ_SMS)
+                    }
+
                     is SettingsViewModel.SettingsEvent.ShowUiMessage -> {
                         snackbarController.showSnackbar(
                             event.message.asString(context),

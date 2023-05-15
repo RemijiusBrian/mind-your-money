@@ -84,7 +84,7 @@ fun PermissionRationaleDialog(
                             .size(PermissionIconSize)
                     )
                 }
-                Spacer(Modifier.height(SpacingSmall))
+                VerticalSpacer(spacing = SpacingSmall)
                 Text(
                     text = buildAnnotatedString {
                         withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) {
