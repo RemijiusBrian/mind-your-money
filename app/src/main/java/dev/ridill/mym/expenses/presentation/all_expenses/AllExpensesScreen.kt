@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -88,6 +89,7 @@ import dev.ridill.mym.core.ui.components.NewTagSheetContent
 import dev.ridill.mym.core.ui.components.SelectableExpenseCard
 import dev.ridill.mym.core.ui.components.SnackbarController
 import dev.ridill.mym.core.ui.components.VerticalNumberSpinner
+import dev.ridill.mym.core.ui.components.VerticalProgressIndicator
 import dev.ridill.mym.core.ui.theme.ContentAlpha
 import dev.ridill.mym.core.ui.theme.ElevationLevel0
 import dev.ridill.mym.core.ui.theme.ElevationLevel1
@@ -461,7 +463,7 @@ private fun TagOverviewCard(
                     )
                 }
             }
-            /*VerticalProgressIndicator(
+            VerticalProgressIndicator(
                 progress = animatedPercent,
                 width = OverviewProgressBarBaseWidth * (if (expanded) 2f else 1f),
                 modifier = Modifier
@@ -469,7 +471,7 @@ private fun TagOverviewCard(
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
                     .copy(alpha = ContentAlpha.PERCENT_32),
                 indicatorColor = color.copy(alpha = ContentAlpha.PERCENT_60)
-            )*/
+            )
         }
     }
 }
@@ -722,8 +724,8 @@ private fun MultiSelectionOptions(
         }
         IconButton(onClick = onUntagClick) {
             Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_de_tag),
-                contentDescription = stringResource(R.string.content_de_tag)
+                imageVector = ImageVector.vectorResource(R.drawable.ic_untag),
+                contentDescription = stringResource(R.string.content_untag)
             )
         }
         TriStateCheckbox(

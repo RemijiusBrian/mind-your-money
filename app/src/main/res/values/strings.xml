@@ -29,7 +29,7 @@
     <string name="content_save">Save</string>
     <string name="content_new_tag">New Tag</string>
     <string name="content_toggle_years_list">Toggle Years List</string>
-    <string name="content_de_tag">De-Tag</string>
+    <string name="content_untag">Untag</string>
     <string name="content_cancel_multi_selection">Cancel Multi Selection</string>
     <string name="content_balance_low_warning">Balance Low Warning</string>
 
