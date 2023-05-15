@@ -13,9 +13,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDeepLink
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
 import dev.ridill.mym.expenses.presentation.add_edit_expense.AddEditExpenseScreenContent
@@ -27,6 +29,12 @@ object AddEditExpenseScreenSpec : ScreenSpec {
     override val route: String = "add_edit_expense/{$ARG_EXPENSE_ID}"
 
     override val label: Int = R.string.destination_add_edit_expense
+
+    override val deepLinks: List<NavDeepLink> = listOf(
+        navDeepLink {
+            uriPattern = "https://www.mym.ridill.dev/add_edit_expense/{$ARG_EXPENSE_ID}"
+        }
+    )
 
     @StringRes
     fun getTitle(isEditMode: Boolean): Int =

@@ -7,6 +7,7 @@ import dev.ridill.mym.expenses.data.local.relation.ExpenseAndTagRelation
 import dev.ridill.mym.expenses.domain.model.Expense
 import dev.ridill.mym.expenses.domain.model.ExpenseListItem
 import dev.ridill.mym.expenses.domain.repository.ExpenseRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -34,6 +35,10 @@ class ExpenseRepositoryImpl(
 
     override suspend fun delete(expense: Expense) = withContext(dispatcher.io) {
         dao.delete(expense.toEntity())
+    }
+
+    override suspend fun deleteById(expenseId: Long) = withContext(Dispatchers.IO) {
+        dao.deleteById(expenseId)
     }
 
     override fun getDistinctYearsList(): Flow<List<Int>> = dao.getDistinctYears()

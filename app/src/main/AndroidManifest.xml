@@ -40,5 +40,13 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".expenses.domain.notification.DeleteExpenseReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="@string/notification_action_delete_expense" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

@@ -60,8 +60,9 @@
     <string name="notification_channel_group_expenses_desc">All \'Expense\' notifications</string>
     <string name="notification_channel_auto_add_expenses">Auto Add Expenses</string>
     <string name="expense_notification_title">Expense Added</string>
-    <string name="expense_notification_text">Expense added for %s</string>
-    <string name="expenses_added_notification_summary">%d New Expenses</string>
+    <string name="expense_notification_text">%1$s spent at %2$s</string>
+
+    <string name="notification_action_delete_expense">Delete Expense</string>
 
     <!-- Preferences -->
     <string name="pref_title_general">General</string>
@@ -104,6 +105,7 @@
     <string name="action_discard">Discard</string>
     <string name="action_undo">Undo</string>
     <string name="action_agree">Agree</string>
+    <string name="action_delete">Delete</string>
 
     <string name="theme_system_default">System Default</string>
     <string name="theme_light">Light</string>

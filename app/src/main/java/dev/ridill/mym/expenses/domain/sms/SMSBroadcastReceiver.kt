@@ -5,13 +5,12 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Telephony
 import dagger.hilt.android.AndroidEntryPoint
-import dev.ridill.mym.core.notification.NotificationHelper
 import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.core.util.Zero
-import dev.ridill.mym.core.util.logI
 import dev.ridill.mym.core.util.tryOrNull
 import dev.ridill.mym.di.ApplicationScope
 import dev.ridill.mym.expenses.domain.model.Expense
+import dev.ridill.mym.expenses.domain.notification.ExpenseAutoAddNotificationHelper
 import dev.ridill.mym.expenses.domain.repository.ExpenseRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -28,14 +27,13 @@ class SMSBroadcastReceiver : BroadcastReceiver() {
     lateinit var applicationScope: CoroutineScope
 
     @Inject
-    lateinit var notificationHelper: NotificationHelper<Expense>
+    lateinit var notificationHelper: ExpenseAutoAddNotificationHelper
 
     @Inject
     lateinit var smsService: PaymentSmsService
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent == null || intent.action != "android.provider.Telephony.SMS_RECEIVED") return
-        logI { "SMS Received" }
         val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             .ifEmpty { return }
 

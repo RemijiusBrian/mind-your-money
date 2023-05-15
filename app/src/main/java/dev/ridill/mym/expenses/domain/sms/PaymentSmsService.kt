@@ -14,7 +14,7 @@ class PaymentSmsService {
         AMOUNT_PATTERN.toRegex().find(body)?.groups?.get(1)?.value
 
     private fun extractMerchantName(content: String): String? =
-        MERCHANT_PATTERN.toRegex().find(content)?.value
+        MERCHANT_PATTERN.toRegex().find(content)?.groups?.get(1)?.value
 
     @Throws(AmountExtractionThrowable::class)
     fun extractPaymentDetails(content: String): PaymentDetails {

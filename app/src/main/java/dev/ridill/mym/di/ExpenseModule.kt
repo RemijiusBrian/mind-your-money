@@ -7,14 +7,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.ridill.mym.core.data.db.MYMDatabase
-import dev.ridill.mym.core.notification.NotificationHelper
 import dev.ridill.mym.core.util.DispatcherProvider
 import dev.ridill.mym.expenses.data.local.ExpenseDao
 import dev.ridill.mym.expenses.data.local.TagsDao
 import dev.ridill.mym.expenses.data.repository.AllExpensesRepositoryImpl
 import dev.ridill.mym.expenses.data.repository.ExpenseRepositoryImpl
 import dev.ridill.mym.expenses.data.repository.TagsRepositoryImpl
-import dev.ridill.mym.expenses.domain.model.Expense
 import dev.ridill.mym.expenses.domain.notification.ExpenseAutoAddNotificationHelper
 import dev.ridill.mym.expenses.domain.repository.AllExpensesRepository
 import dev.ridill.mym.expenses.domain.repository.ExpenseRepository
@@ -55,5 +53,5 @@ object ExpenseModule {
     @Provides
     fun provideExpenseAutoAddNotificationHelper(
         @ApplicationContext context: Context
-    ): NotificationHelper<Expense> = ExpenseAutoAddNotificationHelper(context)
+    ): ExpenseAutoAddNotificationHelper = ExpenseAutoAddNotificationHelper(context)
 }

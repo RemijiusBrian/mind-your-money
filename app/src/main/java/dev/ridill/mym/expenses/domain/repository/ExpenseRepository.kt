@@ -20,6 +20,8 @@ interface ExpenseRepository {
 
     suspend fun delete(expense: Expense)
 
+    suspend fun deleteById(expenseId: Long)
+
     suspend fun deleteMultipleExpenses(ids: List<Long>)
 
     fun getDistinctYearsList(): Flow<List<Int>>
