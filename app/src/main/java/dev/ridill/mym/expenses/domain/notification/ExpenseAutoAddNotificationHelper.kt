@@ -43,7 +43,7 @@ class ExpenseAutoAddNotificationHelper(
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            context.getString(R.string.notification_channel_auto_add_expenses),
+            context.getString(R.string.notification_channel_auto_add_expenses_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
             group = NotificationHelper.ChannelGroups.EXPENSES

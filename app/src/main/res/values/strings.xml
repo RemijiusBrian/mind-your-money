@@ -49,19 +49,18 @@
     <string name="content_date_picker">Date Picker</string>
     <string name="content_notification_status">Notification Status</string>-->
 
-    <!-- Notifications -->
-    <string name="notification_channel_group_payment_plans">Payment Plans</string>
-    <string name="notification_channel_group_bills_desc">All \'Payment Plans\' notifications</string>
-    <string name="notification_channel_payment_plan_reminder">Payment Reminders</string>
-    <string name="upcoming_payment_reminder_notification_text">Coming up on %s</string>
-    <string name="upcoming_payments">Upcoming Payments</string>
+    <!--    <string name="notification_channel_group_payment_plans">Payment Plans</string>-->
+    <!--    <string name="notification_channel_group_bills_desc">All \'Payment Plans\' notifications</string>-->
+    <!--    <string name="notification_channel_payment_plan_reminder">Payment Reminders</string>-->
+    <!--    <string name="upcoming_payment_reminder_notification_text">Coming up on %s</string>-->
+    <!--    <string name="upcoming_payments">Upcoming Payments</string>-->
 
+    <!-- Notifications -->
     <string name="notification_channel_group_expenses">Expenses</string>
     <string name="notification_channel_group_expenses_desc">All \'Expense\' notifications</string>
-    <string name="notification_channel_auto_add_expenses">Auto Add Expenses</string>
-    <string name="expense_notification_title">Expense Added</string>
+    <string name="notification_channel_auto_add_expenses_name">Expenses From SMS</string>
+    <string name="expense_notification_title">Expense Detected</string>
     <string name="expense_notification_text">%1$s spent at %2$s</string>
-
     <string name="notification_action_delete_expense">Delete Expense</string>
 
     <!-- Preferences -->
