@@ -138,7 +138,7 @@ class ExpenseAutoAddNotificationHelper(
 }
 
 private const val CHANNEL_ID = "mym.notifications.expenses"
-private const val NOTIFICATION_GROUP = "EXPENSE_AUTO_ADDED_GROUP"
+private const val NOTIFICATION_GROUP = "EXPENSE_FROM_SMS_GROUP"
 private const val SUMMARY_NOTIFICATION_ID = 1_000_000
 private const val DELETED_NOTIFICATION_TIMEOUT = 3_000L
 const val DELETE_EXPENSE_ID = "DELETE_EXPENSE_ID"
