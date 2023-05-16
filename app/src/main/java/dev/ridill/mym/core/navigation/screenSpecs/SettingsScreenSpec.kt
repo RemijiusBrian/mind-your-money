@@ -8,7 +8,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,6 +21,7 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import dev.ridill.mym.R
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
@@ -63,7 +66,10 @@ object SettingsScreenSpec : BottomBarSpec {
         val snackbarController = rememberSnackbarController()
         val context = LocalContext.current
 
-        val smsPermissionState = rememberPermissionState(permission = Manifest.permission.READ_SMS)
+        val smsPermissionState = rememberPermissionState(Manifest.permission.RECEIVE_SMS)
+        val smsPermissionGranted by remember {
+            derivedStateOf { smsPermissionState.status.isGranted }
+        }
 
         LaunchedEffect(snackbarController, context, viewModel) {
             viewModel.events.collect { event ->
@@ -77,7 +83,8 @@ object SettingsScreenSpec : BottomBarSpec {
                     }
 
                     SettingsViewModel.SettingsEvent.RequestSmsPermission -> {
-                        if (!smsPermissionState.status.isPermanentlyDenied()) {
+                        if (smsPermissionState.status.isGranted) return@collect
+                        if (smsPermissionState.status.isPermanentlyDenied()) {
                             val intent = Intent(
                                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                                 Uri.fromParts("package", context.packageName, null)
@@ -86,6 +93,7 @@ object SettingsScreenSpec : BottomBarSpec {
                         } else {
                             smsPermissionState.launchPermissionRequest()
                         }
+
                     }
 
                     is SettingsViewModel.SettingsEvent.ShowUiMessage -> {
@@ -102,6 +110,7 @@ object SettingsScreenSpec : BottomBarSpec {
             snackbarController = snackbarController,
             context = context,
             state = state,
+            smsPermissionGranted = smsPermissionGranted,
             actions = viewModel,
             navigateUp = navController::navigateUp,
             navigateToNotificationSettings = {
