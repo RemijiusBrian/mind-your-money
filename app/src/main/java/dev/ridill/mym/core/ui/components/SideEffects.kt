@@ -8,20 +8,15 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 
 @Composable
-fun OnLifecycleStartEffect(
+fun OnLifecycleEventEffect(
+    lifecycleEvent: Lifecycle.Event,
     key: Any? = null,
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    onStart: () -> Unit
+    actionOnEvent: () -> Unit
 ) {
     DisposableEffect(lifecycleOwner, key) {
         val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_START -> {
-                    onStart()
-                }
-
-                else -> Unit
-            }
+            if (event == lifecycleEvent) actionOnEvent()
         }
         lifecycleOwner.lifecycle.addObserver(observer)
 
@@ -30,3 +25,15 @@ fun OnLifecycleStartEffect(
         }
     }
 }
+
+@Composable
+fun OnLifecycleStartEffect(
+    key: Any? = null,
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    onStart: () -> Unit
+) = OnLifecycleEventEffect(
+    lifecycleEvent = Lifecycle.Event.ON_START,
+    key = key,
+    lifecycleOwner = lifecycleOwner,
+    actionOnEvent = onStart
+)

@@ -143,4 +143,10 @@
     <string name="click_to_set_limit">Click to set limit</string>
     <string name="delete">Delete</string>
     <string name="expense_from_sms">Expense From SMS</string>
+
+    <string name="greeting_part_of_day">Good %1$s</string>
+    <string name="part_of_day_morning">Morning</string>
+    <string name="part_of_day_noon">Noon</string>
+    <string name="part_of_day_after_noon">Afternoon</string>
+    <string name="part_of_day_evening">Evening</string>
 </resources>

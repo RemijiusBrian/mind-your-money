@@ -1,5 +1,7 @@
 package dev.ridill.mym.core.util
 
+import androidx.annotation.StringRes
+import dev.ridill.mym.R
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -43,6 +45,20 @@ object DateUtil {
             .appendText(ChronoField.DAY_OF_MONTH, ordinalMap)
             .toFormatter()
     }
+
+    fun getPartOfDay(): PartOfDay = when (currentDateTime().hour) {
+        in (0..11) -> PartOfDay.MORNING
+        12 -> PartOfDay.NOON
+        in (13..18) -> PartOfDay.AFTER_NOON
+        else -> PartOfDay.EVENING
+    }
+}
+
+enum class PartOfDay(@StringRes val labelRes: Int) {
+    MORNING(R.string.part_of_day_morning),
+    NOON(R.string.part_of_day_noon),
+    AFTER_NOON(R.string.part_of_day_after_noon),
+    EVENING(R.string.part_of_day_evening)
 }
 
 /*object DatePatterns {
@@ -64,16 +80,6 @@ fun Long.toLocalDate(): LocalDate = this.toDateTime().toLocalDate()
 
 val LocalDate.timeMillis: Long
     get() = atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-
-*/
-/*val LocalDateTime.partOfDay: Int
-    @StringRes get() = when (hour) {
-        in (0..11) -> R.string.hour_morning
-        12 -> R.string.hour_noon
-        in (13..18) -> R.string.hour_afternoon
-        else -> R.string.hour_evening
-    }*//*
-
 
 fun LocalDate.format(pattern: String = DatePatterns.DD_MM_YYYY): String =
     this.format(DateTimeFormatter.ofPattern(pattern))

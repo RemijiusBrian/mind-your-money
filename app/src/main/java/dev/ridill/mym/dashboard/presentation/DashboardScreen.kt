@@ -2,7 +2,6 @@ package dev.ridill.mym.dashboard.presentation
 
 import androidx.annotation.FloatRange
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.VectorConverter
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.TargetBasedAnimation
@@ -10,8 +9,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +21,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -45,8 +41,10 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -64,13 +62,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
-import dev.ridill.mym.core.navigation.screenSpecs.ARG_QUICK_ACTION_LIMIT_UPDATE
 import dev.ridill.mym.core.navigation.screenSpecs.BottomBarSpec
 import dev.ridill.mym.core.navigation.screenSpecs.DashboardScreenSpec
-import dev.ridill.mym.core.ui.components.ExpenseCard
+import dev.ridill.mym.core.ui.components.FadeVisibility
 import dev.ridill.mym.core.ui.components.HorizontalSpacer
-import dev.ridill.mym.core.ui.components.LabelText
 import dev.ridill.mym.core.ui.components.MYMScaffold
+import dev.ridill.mym.core.ui.components.OnLifecycleStartEffect
 import dev.ridill.mym.core.ui.components.SnackbarController
 import dev.ridill.mym.core.ui.components.VerticalNumberSpinner
 import dev.ridill.mym.core.ui.components.VerticalSpacer
@@ -85,6 +82,7 @@ import dev.ridill.mym.core.ui.theme.SpacingMedium
 import dev.ridill.mym.core.ui.theme.SpacingSmall
 import dev.ridill.mym.core.ui.theme.SpacingXSmall
 import dev.ridill.mym.core.ui.theme.defaultScreenPadding
+import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.One
 import dev.ridill.mym.core.util.Zero
@@ -151,7 +149,10 @@ fun DashboardScreenContent(
                 verticalArrangement = Arrangement.spacedBy(SpacingMedium),
                 state = lazyListState
             ) {
-                item(key = "Expenditure Overview") {
+                item(key = "Greeting") {
+                    Greeting()
+                }
+                /*item(key = "Expenditure Overview") {
                     ExpenditureOverview(
                         monthlyLimit = state.monthlyLimit,
                         amountSpent = state.expenditure,
@@ -184,13 +185,11 @@ fun DashboardScreenContent(
                         modifier = Modifier
                             .animateItemPlacement()
                     )
-                }
+                }*/
             }
 
-            AnimatedVisibility(
+            FadeVisibility(
                 visible = showScrollUpButton,
-                enter = fadeIn(),
-                exit = fadeOut(),
                 modifier = Modifier
                     .padding(SpacingLarge)
                     .align(Alignment.BottomEnd)
@@ -210,6 +209,31 @@ fun DashboardScreenContent(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun Greeting(
+    modifier: Modifier = Modifier
+) {
+    var timeOfDayLabelRes by remember { mutableIntStateOf(-1) }
+
+    OnLifecycleStartEffect {
+        timeOfDayLabelRes = DateUtil.getPartOfDay().labelRes
+    }
+
+    Column(
+        modifier = modifier
+    ) {
+        if (timeOfDayLabelRes != -1) {
+            Text(
+                text = stringResource(
+                    R.string.greeting_part_of_day,
+                    stringResource(timeOfDayLabelRes)
+                ),
+                style = MaterialTheme.typography.titleSmall
+            )
         }
     }
 }
