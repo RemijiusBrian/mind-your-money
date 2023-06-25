@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace 'dev.ridill.mym'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "dev.ridill.mym"
         minSdk 28
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -71,7 +71,7 @@ dependencies {
     androidTestImplementation(composeBom)
 
     implementation("androidx.compose.ui:ui")
-    implementation('androidx.compose.material3:material3:1.2.0-alpha01')
+    implementation('androidx.compose.material3:material3:1.2.0-alpha03')
     implementation("androidx.compose.material3:material3-window-size-class")
     // Material Icons
     implementation("androidx.compose.material:material-icons-core")
@@ -80,7 +80,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.ui:ui-tooling-preview")
     // Integrations
-    implementation("androidx.activity:activity-compose:1.7.1")
+    implementation('androidx.activity:activity-compose:1.7.2')
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation("androidx.compose.runtime:runtime-livedata")
 
@@ -94,7 +94,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     // Compose Navigation
-    def nav_version = "2.5.3"
+    def nav_version = '2.6.0'
     implementation("androidx.navigation:navigation-compose:$nav_version")
 
     // Splash Screen
@@ -104,7 +104,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // Room Persistence
-    def room_version = "2.5.1"
+    def room_version = '2.5.2'
     implementation("androidx.room:room-runtime:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
     // Kotlin Extensions and Coroutines support for Room
@@ -123,7 +123,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.8.1")
 
     // Kotlin Coroutines
-    def coroutines_version = '1.6.4'
+    def coroutines_version = '1.7.1'
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version")
     implementation("com.github.Zhuinden:flow-combinetuple-kt:1.1.1")
@@ -138,7 +138,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Lottie
-    implementation("com.airbnb.android:lottie-compose:6.0.0")
+    implementation('com.airbnb.android:lottie-compose:6.0.1')
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
