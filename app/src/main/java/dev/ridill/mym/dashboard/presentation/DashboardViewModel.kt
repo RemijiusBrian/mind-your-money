@@ -41,9 +41,9 @@ class DashboardViewModel @Inject constructor(
         monthlyLimit
     ).map { (balance, limit) ->
         (balance / limit)
-            .coerceIn(Double.Zero, Double.One)
             .toFloat()
             .ifNaN { Float.Zero }
+            .coerceIn(Float.Zero, Float.One)
     }.distinctUntilChanged()
     private val showBalanceLowWarning = combineTuple(
         monthlyLimit,

@@ -23,16 +23,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallFloatingActionButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -42,9 +41,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -52,7 +50,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
 import dev.ridill.mym.core.navigation.screenSpecs.ARG_QUICK_ACTION_LIMIT_UPDATE
@@ -70,7 +67,6 @@ import dev.ridill.mym.core.ui.components.VerticalSpacer
 import dev.ridill.mym.core.ui.components.VerticalTitleAndValue
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
 import dev.ridill.mym.core.ui.theme.ContentAlpha
-import dev.ridill.mym.core.ui.theme.CornerRadiusMedium
 import dev.ridill.mym.core.ui.theme.ElevationLevel1
 import dev.ridill.mym.core.ui.theme.MYMTheme
 import dev.ridill.mym.core.ui.theme.SpacingLarge
@@ -148,7 +144,10 @@ fun DashboardScreenContent(
                 state = lazyListState
             ) {
                 item(key = "Greeting") {
-                    Greeting()
+                    Greeting(
+                        modifier = Modifier
+                            .animateItemPlacement()
+                    )
                 }
                 item(key = "Expenditure Overview") {
                     ExpenditureOverview(
@@ -247,6 +246,24 @@ private fun ExpenditureOverview(
     onLimitCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val balanceSafeColor = MaterialTheme.colorScheme.secondary
+    val balanceErrorColor = MaterialTheme.colorScheme.error
+    val balanceColorAnimation = remember(balanceSafeColor, balanceErrorColor) {
+        TargetBasedAnimation(
+            animationSpec = tween(),
+            typeConverter = Color.VectorConverter(ColorSpaces.Srgb),
+            initialValue = balanceErrorColor,
+            targetValue = balanceSafeColor,
+            initialVelocity = balanceErrorColor
+        )
+    }
+    val balanceColor by remember(balancePercentOfLimit) {
+        derivedStateOf {
+            balanceColorAnimation.getValueFromNanos(
+                (balanceColorAnimation.durationNanos * balancePercentOfLimit).roundToLong()
+            )
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -262,22 +279,47 @@ private fun ExpenditureOverview(
                 )
             }
         }
+        VerticalSpacer(spacing = SpacingMedium)
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            BalanceCard(
-                balanceAmount = balance,
-                balancePercentOfLimit = balancePercentOfLimit,
-                showBalanceLowWarning = showBalanceLowWarning,
+            Column(
                 modifier = Modifier
                     .weight(Float.One)
-            )
+            ) {
+                Row {
+                    if (showBalanceLowWarning) {
+                        AnimatedWarning()
+                        HorizontalSpacer(spacing = SpacingXSmall)
+                    }
+                    VerticalTitleAndValue(
+                        title = stringResource(R.string.you_have_balance),
+                        titleStyle = MaterialTheme.typography.titleSmall,
+                        valueStyle = MaterialTheme.typography.titleSmall
+                    ) {
+                        VerticalNumberSpinner(targetState = balance) {
+                            Text(
+                                text = Formatter.currency(it),
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                                color = balanceColor
+                            )
+                        }
+                    }
+                }
+                LinearProgressIndicator(
+                    progress = balancePercentOfLimit,
+                    color = balanceColor,
+                    strokeCap = StrokeCap.Round
+                )
+            }
             HorizontalSpacer(spacing = SpacingMedium)
-            Card(
+            Surface(
                 modifier = Modifier
                     .weight(Float.One),
-                onClick = onLimitCardClick
+                onClick = onLimitCardClick,
+                shape = MaterialTheme.shapes.medium
             ) {
                 VerticalTitleAndValue(
                     title = stringResource(R.string.left_from),
@@ -289,7 +331,6 @@ private fun ExpenditureOverview(
                     VerticalNumberSpinner(targetState = monthlyLimit) {
                         Text(
                             text = Formatter.currency(it),
-                            style = MaterialTheme.typography.titleSmall,
                             overflow = TextOverflow.Ellipsis,
                             maxLines = 1
                         )
@@ -300,7 +341,7 @@ private fun ExpenditureOverview(
     }
 }
 
-@Composable
+/*@Composable
 private fun BalanceCard(
     balanceAmount: Double,
     @FloatRange(0.0, 1.0) balancePercentOfLimit: Float,
@@ -341,14 +382,17 @@ private fun BalanceCard(
     Card(
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = containerColor
-                .copy(alpha = ContentAlpha.PERCENT_16),
+            containerColor = Color.Transparent,
             contentColor = contentColorAnimatable.getValueFromNanos(
                 (contentColorAnimatable.durationNanos * balancePercentOfLimit).roundToLong()
             )
         ),
         modifier = modifier
             .drawBehind {
+                drawRect(
+                    color = containerColor
+                        .copy(alpha = ContentAlpha.PERCENT_16)
+                )
                 drawRoundRect(
                     color = containerColor,
                     size = size.copy(
@@ -386,7 +430,7 @@ private fun BalanceCard(
             }
         }
     }
-}
+}*/
 
 @Composable
 private fun AnimatedWarning(
