@@ -4,14 +4,11 @@ import android.Manifest
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -37,7 +34,7 @@ object SettingsScreenSpec : BottomBarSpec {
 
     override val label: Int = R.string.destination_settings
 
-    override val icon: ImageVector = Icons.Outlined.Settings
+    override val iconRes: Int = R.drawable.ic_settings
 
     override val arguments: List<NamedNavArgument>
         get() = listOf(

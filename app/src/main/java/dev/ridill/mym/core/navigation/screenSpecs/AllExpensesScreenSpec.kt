@@ -1,14 +1,11 @@
 package dev.ridill.mym.core.navigation.screenSpecs
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Money
 import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.material3.rememberStandardBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -22,7 +19,7 @@ import dev.ridill.mym.expenses.presentation.all_expenses.AllExpensesViewModel
 object AllExpensesScreenSpec : BottomBarSpec {
     override val route: String = "all_expenses"
 
-    override val icon: ImageVector = Icons.Default.Money
+    override val iconRes: Int = R.drawable.ic_all_expenses
 
     override val label: Int = R.string.destination_all_expenses
 

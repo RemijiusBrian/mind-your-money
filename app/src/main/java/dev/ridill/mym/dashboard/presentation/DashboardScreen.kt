@@ -1,7 +1,6 @@
 package dev.ridill.mym.dashboard.presentation
 
 import androidx.annotation.FloatRange
-import androidx.annotation.StringRes
 import androidx.compose.animation.VectorConverter
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.TargetBasedAnimation
@@ -13,28 +12,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -55,22 +50,24 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.ridill.mym.R
+import dev.ridill.mym.core.navigation.screenSpecs.ARG_QUICK_ACTION_LIMIT_UPDATE
 import dev.ridill.mym.core.navigation.screenSpecs.BottomBarSpec
 import dev.ridill.mym.core.navigation.screenSpecs.DashboardScreenSpec
+import dev.ridill.mym.core.ui.components.ExpenseCard
 import dev.ridill.mym.core.ui.components.FadeVisibility
 import dev.ridill.mym.core.ui.components.HorizontalSpacer
+import dev.ridill.mym.core.ui.components.LabelText
 import dev.ridill.mym.core.ui.components.MYMScaffold
 import dev.ridill.mym.core.ui.components.OnLifecycleStartEffect
 import dev.ridill.mym.core.ui.components.SnackbarController
 import dev.ridill.mym.core.ui.components.VerticalNumberSpinner
 import dev.ridill.mym.core.ui.components.VerticalSpacer
+import dev.ridill.mym.core.ui.components.VerticalTitleAndValue
 import dev.ridill.mym.core.ui.components.rememberSnackbarController
 import dev.ridill.mym.core.ui.theme.ContentAlpha
 import dev.ridill.mym.core.ui.theme.CornerRadiusMedium
@@ -86,6 +83,7 @@ import dev.ridill.mym.core.util.DateUtil
 import dev.ridill.mym.core.util.Formatter
 import dev.ridill.mym.core.util.One
 import dev.ridill.mym.core.util.Zero
+import dev.ridill.mym.core.util.logD
 import kotlinx.coroutines.launch
 import kotlin.math.roundToLong
 
@@ -116,7 +114,7 @@ fun DashboardScreenContent(
                     BottomBarSpec.bottomBarDestinations.forEach { spec ->
                         IconButton(onClick = { onBottomBarActionClick(spec) }) {
                             Icon(
-                                imageVector = spec.icon,
+                                imageVector = ImageVector.vectorResource(spec.iconRes),
                                 contentDescription = stringResource(spec.label)
                             )
                         }
@@ -152,7 +150,7 @@ fun DashboardScreenContent(
                 item(key = "Greeting") {
                     Greeting()
                 }
-                /*item(key = "Expenditure Overview") {
+                item(key = "Expenditure Overview") {
                     ExpenditureOverview(
                         monthlyLimit = state.monthlyLimit,
                         amountSpent = state.expenditure,
@@ -185,7 +183,7 @@ fun DashboardScreenContent(
                         modifier = Modifier
                             .animateItemPlacement()
                     )
-                }*/
+                }
             }
 
             FadeVisibility(
@@ -221,6 +219,7 @@ private fun Greeting(
 
     OnLifecycleStartEffect {
         timeOfDayLabelRes = DateUtil.getPartOfDay().labelRes
+        logD { timeOfDayLabelRes }
     }
 
     Column(
@@ -243,136 +242,59 @@ private fun ExpenditureOverview(
     monthlyLimit: Long,
     amountSpent: Double,
     balance: Double,
-    balancePercentOfLimit: Float,
+    @FloatRange(from = 0.0, to = 1.0) balancePercentOfLimit: Float,
     showBalanceLowWarning: Boolean,
     onLimitCardClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .heightIn(max = OverviewMaxHeight)
     ) {
-        ClickableOverviewStat(
-            title = R.string.your_limit,
-            onClick = onLimitCardClick,
-            modifier = Modifier
-                .weight(Float.One),
-            titleStyle = MaterialTheme.typography.headlineSmall,
-            valueStyle = MaterialTheme.typography.headlineMedium
-                .copy(fontWeight = FontWeight.SemiBold)
+        VerticalTitleAndValue(
+            title = stringResource(R.string.you_have_spent),
         ) {
-            Column {
-                VerticalNumberSpinner(targetState = monthlyLimit) {
-                    Text(
-                        text = Formatter.currency(it),
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                if (monthlyLimit <= Long.Zero) {
-                    Text(
-                        text = stringResource(R.string.click_to_set_limit),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
+            VerticalNumberSpinner(targetState = amountSpent) {
+                Text(
+                    text = Formatter.currency(it),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
+                )
             }
         }
-        HorizontalSpacer(spacing = SpacingSmall)
-        Column(
-            modifier = Modifier
-                .weight(Float.One)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            OverviewStat(
-                title = R.string.youve_spent,
-                modifier = Modifier
-                    .weight(Float.One),
-                titleStyle = MaterialTheme.typography.titleMedium,
-                valueStyle = MaterialTheme.typography.titleLarge
-            ) {
-                VerticalNumberSpinner(targetState = amountSpent) {
-                    Text(
-                        text = Formatter.currency(it),
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
-            VerticalSpacer(SpacingSmall)
             BalanceCard(
                 balanceAmount = balance,
                 balancePercentOfLimit = balancePercentOfLimit,
+                showBalanceLowWarning = showBalanceLowWarning,
+                modifier = Modifier
+                    .weight(Float.One)
+            )
+            HorizontalSpacer(spacing = SpacingMedium)
+            Card(
                 modifier = Modifier
                     .weight(Float.One),
-                showBalanceLowWarning = showBalanceLowWarning
-            )
-        }
-    }
-}
-
-private val OverviewMaxHeight = 160.dp
-
-@Composable
-private fun OverviewStat(
-    @StringRes title: Int,
-    modifier: Modifier = Modifier,
-    titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
-    valueStyle: TextStyle = MaterialTheme.typography.titleLarge
-        .copy(fontWeight = FontWeight.SemiBold),
-    colors: CardColors = CardDefaults.cardColors(),
-    value: @Composable () -> Unit
-) {
-    Card(
-        shape = MaterialTheme.shapes.medium,
-        modifier = modifier,
-        colors = colors
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(SpacingSmall),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(title),
-                style = titleStyle
-            )
-            Spacer(Modifier.height(SpacingXSmall))
-            ProvideTextStyle(value = valueStyle) {
-                value()
-            }
-        }
-    }
-}
-
-@Composable
-private fun ClickableOverviewStat(
-    @StringRes title: Int,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    titleStyle: TextStyle = MaterialTheme.typography.titleMedium,
-    valueStyle: TextStyle = MaterialTheme.typography.titleLarge
-        .copy(fontWeight = FontWeight.SemiBold),
-    colors: CardColors = CardDefaults.cardColors(),
-    value: @Composable () -> Unit
-) {
-    Card(
-        shape = MaterialTheme.shapes.medium,
-        modifier = modifier,
-        colors = colors,
-        onClick = onClick
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(SpacingSmall),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(title),
-                style = titleStyle
-            )
-            Spacer(Modifier.height(SpacingXSmall))
-            ProvideTextStyle(value = valueStyle) {
-                value()
+                onClick = onLimitCardClick
+            ) {
+                VerticalTitleAndValue(
+                    title = stringResource(R.string.left_from),
+                    titleStyle = MaterialTheme.typography.titleSmall,
+                    valueStyle = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier
+                        .padding(SpacingSmall)
+                ) {
+                    VerticalNumberSpinner(targetState = monthlyLimit) {
+                        Text(
+                            text = Formatter.currency(it),
+                            style = MaterialTheme.typography.titleSmall,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                    }
+                }
             }
         }
     }
@@ -386,9 +308,9 @@ private fun BalanceCard(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = CornerRadiusMedium
 ) {
-    val balanceSafeColor = MaterialTheme.colorScheme.secondary
+    val balanceSafeColor = MaterialTheme.colorScheme.primary
     val onBalanceSafeColor = contentColorFor(balanceSafeColor)
-    val balanceErrorColor = MaterialTheme.colorScheme.errorContainer
+    val balanceErrorColor = MaterialTheme.colorScheme.error
     val onBalanceErrorColor = contentColorFor(balanceErrorColor)
     val containerColorAnimatable = remember(balanceSafeColor, balanceErrorColor) {
         TargetBasedAnimation(
@@ -398,6 +320,13 @@ private fun BalanceCard(
             targetValue = balanceSafeColor,
             initialVelocity = balanceErrorColor
         )
+    }
+    val containerColor by remember {
+        derivedStateOf {
+            containerColorAnimatable.getValueFromNanos(
+                (containerColorAnimatable.durationNanos * balancePercentOfLimit).roundToLong()
+            )
+        }
     }
     val contentColorAnimatable = remember(onBalanceSafeColor, onBalanceErrorColor) {
         TargetBasedAnimation(
@@ -412,28 +341,23 @@ private fun BalanceCard(
     Card(
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent,
+            containerColor = containerColor
+                .copy(alpha = ContentAlpha.PERCENT_16),
             contentColor = contentColorAnimatable.getValueFromNanos(
-                (contentColorAnimatable.durationNanos * balancePercentOfLimit.roundToLong())
+                (contentColorAnimatable.durationNanos * balancePercentOfLimit).roundToLong()
             )
         ),
-        modifier = modifier.drawBehind {
-            val containerColor = containerColorAnimatable.getValueFromNanos(
-                (containerColorAnimatable.durationNanos * balancePercentOfLimit.roundToLong())
-            )
-            drawRoundRect(
-                color = containerColor.copy(alpha = ContentAlpha.PERCENT_16),
-                cornerRadius = CornerRadius(cornerRadius.toPx())
-            )
-
-            drawRoundRect(
-                color = containerColor,
-                size = size.copy(
-                    width = size.width * balancePercentOfLimit
-                ),
-                cornerRadius = CornerRadius(cornerRadius.toPx())
-            )
-        }
+        modifier = modifier
+            .drawBehind {
+                drawRoundRect(
+                    color = containerColor,
+                    size = size.copy(
+                        width = size.width * (balancePercentOfLimit.takeIf { it > Float.Zero }
+                            ?: Float.One)
+                    ),
+                    cornerRadius = CornerRadius(cornerRadius.toPx())
+                )
+            }
     ) {
         Column(
             modifier = Modifier
@@ -447,51 +371,21 @@ private fun BalanceCard(
                     HorizontalSpacer(spacing = SpacingXSmall)
                 }
                 Text(
-                    text = stringResource(R.string.balance),
-                    style = MaterialTheme.typography.titleMedium
+                    text = stringResource(R.string.you_have_balance),
+                    style = MaterialTheme.typography.titleSmall
                 )
             }
-            Spacer(Modifier.height(SpacingXSmall))
+            VerticalSpacer(spacing = SpacingSmall)
             VerticalNumberSpinner(targetState = balanceAmount) {
                 Text(
                     text = Formatter.currency(it),
-                    style = MaterialTheme.typography.titleLarge,
-                    overflow = TextOverflow.Ellipsis
+                    style = MaterialTheme.typography.titleSmall,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
                 )
             }
         }
     }
-
-    /*OverviewStat(
-        title = R.string.balance,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent,
-            contentColor = contentColorAnimatable.getValueFromNanos(
-                (contentColorAnimatable.durationNanos * balancePercentOfLimit.roundToLong())
-            )
-        ),
-        modifier = modifier.drawBehind {
-            val containerColor = containerColorAnimatable.getValueFromNanos(
-                (containerColorAnimatable.durationNanos * balancePercentOfLimit.roundToLong())
-            )
-            drawRoundRect(
-                color = containerColor.copy(alpha = ContentAlpha.PERCENT_16),
-                cornerRadius = CornerRadius(cornerRadius.toPx())
-            )
-
-            drawRoundRect(
-                color = containerColor,
-                size = size.copy(
-                    width = size.width * balancePercentOfLimit
-                ),
-                cornerRadius = CornerRadius(cornerRadius.toPx())
-            )
-        }
-    ) {
-        VerticalNumberSpinner(targetState = balanceAmount) {
-            Text(Formatter.currency(it))
-        }
-    }*/
 }
 
 @Composable
@@ -532,7 +426,7 @@ private val WarningSize = 8.dp
 private fun PreviewScreenContent() {
     MYMTheme {
         DashboardScreenContent(
-            state = DashboardState(),
+            state = DashboardState.INITIAL,
             onAddFabClick = {},
             onExpenseClick = {},
             onBottomBarActionClick = {},

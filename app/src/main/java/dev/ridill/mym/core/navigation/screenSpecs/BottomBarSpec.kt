@@ -1,6 +1,6 @@
 package dev.ridill.mym.core.navigation.screenSpecs
 
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.annotation.DrawableRes
 
 sealed interface BottomBarSpec : ScreenSpec {
 
@@ -12,5 +12,6 @@ sealed interface BottomBarSpec : ScreenSpec {
 
     val navRoute: String get() = route
 
-    val icon: ImageVector
+    @get:DrawableRes
+    val iconRes: Int
 }

@@ -110,9 +110,15 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
 
-    <string name="your_limit">Your Limit</string>
-    <string name="youve_spent">You\'ve Spent</string>
-    <string name="balance">Balance</string>
+    <string name="greeting_part_of_day">Good %1$s</string>
+    <string name="part_of_day_morning">Morning</string>
+    <string name="part_of_day_noon">Noon</string>
+    <string name="part_of_day_after_noon">Afternoon</string>
+    <string name="part_of_day_evening">Evening</string>
+
+    <string name="you_have_spent">You\'ve Spent</string>
+    <string name="left_from">Left From</string>
+    <string name="you_have_balance">You Have Balance</string>
     <string name="expenses">Expenses</string>
     <string name="expense_list_empty">You don\'t have any expenses yet.</string>
     <string name="add_expense">Add Expense</string>
@@ -143,10 +149,4 @@
     <string name="click_to_set_limit">Click to set limit</string>
     <string name="delete">Delete</string>
     <string name="expense_from_sms">Expense From SMS</string>
-
-    <string name="greeting_part_of_day">Good %1$s</string>
-    <string name="part_of_day_morning">Morning</string>
-    <string name="part_of_day_noon">Noon</string>
-    <string name="part_of_day_after_noon">Afternoon</string>
-    <string name="part_of_day_evening">Evening</string>
 </resources>
